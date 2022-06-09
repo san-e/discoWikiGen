@@ -158,33 +158,37 @@ def get_guns() -> dict:
 
     temp = {}
     list = []
+    deleteLater = []
     for gun in guns:
         for x in gunsSoldAt.items():
             if linear_search(x[1], gun):
                 base = x[0]
-                skip = False
-                try:
-                    system = fl.bases[reverse_dict(base_table)[base]].system_().name()
-                except (AttributeError, KeyError):
-                    skip = True
-                try:
-                    sector = fl.bases[reverse_dict(base_table)[base]].sector()
-                except (AttributeError, KeyError):
-                    skip = True
-                try:
-                    faction = fl.bases[reverse_dict(base_table)[base]].owner().name()
-                except (AttributeError, KeyError):
-                    skip = True
-                if not skip:
-                    list.append([base, system, sector, faction])
-        list.sort()
-        temp[gun] = list
+                # skip = False
+                # try:
+                #     system = fl.bases[reverse_dict(base_table)[base]].system_().name()
+                # except (AttributeError, KeyError):
+                #     skip = True
+                # try:
+                #     sector = fl.bases[reverse_dict(base_table)[base]].sector()
+                # except (AttributeError, KeyError):
+                #     skip = True
+                # try:
+                #     faction = fl.bases[reverse_dict(base_table)[base]].owner().name()
+                # except (AttributeError, KeyError):
+                #     skip = True
+                list.append([base])
+        try:
+            temp[gun] = list[0]
+        except:
+            temp[gun] = []
+            deleteLater.append(gun)
         list = []
 
     for x in guns.items():
         x[1]["sold_at"] = temp[x[0]]
+    for x in deleteLater:
+        del guns[x]
     return guns
-
 
 filename = "data.json"
 print("Reading game files...")
