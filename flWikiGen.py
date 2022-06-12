@@ -40,38 +40,38 @@ def get_ships() -> dict:
     print("Reading ship data...")
     ships = {}
     for ship in fl.ships:
-        try:
-            if "li_" in ship.nickname:
-                built_by = "Liberty"
-            elif "br_" in ship.nickname:
-                built_by = "Bretonia"
-            elif "ku_" in ship.nickname:
-                built_by = "Kusari"           
-            elif "rh_" in ship.nickname:
-                built_by = "Rheinland"
-            elif "ga_" in ship.nickname:
-                built_by = "Gallia"
-            elif "ge_" in ship.nickname or "fl_" in ship.nickname:
-                built_by = "Civillian"
-            elif "bw_" in ship.nickname:
-                built_by = "Borderworlds"
-            elif "co_" in ship.nickname:
-                built_by = "Corsairs"
-            elif "oc_" in ship.nickname:
-                built_by = "Outcasts"
-            elif "col_" in ship.nickname:
-                built_by = "Crayter Republic"
-            else:
-                built_by = ""
+        if not "_npc" in ship.nickname:
+            try:
+                if "li_" in ship.nickname:
+                    built_by = "Liberty"
+                elif "br_" in ship.nickname:
+                    built_by = "Bretonia"
+                elif "ku_" in ship.nickname:
+                    built_by = "Kusari"           
+                elif "rh_" in ship.nickname:
+                    built_by = "Rheinland"
+                elif "ga_" in ship.nickname:
+                    built_by = "Gallia"
+                elif "ge_" in ship.nickname or "fl_" in ship.nickname:
+                    built_by = "Civillian"
+                elif "bw_" in ship.nickname:
+                    built_by = "Borderworlds"
+                elif "co_" in ship.nickname:
+                    built_by = "Corsairs"
+                elif "oc_" in ship.nickname:
+                    built_by = "Outcasts"
+                elif "col_" in ship.nickname:
+                    built_by = "Crayter Republic"
+                else:
+                    built_by = ""
 
-            sold_at = []
-            for x in ship.sold_at():
-                sold_at.append(x.name())
+                sold_at = []
+                for x in ship.sold_at():
+                    sold_at.append(x.name())
 
-
-            ships[ship.name()] = {"nickname" : ship.nickname, "infocard" : ship.infocard(markup = 'html'), "infocard_plain" : ship.infocard(markup = 'plain') , "price" : ship.price(), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "built_by" : built_by, "sold_at" : sold_at}
-        except TypeError:
-            pass          
+                ships[ship.name()] = {"nickname" : ship.nickname, "type" : ship.type(), "infocard" : ship.infocard(markup = 'html'), "infocard_plain" : ship.infocard(markup = 'plain') , "price" : ship.price(), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "built_by" : built_by, "sold_at" : sold_at}
+            except TypeError:
+                pass          
     return ships
 
 def get_bases() -> dict:
