@@ -69,7 +69,7 @@ def get_ships() -> dict:
                 sold_at.append(x.name())
 
 
-            ships[ship.name()] = {"nickname" : ship.nickname, "infocard" : ship.infocard(markup = 'html') , "price" : ship.price(), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "built_by" : built_by, "sold_at" : sold_at}
+            ships[ship.name()] = {"nickname" : ship.nickname, "infocard" : ship.infocard(markup = 'html'), "infocard_plain" : ship.infocard(markup = 'plain') , "price" : ship.price(), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "built_by" : built_by, "sold_at" : sold_at}
         except TypeError:
             pass          
     return ships
@@ -109,7 +109,7 @@ def get_systems() -> dict:
         zones = list( dict.fromkeys(zones) )            #   remove duplicates
         connections = list( dict.fromkeys(connections) )#
 
-        systems[system.name()] = {"nickname" : system.nickname, "infocard" : system.infocard(), "region" : system.region(), "bases" : bases, "connections" : connections, "zones" : zones}
+        systems[system.name()] = {"nickname" : system.nickname, "infocard" : system.infocard(), "infocard_plain" : system.infocard(markup = 'plain'), "region" : system.region(), "bases" : bases, "connections" : connections, "zones" : zones}
     return systems
 
 def get_commodities() -> dict:
@@ -121,7 +121,7 @@ def get_commodities() -> dict:
                 boughtAt = {}
                 for base in commodity.bought_at().items():
                     boughtAt[base[0].name()] = base[1]
-                commodities[commodity.name()] = {"nickname" : commodity.nickname, "infocard" : commodity.infocard(), "price" : commodity.price(), "boughtAt" : boughtAt}
+                commodities[commodity.name()] = {"nickname" : commodity.nickname, "infocard" : commodity.infocard(), "infocard_plain" : commodity.infocard(markup = 'plain'), "price" : commodity.price(), "bought_at" : boughtAt}
         except:
             pass
     return commodities
