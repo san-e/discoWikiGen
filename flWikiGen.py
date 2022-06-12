@@ -69,7 +69,23 @@ def get_ships() -> dict:
                 for x in ship.sold_at():
                     sold_at.append(x.name())
 
-                ships[ship.name()] = {"nickname" : ship.nickname, "type" : ship.type(), "infocard" : ship.infocard(markup = 'html'), "infocard_plain" : ship.infocard(markup = 'plain') , "price" : ship.price(), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "built_by" : built_by, "sold_at" : sold_at}
+                equipment = []
+                for x in ship.equipment():
+                    equipment.append(x.name())
+
+                try:
+                    hull_price = ship.hull().price
+                except:
+                    hull_price = 0
+                
+                try:
+                    power_output = ship.power_core().capacity
+                    power_recharge = ship.power_core().charge_rate
+                except:
+                    power_output = 0
+                    power_recharge = 0
+
+                ships[ship.name()] = {"nickname" : ship.nickname, "type" : ship.type(), "infocard" : ship.infocard(markup = 'html'), "infocard_plain" : ship.infocard(markup = 'plain') , "hull_price" : hull_price, "package_price" : ship.price(), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at}
             except TypeError:
                 pass          
     return ships
