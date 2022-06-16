@@ -67,7 +67,8 @@ def get_ships() -> dict:
 
                 sold_at = []
                 for x in ship.sold_at():
-                    sold_at.append(x.name())
+                    if x.has_solar():
+                        sold_at.append([x.name(), x.owner().name(), x.system_().name(), x.system_().region()])
 
                 equipment = []
                 for x in ship.equipment():
@@ -148,12 +149,13 @@ def get_ships() -> dict:
                     if hardpoints.count(x) > 1:
                         tempHardpoints.append(f"*{hardpoints.count(x)} {x}")
                     else:
-                        tempHardpoints.append(x)
+                        tempHardpoints.append(f"*1 {x}")
                 hardpoints = list( dict.fromkeys(tempHardpoints) ) #remove duplicates
 
-                ships[ship.name()] = {"nickname" : ship.nickname, "type" : ship.type(), "infocard" : ship.infocard(markup = 'html'), "infocard_plain" : ship.infocard(markup = 'plain') , "hull_price" : hull_price, "package_price" : ship.price(), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
+                infocard = ship.infocard('plain').split("<p>")[0]
+                ships[ship.name()] = {"nickname" : ship.nickname, "type" : ship.type(), "infocard" : infocard , "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
             except TypeError:
-                pass          
+                pass
     return ships
 
 def get_bases() -> dict:
