@@ -1,9 +1,9 @@
 import flint as fl
 import json
 import time
+import math
 from os import path
 fl.set_install_path("A:\Spiele\Freelancer\Discovery Freelancer")
-#fl.set_install_path("A:\Spiele\Freelancer\Discovery Freelancer the second")
 
 # LOOKUP TABLES
 gun_table = {}
@@ -22,6 +22,9 @@ for base in fl.bases:
         except TypeError:
             pass
 
+def degree(x):
+    degree = (x * 180) / math.pi
+    return degree
 
 def linear_search(array, to_find):
 	for i in range(0, len(array)):
@@ -72,13 +75,30 @@ def get_ships() -> dict:
 
                 equipment = []
                 for x in ship.equipment():
-                    equipment.append(x.name())
+                    equipment.append([f"* [[{x.name()}]]", x.price()])
 
                 try:
                     hull_price = ship.hull().price
                 except:
                     hull_price = 0
                 
+                gunCount = 0
+                turretCount = 0
+                torpedoCount = 0
+                mineCount = 0
+                cmCount = 0
+                for x in ship.hardpoints():
+                    if "weapon" in x:
+                        gunCount += 1
+                    elif "turret" in x:
+                        turretCount += 1
+                    elif "torpedo" in x:
+                        torpedoCount += 1
+                    elif "mine" in x:
+                        mineCount += 1
+                    elif "cm" in x:
+                        cmCount += 1
+
                 try:
                     power_output = ship.power_core().capacity
                     power_recharge = ship.power_core().charge_rate
@@ -86,59 +106,55 @@ def get_ships() -> dict:
                     power_output = 0
                     power_recharge = 0
 
-                # weaponHardpoints = {"class1" : 0, "bomberGun" : 0, "bomberSpecial" : 0, "class3" : 0, "class4" : 0, "class5" : 0, "class6" : 0, "class7" : 0, "class8" : 0, "class9" : 0, "lightTurret" : 0, "transportTurret" : 0, "battlecruiserTurret" : 0, "gunboatTurret" : 0, "heavyGunboatTurret" : 0, "cruiserTurret" : 0, "heavyCruiserTurret" : 0, "battleshipTurret" : 0, "lightBattleshipTurret" : 0, "heavyBattleshipTurret" : 0, "cd" : 0}
-                # for x in ship.hardpoints().values():
-                #     try:
-                #         if "gun_special_1" in x[0].nickname:
-                #             weaponHardpoints["class1"] += 1
-                #         elif "gun_special_2" in x[0].nickname:
-                #             weaponHardpoints["bomberGun"] += 1
-                #         elif "gun_special_3" in x[0].nickname:
-                #             weaponHardpoints["class3"] += 1
-                #         elif "gun_special_4" in x[0].nickname:
-                #             weaponHardpoints["class4"] += 1
-                #         elif "gun_special_5" in x[0].nickname:
-                #             weaponHardpoints["class5"] += 1
-                #         elif "gun_special_6" in x[0].nickname:
-                #             weaponHardpoints["class6"] += 1
-                #         elif "gun_special_7" in x[0].nickname:
-                #             weaponHardpoints["class7"] += 1
-                #         elif "gun_special_8" in x[0].nickname:
-                #             weaponHardpoints["class8"] += 1
-                #         elif "gun_special_9" in x[0].nickname:
-                #             weaponHardpoints["class9"] += 1
-                #         elif "turret_special_1" in x[0].nickname:
-                #             weaponHardpoints["lightTurret"] += 1
-                #         elif "turret_special_2" in x[0].nickname:
-                #             weaponHardpoints["battlecruiserTurret"] += 1
-                #         elif "turret_special_3" in x[0].nickname:
-                #             weaponHardpoints["transportTurret"] += 1
-                #         elif "turret_special_4" in x[0].nickname:
-                #             weaponHardpoints["gunboatTurret"] += 1    
-                #         elif "turret_special_5" in x[0].nickname:
-                #             weaponHardpoints["heavyGunboatTurret"] += 1                                                     
-                #         elif "turret_special_6" in x[0].nickname:
-                #             weaponHardpoints["cruiserTurret"] += 1
-                #         elif "turret_special_7" in x[0].nickname:
-                #             weaponHardpoints["heavyCruiserTurret"] += 1                            
-                #         elif "turret_special_9" in x[0].nickname:
-                #             weaponHardpoints["battleshipTurret"] += 1
-                #         elif "turret_special_10" in x[0].nickname:
-                #             weaponHardpoints["lightBattleshipTurret"] += 1
-                #         elif "turret_special_8" in x[0].nickname:
-                #             weaponHardpoints["heavyBattleshipTurret"] += 1 
-                #         elif "hp_torpedo" == x[0].nickname:
-                #             weaponHardpoints["cd"] += 1 
-                #         elif "torpedo_special_2" in x[0].nickname:
-                #             weaponHardpoints["bomberSpecial"] += 1                                                                                   
-                #     except AttributeError:
-                #         pass
-                # delete = []
-                # for x in weaponHardpoints.items():
-                #     if x[1] == 0:
-                #         delete.append(x[0])
-                # for x in delete:
-                #     del weaponHardpoints[x]
+                maxClass = {"1" : 0, "2" : 0, "3" : 0, "4" : 0, "5" : 0, "6" : 0, "7" : 0, "8" : 0, "9" : 0, "10" : 0}
+                for x in ship.hardpoints().values():
+                    try:
+                        if "gun_special_1" in x[0].nickname:
+                            maxClass["1"] += 1
+                        elif "gun_special_2" in x[0].nickname:
+                            maxClass["2"] += 1
+                        elif "gun_special_3" in x[0].nickname:
+                            maxClass["3"] += 1
+                        elif "gun_special_4" in x[0].nickname:
+                            maxClass["4"] += 1
+                        elif "gun_special_5" in x[0].nickname:
+                            maxClass["5"] += 1
+                        elif "gun_special_6" in x[0].nickname:
+                            maxClass["6"] += 1
+                        elif "gun_special_7" in x[0].nickname:
+                            maxClass["7"] += 1
+                        elif "gun_special_8" in x[0].nickname:
+                            maxClass["8"] += 1
+                        elif "gun_special_9" in x[0].nickname:
+                            maxClass["9"] += 1
+                        elif "hp_turret_special_1" == x[0].nickname:
+                            maxClass["1"] += 1
+                        elif "turret_special_2" in x[0].nickname:
+                            maxClass["2"] += 1
+                        elif "turret_special_3" in x[0].nickname:
+                            maxClass["3"] += 1
+                        elif "turret_special_4" in x[0].nickname:
+                            maxClass["4"] += 1    
+                        elif "turret_special_5" in x[0].nickname:
+                            maxClass["5"] += 1                                                     
+                        elif "turret_special_6" in x[0].nickname:
+                            maxClass["6"] += 1
+                        elif "turret_special_7" in x[0].nickname:
+                            maxClass["7"] += 1                            
+                        elif "turret_special_9" in x[0].nickname:
+                            maxClass["9"] += 1
+                        elif "hp_turret_special_10" == x[0].nickname:
+                            maxClass["10"] += 1
+                        elif "turret_special_8" in x[0].nickname:
+                            maxClass["8"] += 1                                                                                  
+                    except AttributeError:
+                        pass
+                delete = []
+                for x in maxClass.items():
+                    if x[1] == 0:
+                        delete.append(x[0])
+                for x in delete:
+                    del maxClass[x]
 
                 hardpoints = []
                 for x in ship.hardpoints().values():
@@ -147,13 +163,21 @@ def get_ships() -> dict:
                 tempHardpoints = []
                 for x in hardpoints:
                     if hardpoints.count(x) > 1:
-                        tempHardpoints.append(f"*{hardpoints.count(x)} {x}")
+                        tempHardpoints.append(f"*{hardpoints.count(x)}x [[{x}]]")
                     else:
-                        tempHardpoints.append(f"*1 {x}")
+                        tempHardpoints.append(f"* [[{x}]]")
                 hardpoints = list( dict.fromkeys(tempHardpoints) ) #remove duplicates
 
-                infocard = ship.infocard('plain').split("<p>")[0]
-                ships[ship.name()] = {"nickname" : ship.nickname, "type" : ship.type(), "infocard" : infocard , "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
+                try:
+                    maxClass = list(maxClass.keys())[-1]
+                except:
+                    maxClass = 0
+
+                try:
+                    infocardMan = ship.infocard('plain').split("Maneuverability")[1][2:][:-1]
+                except:
+                    infocardMan = ""
+                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan, "type" : ship.type(), "maxClass" : maxClass, "infocard" : ship.infocard('plain').split("<p>")[0] , "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
             except TypeError:
                 pass
     return ships
