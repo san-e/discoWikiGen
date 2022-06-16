@@ -5,3 +5,4 @@ The idea as of right now is to dump everything I can into one file and using tha
 
 ## Dependencies
 - My [fork](https://github.com/BASEFlow1/flint) of [flint](https://github.com/biqqles/flint)
+- pyperclip
