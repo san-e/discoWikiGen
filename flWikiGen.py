@@ -5,8 +5,6 @@ import math
 from sys import argv
 from os import path
 from os.path import exists
-print(argv[1])
-print()
 if path.exists(argv[1]):
     if exists(argv[1] + "\\EXE\\freelancer.exe"):
         fl.set_install_path(argv[1])
@@ -18,7 +16,7 @@ else:
 gun_table = {}
 for x in fl.equipment:
     try:
-        if x.classIsGun and x.is_valid():
+        if str(type(x)) == "<class 'flint.entities.equipment.Gun'>" and x.is_valid():
             gun_table[x.nickname] = x.name()
     except:
         pass
@@ -234,7 +232,7 @@ def get_commodities() -> dict:
     commodities = {}
     for commodity in fl.equipment:
         try:
-            if commodity.classIsCommodity:
+            if str(type(commodity)) == "<class 'flint.entities.equipment.Commodity'>"
                 boughtAt = {}
                 for base in commodity.bought_at().items():
                     boughtAt[base[0].name()] = base[1]
@@ -248,7 +246,7 @@ def get_guns() -> dict:
     guns = {}
     for gun in fl.equipment:
         try:
-            if gun.classIsGun and gun.is_valid():
+            if str(type(gun)) == "<class 'flint.entities.equipment.Gun'>" and gun.is_valid():
                 Value = gun.hull_dps() / gun.price() * 1000 if gun.hull_dps() > gun.shield_dps() else gun.shield_dps() / gun.price() * 1000
                 Rating = gun.efficiency() * Value
                 if gun.is_missile():
@@ -266,7 +264,7 @@ def get_guns() -> dict:
     for base in fl.bases:
         for gun in base.sells_equipment():
             try:
-                if gun.classIsGun and gun.is_valid():
+                if str(type(gun)) == "<class 'flint.entities.equipment.Gun'>" and gun.is_valid():
                     gunsSold.append(gun.name())
             except:
                 pass
