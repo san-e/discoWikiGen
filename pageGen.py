@@ -2,7 +2,7 @@ import json
 import pyperclip
 from os import getcwd
 
-infobox = "{{Ship Infobox\n| name = {name}\n| image = li_elite.png\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxspeed = {impulse_speed}\n| maxthrust = 200\n| maxpower = {power_output}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
+infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxspeed = {impulse_speed}\n| maxthrust = 200\n| maxpower = {power_output}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
 infocard = "{infocard}\n\n"
 handling = "==Handling==\n{handling}\n"
 hardpoints = "==Hardpoints==\n{hardpoints}\n"
@@ -45,6 +45,7 @@ except:
     quit()
 
 infobox = infobox.replace("{name}", data["Ships"][name]["longName"])
+infobox = infobox.replace("{image}", image)
 infobox = infobox.replace("{nickname}", data["Ships"][name]["nickname"])
 infobox = infobox.replace("{class}", classToWikiType[data["Ships"][name]["type"]])
 if data["Ships"][name]["built_by"] != "":
