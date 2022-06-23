@@ -30,7 +30,18 @@ classToWikiType = {
 filename = "data.json"
 with open(f"D:\\repos\\flWiki\\{filename}", "r") as file:
     data = json.load(file)
-name = "Liberty Battlecruiser"
+
+image = str(input("Enter image name (copy-paste from page source): "))
+if image == "":
+    image = "li_fighter.png"
+    print(f"No Image has been specified, defaulting to {image}")
+name = str(input("Enter ship name (as displayed in FLStat): "))
+try:
+    if data["Ships"][name]:
+        pass
+except:
+    print("Ship name could not be found in database, aborting...")
+    quit()
 
 infobox = infobox.replace("{name}", data["Ships"][name]["longName"])
 infobox = infobox.replace("{nickname}", data["Ships"][name]["nickname"])
@@ -103,3 +114,4 @@ else:
     category = ""
 
 pyperclip.copy(f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}")
+print("Page source copied to clipboard.")
