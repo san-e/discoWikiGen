@@ -2,8 +2,17 @@ import flint as fl
 import json
 import time
 import math
+from sys import argv
 from os import path
-fl.set_install_path("A:\Spiele\Freelancer\Discovery Freelancer")
+from os.path import exists
+print(argv[1])
+print()
+if path.exists(argv[1]):
+    if exists(argv[1] + "\\EXE\\freelancer.exe"):
+        fl.set_install_path(argv[1])
+else:
+    print("Invalid directory")
+    quit()
 
 # LOOKUP TABLES
 gun_table = {}
