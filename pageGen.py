@@ -36,13 +36,13 @@ image = str(input("Enter image name (copy-paste from page source): "))
 if image == "":
     image = "li_fighter.png"
     print(f"No Image has been specified, defaulting to {image}")
-name = str(input("Enter ship name (as displayed in FLStat): "))
-try:
-    if data["Ships"][name]:
-        pass
-except:
-    print("Ship name could not be found in database, aborting...")
-    quit()
+while True:
+    name = str(input("Enter ship name (as displayed in FLStat): "))
+    try:
+        if data["Ships"][name]:
+            break
+    except:
+        print("Ship name could not be found in database, retrying...")
 
 infobox = infobox.replace("{name}", data["Ships"][name]["longName"])
 infobox = infobox.replace("{image}", image)
