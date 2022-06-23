@@ -27,7 +27,7 @@ classToWikiType = {
     "Destroyer" : "CRUISER"
 }
 
-filename = "data.json"
+filename = "flData.json"
 with open(f"D:\\repos\\flWiki\\{filename}", "r") as file:
     data = json.load(file)
 
