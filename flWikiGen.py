@@ -93,32 +93,34 @@ def get_ships() -> dict:
                 except:
                     hull_price = 0
                 
+                try:
+                    try:
+                        maxShield = int(ship.hardpoints()["hpshield01"][0].nickname[-1])
+                    except:
+                        maxShield = int(ship.hardpoints()["hpshield02"][0].nickname[-1])
+                except:
+                    maxShield = 0
+
                 gunCount = 0
                 turretCount = 0
                 torpedoCount = 0
                 mineCount = 0
                 cmCount = 0
-                for x in ship.hardpoints():
-                    if "weapon" in x:
-                        gunCount += 1
-                    elif "turret" in x:
-                        turretCount += 1
-                    elif "torpedo" in x:
-                        torpedoCount += 1
-                    elif "mine" in x:
-                        mineCount += 1
-                    elif "cm" in x:
-                        cmCount += 1
-
-                try:
-                    power_output = ship.power_core().capacity
-                    power_recharge = ship.power_core().charge_rate
-                except:
-                    power_output = 0
-                    power_recharge = 0
-
+                thrusterCount = 0
                 maxClass = {"1" : 0, "2" : 0, "3" : 0, "4" : 0, "5" : 0, "6" : 0, "7" : 0, "8" : 0, "9" : 0, "10" : 0}
                 for x in ship.hardpoints().values():
+                    if "weapon" in x[0].nickname:
+                        gunCount += 1
+                    elif "turret" in x[0].nickname:
+                        turretCount += 1
+                    elif "torpedo" in x[0].nickname:
+                        torpedoCount += 1
+                    elif "mine" in x[0].nickname:
+                        mineCount += 1
+                    elif "cm" in x[0].nickname:
+                        cmCount += 1
+                    elif "thruster" in x[0].nickname:
+                        thrusterCount += 1
                     try:
                         if "gun_special_1" in x[0].nickname:
                             maxClass["1"] += 1
@@ -159,13 +161,21 @@ def get_ships() -> dict:
                         elif "turret_special_8" in x[0].nickname:
                             maxClass["8"] += 1                                                                                  
                     except AttributeError:
-                        pass
+                        pass                    
+
                 delete = []
                 for x in maxClass.items():
                     if x[1] == 0:
                         delete.append(x[0])
                 for x in delete:
-                    del maxClass[x]
+                    del maxClass[x]                
+
+                try:
+                    power_output = ship.power_core().capacity
+                    power_recharge = ship.power_core().charge_rate
+                except:
+                    power_output = 0
+                    power_recharge = 0
 
                 hardpoints = []
                 for x in ship.hardpoints().values():
@@ -188,7 +198,7 @@ def get_ships() -> dict:
                     infocardMan = ship.infocard('plain').split("Maneuverability")[1][2:][:-1]
                 except:
                     infocardMan = ""
-                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan, "type" : ship.type(), "maxClass" : maxClass, "infocard" : ship.infocard('plain').split("<p>")[0] , "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
+                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan, "type" : ship.type(), "maxClass" : maxClass, "maxShield" : maxShield, "infocard" : ship.infocard('plain').split("<p>")[0] , "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "thrusterCount" : thrusterCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
             except TypeError:
                 pass
     return ships
