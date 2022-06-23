@@ -1,5 +1,6 @@
 import json
 import pyperclip
+from os import getcwd
 
 infobox = "{{Ship Infobox\n| name = {name}\n| image = li_elite.png\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxspeed = {impulse_speed}\n| maxthrust = 200\n| maxpower = {power_output}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
 infocard = "{infocard}\n\n"
@@ -28,7 +29,7 @@ classToWikiType = {
 }
 
 filename = "flData.json"
-with open(f"D:\\repos\\flWiki\\{filename}", "r") as file:
+with open(f"{getcwd()}\\{filename}", "r") as file:
     data = json.load(file)
 
 image = str(input("Enter image name (copy-paste from page source): "))
