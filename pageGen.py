@@ -32,10 +32,6 @@ filename = "flData.json"
 with open(f"{getcwd()}\\{filename}", "r") as file:
     data = json.load(file)
 
-image = str(input("Enter image name (copy-paste from page source): "))
-if image == "":
-    image = "li_fighter.png"
-    print(f"No Image has been specified, defaulting to {image}")
 while True:
     name = str(input("Enter ship name (as displayed in FLStat): "))
     try:
@@ -43,6 +39,10 @@ while True:
             break
     except:
         print("Ship name could not be found in database, retrying...")
+image = str(input("Enter image name (copy-paste from page source): "))
+if image == "":
+    image = "li_fighter.png"
+    print(f"No Image has been specified, defaulting to {image}")
 
 if data["Ships"][name]["thrusterCount"] > 0:
     maxthrust = 200
