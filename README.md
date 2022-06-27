@@ -16,3 +16,6 @@ To install, do:
 3. Run `pageGen.py` in the same directory
 
 The page source for the ship you selected will be pasted into your clipboard.
+
+---
+Developed and tested on Python 3.10.4
