@@ -121,6 +121,8 @@ if data["Ships"][name]["built_by"] != "":
     category = category.replace("{built_by}", data["Ships"][name]["built_by"])
 else:
     category = ""
-
-pyperclip.copy(f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}")
+if handle != "":
+    pyperclip.copy(f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}")
+else:
+    pyperclip.copy(f"{infobox}{infocard}{hardpoints}{includes}{availability}{category}")
 print("Page source copied to clipboard.")
