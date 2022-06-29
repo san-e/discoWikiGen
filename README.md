@@ -8,8 +8,7 @@ The idea as of right now is to dump everything I can into one file and using tha
 - pyperclip
 
 To install, do:
-`pip install fl-flint`
-`pip install pyperclip`
+`pip install fl-flint pyperclip`
 
 ## Usage
 1. `git clone` this repo into a directory of your choosing
@@ -17,3 +16,6 @@ To install, do:
 3. Run `pageGen.py` in the same directory
 
 The page source for the ship you selected will be pasted into your clipboard.
+
+---
+Developed and tested on Python 3.10.4
