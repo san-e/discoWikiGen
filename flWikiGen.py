@@ -100,14 +100,14 @@ def get_ships() -> dict:
                                 if int(x.nickname[-1]) > maxShield:
                                     maxShield = int(x.nickname[-1])
                         else:
-                            maxShield = int(ship.hardpoints()["hpshield01"][0][-1])
+                            maxShield = int(ship.hardpoints()["hpshield01"][0].nickname[-1])
                     except:
                         if len(ship.hardpoints()["hpshield02"]) > 1:
                             for x in ship.hardpoints()["hpshield02"]:
                                 if int(x.nickname[-1]) > maxShield:
                                     maxShield = int(x.nickname[-1])
                         else:
-                            maxShield = int(ship.hardpoints()["hpshield02"][0][-1])
+                            maxShield = int(ship.hardpoints()["hpshield02"][0].nickname[-1])
                 except:
                     maxShield = 0
 
@@ -118,19 +118,20 @@ def get_ships() -> dict:
                 cmCount = 0
                 thrusterCount = 0
                 maxClass = {"1" : 0, "2" : 0, "3" : 0, "4" : 0, "5" : 0, "6" : 0, "7" : 0, "8" : 0, "9" : 0, "10" : 0}
-                for x in ship.hardpoints().values():
-                    if "weapon" in x[0].nickname:
+                for x in ship.hardpoints():
+                    if "weapon" in x:
                         gunCount += 1
-                    elif "turret" in x[0].nickname:
+                    elif "turret" in x:
                         turretCount += 1
-                    elif "torpedo" in x[0].nickname:
+                    elif "torpedo" in x:
                         torpedoCount += 1
-                    elif "mine" in x[0].nickname:
+                    elif "mine" in x:
                         mineCount += 1
-                    elif "cm" in x[0].nickname:
+                    elif "cm" in x:
                         cmCount += 1
-                    elif "thruster" in x[0].nickname:
+                    elif "thruster" in x:
                         thrusterCount += 1
+                for x in ship.hardpoints().values():
                     try:
                         if "gun_special_1" in x[0].nickname:
                             maxClass["1"] += 1
@@ -215,10 +216,7 @@ def get_ships() -> dict:
                 # Time to turn 180 ~ 180 / turnRate
 
                 infocard = ship.infocard('plain').split("<p>")[0]
-                while True:
-                    if infocard[0] == " ":
-                        infocard = 
-                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan, "type" : ship.type(), "maxClass" : maxClass, "maxShield" : maxShield, "infocard" : ship.infocard('plain').split("<p>")[0] , "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "thrusterCount" : thrusterCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge,"turnRate" : turnRate, "angularDistance0.5" : angularDistanceInTime, "responseTime" : responseTime, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
+                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan, "type" : ship.type(), "maxClass" : maxClass, "maxShield" : maxShield, "infocard" : infocard, "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "thrusterCount" : thrusterCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "power_recharge" : power_recharge,"turnRate" : turnRate, "angularDistance0.5" : angularDistanceInTime, "responseTime" : responseTime, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
             except TypeError:
                 pass
     return ships
