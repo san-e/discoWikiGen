@@ -16,6 +16,7 @@ classToWikiType = {
     "Very Heavy Fighter" : "VH_FIGHTER",
     "Super Heavy Fighter" : "SH_FIGHTER",
     "Bomber" : "BOMBER",
+    "Gunship" : "GUNBOAT",
     "Gunboat" : "GUNBOAT",
     "Cruiser" : "CRUISER",
     "Battlecruiser" : "BATTLECRUISER",
@@ -76,7 +77,14 @@ while True:
     infobox = infobox.replace("{hull_price}", str(data["Ships"][name]["hull_price"]))
     infobox = infobox.replace("{package_price}", str(data["Ships"][name]["package_price"]))
 
-    infocard = infocard.replace("{infocard}", data["Ships"][name]["infocard"].split("\n", 1)[1])
+
+    info = data["Ships"][name]["infocard"].split("\n", 1)[1]
+    while True:
+        if info[0].isspace():
+            info = info[1:len(info)]
+        else:
+            break
+    infocard = infocard.replace("{infocard}", info)
 
     handle = data["Ships"][name]["maneuverability"].replace("\n", "\n* ")
     handling = handling.replace("{handling}", handle)
@@ -86,14 +94,17 @@ while True:
     for x in data["Ships"][name]["hardpoints"]:
         if "Cruiser Shield Upgrade" in x:
             x = x.replace("Cruiser Shield Upgrade", "Shield Harmonic Reinforcement")
-        if "Gun" in x:
-            temp = x.split("(")[1]
-            temp = temp.split(")")[0]
-            temp = temp.replace(" ", "_")
-            temp2 = x.split("[[")[1]
-            temp2 = temp2.split("]]")[0]
-            #print(f"* [[{temp}_Guns|{temp2}]]")
-            x = x.replace(temp2, f"{temp}_Guns|{temp2}")
+        try:
+            if "Gun" in x:
+                temp = x.split("(")[1]
+                temp = temp.split(")")[0]
+                temp = temp.replace(" ", "_")
+                temp2 = x.split("[[")[1]
+                temp2 = temp2.split("]]")[0]
+                #print(f"* [[{temp}_Guns|{temp2}]]")
+                x = x.replace(temp2, f"{temp}_Guns|{temp2}")
+        except IndexError:
+            pass
         hardpoint = hardpoint + x + "\n"
     hardpoints = hardpoints.replace("{hardpoints}", hardpoint)
 
