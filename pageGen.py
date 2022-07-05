@@ -2,13 +2,9 @@ import json
 from pyperclip import copy
 from os import getcwd
 
-infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
-infocard = "{infocard}\n\n"
-handling = "==Handling==\n{handling}\n"
-hardpoints = "==Hardpoints==\n{hardpoints}\n"
-includes = "==Purchase Includes==\n{{Spoiler|\n{includes}\n}}\n\n"
-availability = "==Availability==\n{| class=\"wikitable collapsible collapsed\"\n!Spoiler: Buying Locations\n|-\n|\n{| class=\"wikitable sortable\"\n|-\n!Base!!Owner!!System!!Location\n{sold_at}\n|}\n|}"
-category = "\n[[Category: {built_by}]]"
+filename = "flData.json"
+with open(f"{getcwd()}\\{filename}", "r") as file:
+    data = json.load(file)
 
 classToWikiType = {
     "Light Fighter" : "L_FIGHTER",
@@ -29,11 +25,14 @@ classToWikiType = {
     "Destroyer" : "CRUISER"
 }
 
-filename = "flData.json"
-with open(f"{getcwd()}\\{filename}", "r") as file:
-    data = json.load(file)
-
 while True:
+    infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
+    infocard = "{infocard}\n\n"
+    handling = "==Handling==\n{handling}\n"
+    hardpoints = "==Hardpoints==\n{hardpoints}\n"
+    includes = "==Purchase Includes==\n{{Spoiler|\n{includes}\n}}\n\n"
+    availability = "==Availability==\n{| class=\"wikitable collapsible collapsed\"\n!Spoiler: Buying Locations\n|-\n|\n{| class=\"wikitable sortable\"\n|-\n!Base!!Owner!!System!!Location\n{sold_at}\n|}\n|}"
+    category = "\n[[Category: {built_by}]]"
     while True:
         name = str(input("Enter ship name (as displayed in FLStat): "))
         try:
@@ -83,9 +82,11 @@ while True:
             break
     infocard = infocard.replace("{infocard}", info)
 
-    handle = data["Ships"][name]["maneuverability"].replace("\n", "\n* ")
+    handle = data["Ships"][name]["maneuverability"].replace("\n", "\n** ")
     if data["Ships"][name]["mustUseMoors"] == True:
-        handle = f"* This ship is too large to use docking bays, it must use mooring points.\n{handle}"
+        handle.replace('*', '**')
+        handle = f"* This ship is too large to use docking bays, it must use mooring points.{handle}"
+        handling = handling.replace("{handling}", handle)
     else:
         handling = handling.replace("{handling}", handle)
 
@@ -125,7 +126,7 @@ while True:
     available = ""
     for x in data["Ships"][name]["sold_at"]:
         if x[3] == "Independent":
-            x[3] = "Independent Systems"
+            x[3] = "Independent Worlds"
         available = f"{available}|-\n|[[{x[0]}]]||[[{x[1]}]]||[[{x[2]}]]||[[{x[3]}]]\n"
     availability = availability.replace("{sold_at}", available)
 
