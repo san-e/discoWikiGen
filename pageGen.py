@@ -2,7 +2,7 @@ import json
 import pyperclip
 from os import getcwd
 
-infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
+infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
 infocard = "{infocard}\n\n"
 handling = "==Handling==\n{handling}\n"
 hardpoints = "==Hardpoints==\n{hardpoints}\n"
@@ -68,6 +68,7 @@ while True:
     infobox = infobox.replace("{maxShield}", str(data["Ships"][name]["maxShield"]))
     infobox = infobox.replace("{impulse_speed}", str(data["Ships"][name]["impulse_speed"]))
     infobox = infobox.replace("{power_output}", str(data["Ships"][name]["power_output"]))
+    infobox = infobox.replace("{maxCruise}", str(data["Ships"][name]["maxCruise"]))
     infobox = infobox.replace("{power_recharge}", str(data["Ships"][name]["power_recharge"]))
     infobox = infobox.replace("{hull_price}", str(data["Ships"][name]["hull_price"]))
     infobox = infobox.replace("{package_price}", str(data["Ships"][name]["package_price"]))
