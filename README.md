@@ -8,6 +8,7 @@ The idea as of right now is to dump everything I can into one file and using tha
 - pyperclip
 
 To install, do:
+
 `pip install pyperclip`
 
 `pip install https://github.com/baseflow1/flint/archive/master.zip -U`
