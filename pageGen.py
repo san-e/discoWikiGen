@@ -46,11 +46,6 @@ while True:
         image = "li_fighter.png"
         print(f"No Image has been specified, defaulting to {image}")
 
-    if data["Ships"][name]["thrusterCount"] > 0:
-        maxthrust = 200
-    else:
-        maxthrust = ""
-
     infobox = infobox.replace("{name}", data["Ships"][name]["longName"])
     infobox = infobox.replace("{image}", image)
     infobox = infobox.replace("{nickname}", data["Ships"][name]["nickname"])
@@ -64,7 +59,7 @@ while True:
     infobox = infobox.replace("{torpedoCount}", str(data["Ships"][name]["torpedoCount"]))
     infobox = infobox.replace("{mineCount}", str(data["Ships"][name]["mineCount"]))
     infobox = infobox.replace("{cmCount}", str(data["Ships"][name]["cmCount"]))
-    infobox = infobox.replace("{maxthrust}", str(maxthrust))
+    infobox = infobox.replace("{maxthrust}", str(data["Ships"][name]["maxThrust"]))
     infobox = infobox.replace("{hull}", str(data["Ships"][name]["hit_pts"]))
     infobox = infobox.replace("{cargo}", str(data["Ships"][name]["hold_size"]))
     infobox = infobox.replace("{regens}", str(data["Ships"][name]["bat_limit"]))
