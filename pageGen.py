@@ -53,7 +53,8 @@ while True:
     if data["Ships"][name]["built_by"] != "":
         infobox = infobox.replace("{built_by}", data["Ships"][name]["built_by"])
     else:
-        infobox = infobox.replace("{{House Link | {built_by}}}", data["Ships"][name]["built_by"])
+        built = str(input("Enter ship owner faction: "))
+        infobox = infobox.replace("{{House Link | {built_by}}}", f"[[{built}]]")
     infobox = infobox.replace("{gunCount}", str(data["Ships"][name]["gunCount"]))
     infobox = infobox.replace("{turretCount}", str(data["Ships"][name]["turretCount"]))
     infobox = infobox.replace("{torpedoCount}", str(data["Ships"][name]["torpedoCount"]))
