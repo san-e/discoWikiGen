@@ -84,7 +84,10 @@ while True:
     infocard = infocard.replace("{infocard}", info)
 
     handle = data["Ships"][name]["maneuverability"].replace("\n", "\n* ")
-    handling = handling.replace("{handling}", handle)
+    if data["Ships"][name]["mustUseMoors"] == True:
+        handle = f"* This ship is too large to use docking bays, it must use mooring points.\n{handle}"
+    else:
+        handling = handling.replace("{handling}", handle)
 
 
     hardpoint = ""

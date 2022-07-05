@@ -221,8 +221,10 @@ def get_ships() -> dict:
                 force = thruster_force + ship.engine().max_force
                 maxThrust = int(force / linear_drag)
 
+                mustUseMoors = False if ship.mission_property == 'can_use_berths' else True
+
                 infocard = ship.infocard('plain').split("<p>")[0]
-                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan, "type" : ship.type(), "maxClass" : maxClass, "maxShield" : maxShield, "infocard" : infocard, "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "maxThrust" : maxThrust, "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "thrusterCount" : thrusterCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "maxCruise" : ship.engine().cruise_speed, "power_recharge" : power_recharge,"turnRate" : turnRate, "angularDistance0.5" : angularDistanceInTime, "responseTime" : responseTime, "built_by" : built_by, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
+                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan, "type" : ship.type(), "maxClass" : maxClass, "maxShield" : maxShield, "infocard" : infocard, "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "maxThrust" : maxThrust, "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "thrusterCount" : thrusterCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "maxCruise" : ship.engine().cruise_speed, "power_recharge" : power_recharge,"turnRate" : turnRate, "angularDistance0.5" : angularDistanceInTime, "responseTime" : responseTime, "built_by" : built_by, "mustUseMoors" : mustUseMoors, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
             except TypeError:
                 pass
     return ships
