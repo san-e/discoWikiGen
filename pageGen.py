@@ -1,5 +1,5 @@
 import json
-import pyperclip
+from pyperclip import copy
 from os import getcwd
 
 infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
@@ -130,9 +130,9 @@ while True:
     else:
         category = ""
     if handle != "":
-        pyperclip.copy(f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}")
+        copy(f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}")
     else:
-        pyperclip.copy(f"{infobox}{infocard}{hardpoints}{includes}{availability}{category}")
+        copy(f"{infobox}{infocard}{hardpoints}{includes}{availability}{category}")
     print("Page source copied to clipboard.")
 
     repeat = input("Generate another page? (yes/No): ")
