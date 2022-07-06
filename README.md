@@ -13,6 +13,8 @@ To install, do:
 
 `pip install https://github.com/baseflow1/flint/archive/master.zip -U`
 
+or navigate to the `requirements.txt` file and do `pip install -r requirements.txt`
+
 ## Usage
 1. `git clone` this repo into a directory of your choosing
 2. Run `flWikiGen.py [path_to_freelancer]`
