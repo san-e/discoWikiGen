@@ -1,0 +1,2 @@
+pyperclip
+https://github.com/baseflow1/flint/archive/master.zip
