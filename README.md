@@ -24,7 +24,7 @@ or navigate to the `requirements.txt` file and do `pip install -r requirements.t
 #### pageGen Usage
 1. Enter the short name of your desired ship (i.e the one that is displayed in FLStat)
 2. Copy-paste the image name from the page you intend to update. If you're creating a new page from scratch, you can also enter just `nickname`. This will use the internal nickname of the ship as the image name.
-3. If the script can't figure it out itself, you will be prompted to enter the owner faction of your ship. This fills the `Built by` row in a ship's wiki-table, use what you find most approptiate here.
+3. If the script can't figure it out itself, you will be prompted to enter the owner faction of your ship. This fills the `Built by` row in a ship's wiki-table, use what you find most appropriate here.
 4. You're done! The page source has been copied into your clipboard and is ready to be pasted into the wiki itself. You will also be asked if you'd like the generate another page, enter `yes` if yes and just press Enter if no.
 ![pageGen.bat in use](/images/pageGen.png?raw=true "pageGen.bat in use")
 
