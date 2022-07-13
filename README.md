@@ -1,5 +1,5 @@
 # discoWikiGen
-Very WIP dynamic wiki page source generator for Discovery Freelancer 
+WIP dynamic wiki page source generator for Discovery Freelancer 
 
 
 ## Dependencies
