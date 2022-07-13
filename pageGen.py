@@ -22,17 +22,28 @@ classToWikiType = {
     "Freighter" : "FREIGHTER",
     "Liner" : "LINER",
     "Transport" : "TRANSPORT",
-    "Destroyer" : "CRUISER"
+    "Destroyer" : "CRUISER",
+    "Repair Ship" : "FREIGHTER",
+    "Train" : "TRANSPORT",
+    "Super Train" : "TRANSPORT",
+    "Heavy Transport" : "TRANSPORT"
 }
 
+
+def resetTemplates(template):
+    if template == "Ship":
+        infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
+        infocard = "{infocard}\n\n"
+        handling = "==Handling==\n{handling}\n"
+        hardpoints = "==Hardpoints==\n{hardpoints}\n"
+        includes = "==Purchase Includes==\n{{Spoiler|\n{includes}\n}}\n\n"
+        availability = "==Availability==\n{| class=\"wikitable collapsible collapsed\"\n!Spoiler: Buying Locations\n|-\n|\n{| class=\"wikitable sortable\"\n|-\n!Base!!Owner!!System!!Location\n{sold_at}\n|}\n|}"
+        category = "\n[[Category: {built_by}]]"
+        return infobox, infocard, handling, hardpoints, includes, availability, category
+    return 1
+
 while True:
-    infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
-    infocard = "{infocard}\n\n"
-    handling = "==Handling==\n{handling}\n"
-    hardpoints = "==Hardpoints==\n{hardpoints}\n"
-    includes = "==Purchase Includes==\n{{Spoiler|\n{includes}\n}}\n\n"
-    availability = "==Availability==\n{| class=\"wikitable collapsible collapsed\"\n!Spoiler: Buying Locations\n|-\n|\n{| class=\"wikitable sortable\"\n|-\n!Base!!Owner!!System!!Location\n{sold_at}\n|}\n|}"
-    category = "\n[[Category: {built_by}]]"
+    infobox, infocard, handling, hardpoints, includes, availability, category = resetTemplates("Ship")
     while True:
         name = str(input("Enter ship name (as displayed in FLStat): "))
         try:
@@ -44,6 +55,9 @@ while True:
     if image == "":
         image = "li_fighter.png"
         print(f"No Image has been specified, defaulting to {image}")
+    elif image.lower() == "nickname":
+        image = f'{data["Ships"][name]["nickname"]}.png'
+        print("Using Ship's nickname as image name.")
 
     infobox = infobox.replace("{name}", data["Ships"][name]["longName"])
     infobox = infobox.replace("{image}", image)
@@ -82,7 +96,7 @@ while True:
             break
     infocard = infocard.replace("{infocard}", info)
 
-    handle = data["Ships"][name]["maneuverability"].replace("\n", "\n** ")
+    handle = data["Ships"][name]["maneuverability"].replace("\n", "\n* ")
     if data["Ships"][name]["mustUseMoors"] == True:
         handle.replace('*', '**')
         handle = f"* This ship is too large to use docking bays, it must use mooring points.{handle}"
