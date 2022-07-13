@@ -1,2 +1,2 @@
 @echo off
-python flWikiGen.py "A:\Spiele\Freelancer\Discovery Freelancer"
+python flWikiGen.py [path_to_disco]
