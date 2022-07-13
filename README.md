@@ -17,8 +17,10 @@ or navigate to the `requirements.txt` file and do `pip install -r requirements.t
 
 ## Usage
 1. `git clone` this repo into a directory of your choosing
-2. Run `flWikiGen.py [path_to_freelancer]`
-3. Run `pageGen.py` in the same directory
+2. Change the `[path_to_disco]` string in `databaseGen.bat` to the path to your Discovery installation. (Remember to re-do this step everytime a patch hits.)
+3. Run `databaseGen.bat`
+4. Now run `pageGen.bat` in the same directory.
+![pageGen.bat in use](/repository/images/pageGen.png?raw=true "pageGen.bat in use")
 
 The page source for the ship you selected will be pasted into your clipboard.
 
