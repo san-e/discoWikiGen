@@ -66,8 +66,6 @@ def get_ships() -> dict:
                     built_by = "Rheinland"
                 elif "ga_" in ship.nickname:
                     built_by = "Gallia"
-                elif "ge_" in ship.nickname or "fl_" in ship.nickname:
-                    built_by = "Civillian"
                 elif "bw_" in ship.nickname:
                     built_by = "Borderworlds"
                 elif "co_" in ship.nickname:
