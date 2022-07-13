@@ -124,6 +124,7 @@ while True:
     hardpoints = hardpoints.replace("{hardpoints}", hardpoint)
 
     include = ""
+    temp = ""
     for x in data["Ships"][name]["equipment"]:
         number = "{:,}".format(x[1])
         if "Shield" in x[0]:
