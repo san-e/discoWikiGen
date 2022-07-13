@@ -76,6 +76,8 @@ def get_ships() -> dict:
                     built_by = "Outcasts"
                 elif "col_" in ship.nickname:
                     built_by = "Crayter Republic"
+                elif "or_" in ship.nickname:
+                    built_by = "The Order"
                 else:
                     built_by = ""
 
