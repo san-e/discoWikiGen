@@ -1,5 +1,5 @@
 pyperclip
 https://github.com/baseflow1/flint/archive/master.zip
 beautifulsoup4==4.11.1
-html_table_parser==0.1.0
+html-table-parser-python3
 pandas==1.4.3
