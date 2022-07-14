@@ -2,9 +2,10 @@ import json
 from pyperclip import copy
 from os import getcwd
 
-filename = "flData.json"
-with open(f"{getcwd()}\\{filename}", "r") as file:
-    data = json.load(file)
+def loadData(filename):
+    with open(f"{getcwd()}\\{filename}", "r") as file:
+        data = json.load(file)
+    return data
 
 classToWikiType = {
     "Light Fighter" : "L_FIGHTER",
@@ -32,7 +33,7 @@ classToWikiType = {
 
 def resetTemplates(template):
     if template == "Ship":
-        infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
+        infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| shiptechcategory = {techcompat}\n| techmix = {techcompat}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}| maxturn = {turnRate}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
         infocard = "{infocard}\n\n"
         handling = "==Handling==\n{handling}\n"
         hardpoints = "==Hardpoints==\n{hardpoints}\n"
@@ -43,6 +44,7 @@ def resetTemplates(template):
     return 1
 
 while True:
+    data = loadData("flData.json")
     infobox, infocard, handling, hardpoints, includes, availability, category = resetTemplates("Ship")
     while True:
         name = str(input("Enter ship name (as displayed in FLStat): "))
@@ -68,6 +70,7 @@ while True:
     else:
         built = str(input("Enter ship owner faction: "))
         infobox = infobox.replace("{{House Link | {built_by}}}", f"[[{built}]]")
+    infobox = infobox.replace("{techcompat}", data["Ships"][name]["techcompat"])
     infobox = infobox.replace("{gunCount}", str(data["Ships"][name]["gunCount"]))
     infobox = infobox.replace("{turretCount}", str(data["Ships"][name]["turretCount"]))
     infobox = infobox.replace("{torpedoCount}", str(data["Ships"][name]["torpedoCount"])) if data["Ships"][name]["torpedoCount"] != 0 else infobox.replace("{torpedoCount}", "")
@@ -81,6 +84,7 @@ while True:
     infobox = infobox.replace("{maxwep}", str(data["Ships"][name]["maxClass"]))
     infobox = infobox.replace("{maxShield}", str(data["Ships"][name]["maxShield"]))
     infobox = infobox.replace("{impulse_speed}", str(data["Ships"][name]["impulse_speed"]))
+    infobox = infobox.replace("{turnRate}", str(data["Ships"][name]["turnRate"]))
     infobox = infobox.replace("{power_output}", str(data["Ships"][name]["power_output"]))
     infobox = infobox.replace("{maxCruise}", str(data["Ships"][name]["maxCruise"]))
     infobox = infobox.replace("{power_recharge}", str(data["Ships"][name]["power_recharge"]))
