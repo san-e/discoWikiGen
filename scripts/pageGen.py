@@ -2,9 +2,10 @@ import json
 from pyperclip import copy
 from os import getcwd
 
-filename = "flData.json"
-with open(f"{getcwd()}\\{filename}", "r") as file:
-    data = json.load(file)
+def loadData(filename):
+    with open(f"{getcwd()}\\{filename}", "r") as file:
+        data = json.load(file)
+    return data
 
 classToWikiType = {
     "Light Fighter" : "L_FIGHTER",
@@ -43,6 +44,7 @@ def resetTemplates(template):
     return 1
 
 while True:
+    data = loadData("flData.json")
     infobox, infocard, handling, hardpoints, includes, availability, category = resetTemplates("Ship")
     while True:
         name = str(input("Enter ship name (as displayed in FLStat): "))
