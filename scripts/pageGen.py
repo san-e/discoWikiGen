@@ -32,16 +32,18 @@ classToWikiType = {
 
 
 def resetTemplates(template):
-    if template == "Ship":
-        infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| shiptechcategory = {techcompat}\n| techmix = {techcompat}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}| maxturn = {turnRate}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
-        infocard = "{infocard}\n\n"
-        handling = "==Handling==\n{handling}\n"
-        hardpoints = "==Hardpoints==\n{hardpoints}\n"
-        includes = "==Purchase Includes==\n{{Spoiler|\n{includes}\n}}\n\n"
-        availability = "==Availability==\n{| class=\"wikitable collapsible collapsed\"\n!Spoiler: Buying Locations\n|-\n|\n{| class=\"wikitable sortable\"\n|-\n!Base!!Owner!!System!!Location\n{sold_at}\n|}\n|}"
-        category = "\n[[Category: {built_by}]]"
-        return infobox, infocard, handling, hardpoints, includes, availability, category
-    return 1
+    match template:
+        case "Ship":
+            infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| shiptechcategory = {techcompat}\n| techmix = {techcompat}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}| maxturn = {turnRate}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
+            infocard = "{infocard}\n\n"
+            handling = "==Handling==\n{handling}\n"
+            hardpoints = "==Hardpoints==\n{hardpoints}\n"
+            includes = "==Purchase Includes==\n{{Spoiler|\n{includes}\n}}\n\n"
+            availability = "==Availability==\n{| class=\"wikitable collapsible collapsed\"\n!Spoiler: Buying Locations\n|-\n|\n{| class=\"wikitable sortable\"\n|-\n!Base!!Owner!!System!!Location\n{sold_at}\n|}\n|}"
+            category = "\n[[Category: {built_by}]]"
+            return infobox, infocard, handling, hardpoints, includes, availability, category
+        case _:
+            return 1
 
 while True:
     data = loadData("flData.json")
