@@ -101,10 +101,9 @@ def get_ships(definitions: dict) -> dict:
                     built_by = ""
 
                 sold_at = []
-                if ship.name() == "Ghoul":
-                    for x in ship.sold_at():
-                        if x.has_solar():
-                            sold_at.append([x.name(), x.owner().name(), x.system_().name(), x.system_().region()])
+                for x in ship.sold_at():
+                    if x.has_solar():
+                        sold_at.append([x.name(), x.owner().name(), x.system_().name(), x.system_().region()])
 
                 equipment = []
                 for x in ship.equipment():
