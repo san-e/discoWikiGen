@@ -1,3 +1,4 @@
+from mimetypes import init
 import flint as fl
 import discoTechCompat as tech
 from json import dump, load
@@ -41,6 +42,10 @@ for base in fl.bases:
         except TypeError:
             pass
 
+commodity_table = {}
+for commodity in fl.commodities:
+    commodity_table[commodity.nickname] = commodity.name()
+
 def degree(x):
     degree = (x * 180) / pi
     return degree
@@ -57,6 +62,14 @@ def reverse_dict(myDict):
         val = myDict[key]
         reversedDict[val] = key
     return reversedDict
+
+def getMineableCommodites(path):
+    content = fl.iniparse(f"{argv[1]}\\DATA\\{path}")
+    for header, attributes in content:
+        if header.lower() == "lootablezone":
+            if "asteroid_loot_commodity" in attributes.keys():
+                return commodity_table[attributes["asteroid_loot_commodity"]]
+    return None
 
 def get_ships(definitions: dict) -> dict:
     print("Reading ship data...")
@@ -250,6 +263,7 @@ def get_systems() -> dict:
     for system in fl.systems:
         if system.nickname not in oorp:
             bases = {}
+            planets = []
             holes = []
             neighbors = []
             zones = []
@@ -259,20 +273,27 @@ def get_systems() -> dict:
             for solar_type, attributes in system.contents_raw():
                 if solar_type.lower() == "nebula":
                     try:
-                        nebulae.append(attributes['zone'])
+                        nebulae.append([attributes['zone'], attributes['file']])
                     except KeyError:
                         pass
                 elif solar_type.lower() == "asteroids":
                     try:
-                        asteroids.append(attributes['zone'])
+                        asteroids.append([attributes['zone'], attributes['file']])
                     except KeyError:
                         pass
+            for x in asteroids:
+                x.append(getMineableCommodites(x[1]))
             for base in system.bases():
-                bases[base.name()] = {"owner": base.owner().name(),"factionLegality": base.owner().legality()}
+                bases[base.name()] = {"owner": base.owner().name(),"factionLegality": base.owner().legality(), "type": str(type(base))}
+            for planet in system.planets():
+                if str(type(planet)) == "<class 'flint.entities.solars.PlanetaryBase'>":
+                    planets.append([planet.name(), planet.nickname, planet.owner().name() if len(planet.owner().name()) <= 20 else planet.owner().short_name()])
+                else:
+                    planets.append([planet.name(), planet.nickname, ""])
             for x in system.connections():
                 name = fl.systems[x.goto[0]].name()
                 neighbors.append(name)
-                holes.append(f"{name} {x.type()}")
+                holes.append([name, x.type(), x.sector()])
                 
                 
             for x in system.zones():
@@ -282,7 +303,7 @@ def get_systems() -> dict:
             neighbors = [x for x in neighbors if x != system.name()]
             neighbors = list(dict.fromkeys(neighbors))
 
-            systems[system.name()] = {"nickname" : system.nickname, "infocard" : system.infocard('plain'), "region" : system.region(), "bases" : bases, "stars": stars, "holes" : holes, "neighbors" : neighbors, "zones" : zones, "nebulae": nebulae, "asteroids": asteroids}
+            systems[system.name()] = {"nickname" : system.nickname, "infocard" : system.infocard('plain'), "region" : system.region(), "bases" : bases,  "planets": planets, "stars": stars, "holes" : holes, "neighbors" : neighbors, "zones" : zones, "nebulae": nebulae, "asteroids": asteroids}
     return systems
 
 def get_commodities() -> dict:

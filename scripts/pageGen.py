@@ -158,11 +158,13 @@ def main(template, data, config):
     elif "sys" in template.lower():    
         version = "{{Version|{version}}}\n"
         infobox = "{{System v2\n| name = {name}\n| nickname = {nickname}\n| image = {nickname}.png\n| government = {government}\n| region = {region}\n| neighbors = {neighbors}\n"
-        overview = "| suns = {suns}\n| fields = {fields}\n| lawful-factions = {lawfuls}\n| trade-factions = {traders}\n| unlawful-factions = {unlawfuls}\n| stations = {bases}\n| planets = {planets}<br/><br/><br/><br/><br/><br/><br/><br/><br/>\n| mining-zones = {miningZones}\n}}\n"
+        description = "| description = \n"
+        overview = "| suns = {suns}\n| fields = {fields}\n| lawful-factions = {lawfuls}\n| trade-factions = {traders}\n| unlawful-factions = {unlawfuls}\n| stations = {bases}\n| planets = {planets}\n| mining-zones = {miningZones}\n}}\n"
         navmap = "=System Map=\n[https://space.discoverygc.com/navmap/#q={name} Navmap]\n"
         AoI = "=Areas of Interest=\n"
         nebulae = "==Nebulae==\n\n{nebulae}\n"
         asteroids = "==Asteroid Fields==\n\n{asteroids}\n"
+        jumps = '==Jump Gates/Holes==\n{| class="wikitable collapsible collapsed"\n!Spoiler: Jump Hole/Gate Locations\n|-\n|\n|-\n|\n{| class="wikitable sortable"\n!Target System!!Location!!Type\n{gates}\n|}\n|}'
         category = "\n[[Category: {region}]]"
 
         while True:
@@ -176,8 +178,13 @@ def main(template, data, config):
 
         infobox = infobox.replace("{name}", name)
         infobox = infobox.replace("{nickname}", data["Systems"][name]["nickname"])
-        if data["Systems"][name]["region"] in config["settings"]["houses"]: infobox = infobox.replace("{government}", "{{" + f'House Link|{data["Systems"][name]["region"]}' + "}}")
-        infobox = infobox.replace("{region}", data["Systems"][name]["region"])
+        region = data["Systems"][name]["region"]
+        if region == "Independent": region = "Independent Worlds"
+        if region in config["settings"]["houses"]: 
+            infobox = infobox.replace("{government}", "{{" + f'House Link|{region}' + "}}")
+        else:
+            infobox = infobox.replace("{government}", 'Independent')
+        infobox = infobox.replace("{region}", region)
         temp = ""        
         for neighbor in data["Systems"][name]["neighbors"]:
             temp = f"{temp}[[{neighbor}]]<br/>"
@@ -191,10 +198,14 @@ def main(template, data, config):
         overview = overview.replace("{suns}", temp)
         temp = ""
         temp2 = []
+        nebs = []
+        asts = []
         for zone, nick, info in data["Systems"][name]["zones"]:
             if zone in temp2: continue
             temp2.append(zone)
-            temp = f"{temp}{zone}\n" if nick in data["Systems"][name]["asteroids"] or data["Systems"][name]["nebulae"] else temp
+            temp = f"{temp}{zone}\n" if nick in data["Systems"][name]["asteroids"] or nick in data["Systems"][name]["nebulae"] else temp
+            if nick in data["Systems"][name]["nebulae"]: nebs.append([zone, nick, info])
+            elif nick in data["Systems"][name]["asteroids"]: asts.append([zone, nick, info])
         temp = "* " + temp.replace('\n', '\n* ')
         overview = overview.replace("{fields}", temp)
         temp = ""
@@ -202,7 +213,8 @@ def main(template, data, config):
         lawfulFactions = []
         unlawfulFactions = []
         for base, dicty in data["Systems"][name]["bases"].items():
-            bases.append([base, dicty["owner"]])
+            if dicty["type"] != "<class 'flint.entities.solars.PlanetaryBase'>":
+                bases.append([base, dicty["owner"]])
             if dicty["factionLegality"] == "Lawful":
                 lawfulFactions.append(dicty["owner"])
                 
@@ -222,15 +234,63 @@ def main(template, data, config):
         unlawfuls = unlawfuls.replace("\n", "\n* ")
         overview = overview.replace("{lawfuls}", lawfuls)
         overview = overview.replace("{unlawfuls}", unlawfuls)
-            
+        stations = "* "
+        for base, owner in bases:
+            stations = f"{stations}'''[[{base}]]''' -- ''[[{owner}]]''\n"
+        stations = stations.replace("\n", "\n* ")
+        overview = overview.replace("{bases}", stations)
+        planets = "\n"
+        brrt = ""
+        for planet, nickname, owner in data["Systems"][name]["planets"]:
+            inhabited = "Inhabited" if owner != "" else "Uninhabited"
+            planet = planet if planet != " " else "Unknown"
+            if inhabited == "Inhabited":
+                planets = f"{planets}§§Planet|{planet}|{inhabited} -- [[{owner}]]|{nickname}.png$$\n"
+            else:
+                planets = f"{planets}§§Planet|{planet}|{inhabited}|{nickname}.png$$\n"
+            brrt = f"{brrt}<br/><br/>"
+        planets = planets.replace("§", "{")
+        planets = planets.replace("$", "}")
+        planets = f"{planets}{brrt}"
+        overview = overview.replace("{planets}", planets)
+        mineableCommodities = ""
+        mineableCommodity = []
+        for doesnt, matter, commodity in data["Systems"][name]["asteroids"]:
+            if commodity != None:
+                mineableCommodity.append(commodity)
+        mineableCommodity = list(dict.fromkeys(mineableCommodity))
+        mineableCommodity.sort()
+        for commodity in mineableCommodity:
+            mineableCommodities = f"{mineableCommodities}* [[{commodity}]]\n"
+        overview = overview.replace("{miningZones}", mineableCommodities)
+
+        navmap = navmap.replace("{name}", name.replace(" ", "%20"))
+
+        nebul = "\n"
+        ast = "\n"
+        for nebula, nick, info in nebs:
+            nebul = f"{nebul}\n'''{nebula}'''\n\n<p>{info}\n"
+        for field, nick, info in asts:
+            ast = f"{ast}\n'''{field}'''\n\n<p>{info}\n"
+        nebul = nebul.replace("<p></b>", "</b>")
+        ast = ast.replace("<p></b>", "</b>")
+        nebulae = nebulae.replace("{nebulae}", nebul)
+        asteroids = asteroids.replace("{asteroids}", ast)
+
+        gates = ""
+        for system, type, sector in data["Systems"][name]["holes"]:
+            gates = f"{gates}|-\n|[[{system}]]||{sector}||{type}\n"
+        jumps = jumps.replace("{gates}", gates)
+
+        category = category.replace("{region}", data["Systems"][name]["region"])
 
 
 
 
 
-
-        return f"{version}{infobox}{overview}{navmap}{AoI}{nebulae}{asteroids}{category}"
-    return 1
+        return f"{version}{infobox}{description}{overview}{navmap}{AoI}{nebulae}{asteroids}{jumps}{category}"
+    else:
+        return False
 
 
 loadedData = loadData("flData.json")
@@ -238,8 +298,11 @@ configData = loadData("config.json")
 while True:
     templates = ["Ship", "System"]
     source = main(template = input(f"Select template ({templates}): "), data = loadedData, config = configData)
-    copy(source)
-    print("Page source copied!")
+    if source != False:
+        copy(source)
+        print("Page source copied!")
+    else:
+        print("Page source could not be copied.")
     
     repeat = input("Generate another page? (yes/No): ")
     if repeat == "" or 'n' in repeat.lower(): break
