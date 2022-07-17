@@ -1,0 +1,199 @@
+{
+ "settings": {
+  "oorpSystems": [
+   "br09",
+   "br10",
+   "br14",
+   "br17",
+   "br19",
+   "br22",
+   "bw11",
+   "bw13",
+   "bw14",
+   "bw17",
+   "bw21",
+   "bw46",
+   "bw58",
+   "ca01",
+   "ev01",
+   "ev02",
+   "ev03",
+   "ew05",
+   "ew08",
+   "ew11",
+   "ew12",
+   "ew14",
+   "ew17",
+   "ew18",
+   "ew19",
+   "ew37",
+   "ew45",
+   "ew63",
+   "ew85",
+   "ga06",
+   "ga09",
+   "ga10",
+   "ga11",
+   "ga12",
+   "ga13",
+   "ga14",
+   "hi03",
+   "hi05",
+   "hi08",
+   "hi08",
+   "hi18",
+   "hi19",
+   "hi22",
+   "hlp1",
+   "hlp2",
+   "iw07",
+   "iw09",
+   "iw13",
+   "ku08",
+   "ku15",
+   "ku16",
+   "ku17",
+   "li06",
+   "li07",
+   "li08",
+   "li10",
+   "li11",
+   "li13",
+   "li14",
+   "rh10",
+   "rh11",
+   "rh12",
+   "st02",
+   "st02c",
+   "st03b"
+  ],
+  "houses": [
+    "Liberty",
+    "Bretonia",
+    "Kusari",
+    "Rheinland",
+    "Gallia",
+    "Corsairs",
+    "Outcasts",
+    "Nomads"
+  ],
+  "corporations":[
+    [
+     "BMM",
+     "br_m_grp"
+    ],
+    [
+     "ALG Waste Disposal",
+     "co_alg_grp"
+    ],
+    [
+     "Border World Exports",
+     "co_be_grp"
+    ],
+    [
+     "Cryer Pharmaceuticals",
+     "co_hsp_grp"
+    ],
+    [
+     "Interspace Commerce",
+     "co_ic_grp"
+    ],
+    [
+     "Daumann Heavy Construction",
+     "co_khc_grp"
+    ],
+    [
+     "Kishiro Technologies",
+     "co_kt_grp"
+    ],
+    [
+     "Deep Space Engineering",
+     "co_me_grp"
+    ],
+    [
+     "Synth Foods, Inc.",
+     "co_ni_grp"
+    ],
+    [
+     "Gateway Shipping",
+     "co_nws_grp"
+    ],
+    [
+     "Orbital Spa and Cruise",
+     "co_os_grp"
+    ],
+    [
+     "RGS Shipping",
+     "co_rs_grp"
+    ],
+    [
+     "Samura Industries",
+     "co_shi_grp"
+    ],
+    [
+     "Universal Shipping",
+     "co_ss_grp"
+    ],
+    [
+     "Planetform, Inc.",
+     "co_ti_grp"
+    ],
+    [
+     "Ageira Technologies",
+     "co_vr_grp"
+    ],
+    [
+      "Hogosha",
+      "fc_h_grp"
+     ],    
+    [
+     "Junkers",
+     "fc_j_grp"
+    ],
+    [
+     "EFL Oil and Machinery",
+     "ga_efl_grp"
+    ],
+    [
+     "Gallic Metal Service",
+     "ga_gms_grp"
+    ],
+    [
+     "IDF Shipping",
+     "ga_idf_grp"
+    ],
+    [
+     "Bristol Constructions and Manufacturing",
+     "ga_sol_grp"
+    ],
+    [
+     "Bounty Hunters Guild",
+     "gd_bh_grp"
+    ],
+    [
+     "The Core",
+     "gd_bh_guardian"
+    ],
+    [
+     "Gas Miners Guild",
+     "gd_gm_grp"
+    ],
+    [
+     "Gas Miners Guild Guard",
+     "gd_gm_guardian"
+    ],
+    [
+     "Independent Miners Guild",
+     "gd_im_grp"
+    ],
+    [
+     "IMG (Gallic Occupation)",
+     "gd_im_guardian"
+    ],
+    [
+     "Kruger Minerals",
+     "rh_m_grp"
+    ]
+   ]
+ }
+}
