@@ -66,6 +66,16 @@
    "st02",
    "st02c",
    "st03b"
+  ],
+  "houses": [
+    "Liberty",
+    "Bretonia",
+    "Kusari",
+    "Rheinland",
+    "Gallia",
+    "Corsairs",
+    "Outcasts",
+    "Nomads"
   ]
  }
 }

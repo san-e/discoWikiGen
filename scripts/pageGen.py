@@ -31,7 +31,8 @@ classToWikiType = {
 }
 
 
-def main(template, data):
+
+def main(template, data, config):
     if template.lower() == "ship":
         version = "{{Version|{version}}}\n"
         infobox = "{{Ship Infobox\n| name = {name}\n| image = {image}\n| nickname = {nickname}\n| shipclass = {class}\n| shipowner = {{House Link | {built_by}}}\n| shiptechcategory = {techcompat}\n| techmix = {techcompat}\n| guns = {gunCount}\n| turrets = {turretCount}\n| torpedoes = {torpedoCount}\n| mines = {mineCount}\n| CM = {cmCount}\n| hull = {hull}\n| cargo = {cargo}\n| maxregens = {regens}\n| optwepclass = {optwep}\n| maxwepclass = {maxwep}\n| maxshieldclass = {maxShield}\n| maxspeed = {impulse_speed}\n| maxturn = {turnRate}\n| maxthrust = {maxthrust}\n| maxpower = {power_output}\n| maxcruise = {maxCruise}\n| recharge = {power_recharge}\n| hullcost = {hull_price}\n| fullcost = {package_price}\n}}\n\n"
@@ -154,16 +155,92 @@ def main(template, data):
             return f"{version}{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}"
         else:
             return f"{version}{infobox}{infocard}{hardpoints}{includes}{availability}{category}"
-    elif "sys" in template.lower():
-        pass
+    elif "sys" in template.lower():    
+        version = "{{Version|{version}}}\n"
+        infobox = "{{System v2\n| name = {name}\n| nickname = {nickname}\n| image = {nickname}.png\n| government = {government}\n| region = {region}\n| neighbors = {neighbors}\n"
+        overview = "| suns = {suns}\n| fields = {fields}\n| lawful-factions = {lawfuls}\n| trade-factions = {traders}\n| unlawful-factions = {unlawfuls}\n| stations = {bases}\n| planets = {planets}<br/><br/><br/><br/><br/><br/><br/><br/><br/>\n| mining-zones = {miningZones}\n}}\n"
+        navmap = "=System Map=\n[https://space.discoverygc.com/navmap/#q={name} Navmap]\n"
+        AoI = "=Areas of Interest=\n"
+        nebulae = "==Nebulae==\n\n{nebulae}\n"
+        asteroids = "==Asteroid Fields==\n\n{asteroids}\n"
+        category = "\n[[Category: {region}]]"
 
+        while True:
+            name = str(input("Enter system name: "))
+            try:
+                if data["Systems"][name]:
+                    break
+            except:
+                print("System could not be found in database, retrying...")
+        version = version.replace("{version}", data["Version"])
+
+        infobox = infobox.replace("{name}", name)
+        infobox = infobox.replace("{nickname}", data["Systems"][name]["nickname"])
+        if data["Systems"][name]["region"] in config["settings"]["houses"]: infobox = infobox.replace("{government}", "{{" + f'House Link|{data["Systems"][name]["region"]}' + "}}")
+        infobox = infobox.replace("{region}", data["Systems"][name]["region"])
+        temp = ""        
+        for neighbor in data["Systems"][name]["neighbors"]:
+            temp = f"{temp}[[{neighbor}]]<br/>"
+        infobox = infobox.replace("{neighbors}", temp)
+
+        temp = ""
+        for star, card in data["Systems"][name]["stars"].items():
+            card = '\n' + card[:-1]
+            card = card.replace("\n", "\n* ")
+            temp = f"{temp}'''{star}'''\n{card}\n"
+        overview = overview.replace("{suns}", temp)
+        temp = ""
+        temp2 = []
+        for zone, nick, info in data["Systems"][name]["zones"]:
+            if zone in temp2: continue
+            temp2.append(zone)
+            temp = f"{temp}{zone}\n" if nick in data["Systems"][name]["asteroids"] or data["Systems"][name]["nebulae"] else temp
+        temp = "* " + temp.replace('\n', '\n* ')
+        overview = overview.replace("{fields}", temp)
+        temp = ""
+        bases = []
+        lawfulFactions = []
+        unlawfulFactions = []
+        for base, dicty in data["Systems"][name]["bases"].items():
+            bases.append([base, dicty["owner"]])
+            if dicty["factionLegality"] == "Lawful":
+                lawfulFactions.append(dicty["owner"])
+                
+            elif dicty["factionLegality"] == "Unlawful":
+                unlawfulFactions.append(dicty["owner"])
+        lawfulFactions = list(dict.fromkeys(lawfulFactions))
+        unlawfulFactions = list(dict.fromkeys(unlawfulFactions))
+        lawfulFactions.sort()
+        unlawfulFactions.sort()
+        lawfuls = "* "
+        unlawfuls = "* "
+        for faction in lawfulFactions:
+            lawfuls = f"{lawfuls}[[{faction}]]\n"
+        for faction in unlawfulFactions:
+            unlawfuls = f"{unlawfuls}[[{faction}]]\n"
+        lawfuls = lawfuls.replace("\n", "\n* ")
+        unlawfuls = unlawfuls.replace("\n", "\n* ")
+        overview = overview.replace("{lawfuls}", lawfuls)
+        overview = overview.replace("{unlawfuls}", unlawfuls)
+            
+
+
+
+
+
+
+        return f"{version}{infobox}{overview}{navmap}{AoI}{nebulae}{asteroids}{category}"
+    return 1
+
+
+loadedData = loadData("flData.json")
+configData = loadData("config.json")
 while True:
     templates = ["Ship", "System"]
-    source = main(template = input(f"Select template ({templates}): "), data = loadData("flData.json"))
+    source = main(template = input(f"Select template ({templates}): "), data = loadedData, config = configData)
     copy(source)
     print("Page source copied!")
     
     repeat = input("Generate another page? (yes/No): ")
-    if repeat == "": break
+    if repeat == "" or 'n' in repeat.lower(): break
     elif 'y' in repeat.lower(): pass
-    elif 'n' in repeat.lower(): break
