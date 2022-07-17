@@ -317,4 +317,3 @@ while True:
     
     repeat = input("Generate another page? (yes/No): ")
     if repeat == "" or 'n' in repeat.lower(): break
-    elif 'y' in repeat.lower(): pass
