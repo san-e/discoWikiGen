@@ -158,7 +158,7 @@ def main(template, data, config):
     elif "sys" in template.lower():    
         version = "{{Version|{version}}}\n"
         infobox = "{{System v2\n| name = {name}\n| nickname = {nickname}\n| image = {nickname}.png\n| government = {government}\n| region = {region}\n| neighbors = {neighbors}\n"
-        description = "| description = \n"
+        description = "| description = {description}\n"
         overview = "| suns = {suns}\n| fields = {fields}\n| lawful-factions = {lawfuls}\n| trade-factions = {traders}\n| unlawful-factions = {unlawfuls}\n| stations = {bases}\n| planets = {planets}\n| mining-zones = {miningZones}\n}}\n"
         navmap = "=System Map=\n[https://space.discoverygc.com/navmap/#q={name} Navmap]\n"
         AoI = "=Areas of Interest=\n"
@@ -190,6 +190,8 @@ def main(template, data, config):
             temp = f"{temp}[[{neighbor}]]<br/>"
         infobox = infobox.replace("{neighbors}", temp)
 
+        description = description.replace("{description}", "")
+
         temp = ""
         for star, card in data["Systems"][name]["stars"].items():
             card = '\n' + card[:-1]
@@ -203,36 +205,45 @@ def main(template, data, config):
         for zone, nick, info in data["Systems"][name]["zones"]:
             if zone in temp2: continue
             temp2.append(zone)
-            temp = f"{temp}{zone}\n" if nick in data["Systems"][name]["asteroids"] or nick in data["Systems"][name]["nebulae"] else temp
-            if nick in data["Systems"][name]["nebulae"]: nebs.append([zone, nick, info])
-            elif nick in data["Systems"][name]["asteroids"]: asts.append([zone, nick, info])
+            temp = f"{temp}{zone}\n" if nick in [field[0] for field in data["Systems"][name]["asteroids"]] or nick in [nebula[0] for nebula in data["Systems"][name]["nebulae"]] else temp
+            if nick in [nebula[0] for nebula in data["Systems"][name]["nebulae"]]: nebs.append([zone, nick, info])
+            elif nick in [field[0] for field in data["Systems"][name]["asteroids"]]: asts.append([zone, nick, info])
         temp = "* " + temp.replace('\n', '\n* ')
         overview = overview.replace("{fields}", temp)
         temp = ""
         bases = []
         lawfulFactions = []
         unlawfulFactions = []
+        corporateFactions = []
         for base, dicty in data["Systems"][name]["bases"].items():
             if dicty["type"] != "<class 'flint.entities.solars.PlanetaryBase'>":
                 bases.append([base, dicty["owner"]])
-            if dicty["factionLegality"] == "Lawful":
+            if dicty["owner"] in [x[0] for x in config["settings"]["corporations"]]:
+                corporateFactions.append(dicty["owner"])
+            elif dicty["factionLegality"] == "Lawful":
                 lawfulFactions.append(dicty["owner"])
-                
             elif dicty["factionLegality"] == "Unlawful":
                 unlawfulFactions.append(dicty["owner"])
         lawfulFactions = list(dict.fromkeys(lawfulFactions))
+        corporateFactions = list(dict.fromkeys(corporateFactions))
         unlawfulFactions = list(dict.fromkeys(unlawfulFactions))
         lawfulFactions.sort()
+        corporateFactions.sort()
         unlawfulFactions.sort()
         lawfuls = "* "
+        corporates = "* "
         unlawfuls = "* "
         for faction in lawfulFactions:
             lawfuls = f"{lawfuls}[[{faction}]]\n"
+        for faction in corporateFactions:
+            corporates = f"{corporates}[[{faction}]]\n"
         for faction in unlawfulFactions:
             unlawfuls = f"{unlawfuls}[[{faction}]]\n"
         lawfuls = lawfuls.replace("\n", "\n* ")
+        corporates = corporates.replace("\n", "\n* ")
         unlawfuls = unlawfuls.replace("\n", "\n* ")
         overview = overview.replace("{lawfuls}", lawfuls)
+        overview = overview.replace("{traders}", corporates)
         overview = overview.replace("{unlawfuls}", unlawfuls)
         stations = "* "
         for base, owner in bases:
