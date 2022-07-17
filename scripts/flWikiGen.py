@@ -1,4 +1,3 @@
-from mimetypes import init
 import flint as fl
 import discoTechCompat as tech
 from json import dump, load
