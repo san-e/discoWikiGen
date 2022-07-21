@@ -236,7 +236,41 @@ def get_ships(definitions: dict) -> dict:
                 mustUseMoors = False if ship.mission_property == 'can_use_berths' else True
 
                 infocard = ship.infocard('plain').split("<p>")[0]
-                ships[ship.name()] = {"nickname" : ship.nickname, "longName" : ship.infocard('plain').split("\n")[0], "maneuverability" : infocardMan,"techcompat": techcompat, "type" : ship.type(), "maxClass" : maxClass, "maxShield" : maxShield, "infocard" : infocard, "hull_price" : hull_price, "package_price" : ship.price(), "impulse_speed" : int(ship.impulse_speed()), "maxThrust" : maxThrust, "hit_pts" : ship.hit_pts, "hold_size" : ship.hold_size, "gunCount" : gunCount, "thrusterCount" : thrusterCount, "turretCount" : turretCount, "torpedoCount" : torpedoCount, "mineCount" : mineCount, "cmCount" : cmCount, "bot_limit" : ship.nanobot_limit, "bat_limit" : ship.shield_battery_limit, "power_output" : power_output, "maxCruise" : ship.engine().cruise_speed if ship.engine().cruise_speed != 0 else 350, "power_recharge" : power_recharge,"turnRate" : round(turnRate, 2), "angularDistance0.5" : angularDistanceInTime, "responseTime" : responseTime, "built_by" : built_by, "mustUseMoors" : mustUseMoors, "equipment" : equipment, "sold_at" : sold_at, "hardpoints" : hardpoints}
+                ships[ship.name()] = {
+                    "nickname" : ship.nickname,
+                    "longName" : ship.infocard('plain').split("\n")[0],
+                    "maneuverability" : infocardMan,
+                    "techcompat": techcompat,
+                    "type" : ship.type(),
+                    "maxClass" : maxClass,
+                    "maxShield" : maxShield,
+                    "infocard" : infocard,
+                    "hull_price" : hull_price,
+                    "package_price" : ship.price(),
+                    "impulse_speed" : int(ship.impulse_speed()),
+                    "maxThrust" : maxThrust,
+                    "hit_pts" : ship.hit_pts,
+                    "hold_size" : ship.hold_size,
+                    "gunCount" : gunCount, 
+                    "thrusterCount" : thrusterCount,
+                    "turretCount" : turretCount,
+                    "torpedoCount" : torpedoCount,
+                    "mineCount" : mineCount,
+                    "cmCount" : cmCount,
+                    "bot_limit" : ship.nanobot_limit,
+                    "bat_limit" : ship.shield_battery_limit,
+                    "power_output" : power_output,
+                    "maxCruise" : ship.engine().cruise_speed if ship.engine().cruise_speed != 0 else 350,
+                    "power_recharge" : power_recharge,
+                    "turnRate" : round(turnRate, 2),
+                    "angularDistance0.5" : angularDistanceInTime,
+                    "responseTime" : responseTime,
+                    "built_by" : built_by,
+                    "mustUseMoors" : mustUseMoors,
+                    "equipment" : equipment,
+                    "sold_at" : sold_at,
+                    "hardpoints" : hardpoints
+                }
             except TypeError:
                 pass
     return ships
@@ -250,7 +284,13 @@ def get_bases() -> dict:
                 ships_sold = []
                 for x in base.sells_ships():
                     ships_sold.append(x.name())
-                bases[base.name()] = {"infocard" : base.infocard('html'), "owner" : base.owner().name(), "system" : base.system_().name(), "sector" : base.sector(), "ships_sold" : ships_sold}
+                bases[base.name()] = {
+                    "infocard" : base.infocard('html'),
+                    "owner" : base.owner().name(),
+                    "system" : base.system_().name(),
+                    "sector" : base.sector(),
+                    "ships_sold" : ships_sold
+                }
             except (TypeError, AttributeError):
                 pass
     return bases
@@ -282,10 +322,18 @@ def get_systems() -> dict:
             for x in asteroids:
                 x.append(getMineableCommodites(x[1]))
             for base in system.bases():
-                bases[base.name()] = {"owner": base.owner().name(),"factionLegality": base.owner().legality(), "type": str(type(base))}
+                bases[base.name()] = {
+                    "owner": base.owner().name(),
+                    "factionLegality": base.owner().legality(),
+                    "type": str(type(base))
+                }
             for planet in system.planets():
                 if str(type(planet)) == "<class 'flint.entities.solars.PlanetaryBase'>":
-                    planets.append([planet.name(), planet.nickname, planet.owner().name() if len(planet.owner().name()) <= 20 else planet.owner().short_name()])
+                    planets.append([
+                        planet.name(),
+                        planet.nickname,
+                        planet.owner().name() if len(planet.owner().name()) <= 20 else planet.owner().short_name()
+                        ])
                 else:
                     planets.append([planet.name(), planet.nickname, ""])
             for x in system.connections():
@@ -301,7 +349,19 @@ def get_systems() -> dict:
             neighbors = [x for x in neighbors if x != system.name()]
             neighbors = list(dict.fromkeys(neighbors))
 
-            systems[system.name()] = {"nickname" : system.nickname, "infocard" : system.infocard('plain'), "region" : system.region(), "bases" : bases,  "planets": planets, "stars": stars, "holes" : holes, "neighbors" : neighbors, "zones" : zones, "nebulae": nebulae, "asteroids": asteroids}
+            systems[system.name()] = {
+                "nickname" : system.nickname,
+                "infocard" : system.infocard('plain'),
+                "region" : system.region(),
+                "bases" : bases,
+                "planets": planets,
+                "stars": stars,
+                "holes" : holes,
+                "neighbors" : neighbors,
+                "zones" : zones,
+                "nebulae": nebulae,
+                "asteroids": asteroids
+            }
     return systems
 
 def get_commodities() -> dict:
@@ -313,7 +373,13 @@ def get_commodities() -> dict:
                 boughtAt = {}
                 for base in commodity.bought_at().items():
                     boughtAt[base[0].name()] = base[1]
-                commodities[commodity.name()] = {"nickname" : commodity.nickname, "infocard" : commodity.infocard(), "infocard_plain" : commodity.infocard(markup = 'plain'), "price" : commodity.price(), "bought_at" : boughtAt}
+                commodities[commodity.name()] = {
+                    "nickname": commodity.nickname,
+                    "infocard": commodity.infocard(),
+                    "infocard_plain": commodity.infocard(markup = 'plain'),
+                    "price": commodity.price(),
+                    "bought_at": boughtAt
+                }
         except:
             pass
     return commodities
@@ -332,7 +398,26 @@ def get_guns() -> dict:
                     type = "turret"
                 else:
                     type = "gun"
-                guns[gun.name()] = {"nickname" : gun.nickname ,"infocard" : gun.infocard(),"price" : gun.price() ,"type" : type, "technology" : gun.technology(), "hull_damage" : gun.hull_damage(), "shield_damage" : gun.shield_damage(), "hull_damage/s" : round(gun.hull_dps(),2), "shield_damage/s" : round(gun.shield_dps(),2),"power_usage" : gun.power_usage,"power_usage/s" : round(gun.energy_per_second(), 2), "efficiency" : round(gun.efficiency(), 4),"refire_rate" : round(gun.refire(), 2), "range" : gun.range(),"projectile_speed" : gun.muzzle_velocity, "value" : round(Value,2), "rating" : round(Rating,2), "lootable" : gun.lootable}
+                guns[gun.name()] = {
+                    "nickname": gun.nickname,
+                    "infocard": gun.infocard(),
+                    "price": gun.price(),
+                    "type": type,
+                    "technology": gun.technology(),
+                    "hull_damage": gun.hull_damage(),
+                    "shield_damage": gun.shield_damage(),
+                    "hull_damage/s": round(gun.hull_dps(),2),
+                    "shield_damage/s": round(gun.shield_dps(),2),
+                    "power_usage": gun.power_usage,
+                    "power_usage/s": round(gun.energy_per_second(), 2),
+                    "efficiency": round(gun.efficiency(), 4),
+                    "refire_rate": round(gun.refire(), 2),
+                    "range": gun.range(),
+                    "projectile_speed": gun.muzzle_velocity,
+                    "value": round(Value, 2),
+                    "rating": round(Rating, 2),
+                    "lootable": gun.lootable
+                }
         except AttributeError:
             pass
 
