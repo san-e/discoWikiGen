@@ -106,7 +106,7 @@ def get_ships(definitions: dict) -> dict:
 
                 equipment = []
                 for x in ship.equipment():
-                    equipment.append([f"* [[{x.name()}]]", x.price()])
+                    equipment.append([x.name(), x.price()])
 
                 try:
                     hull_price = ship.hull().price
@@ -201,10 +201,8 @@ def get_ships(definitions: dict) -> dict:
                         hardpoints.append(x[0].name())
                 tempHardpoints = []
                 for x in hardpoints:
-                    if hardpoints.count(x) > 1:
-                        tempHardpoints.append(f"*{hardpoints.count(x)}x [[{x}]]")
-                    else:
-                        tempHardpoints.append(f"* [[{x}]]")
+                    tempHardpoints.append(f"{x}:{hardpoints.count(x)}")
+
                 hardpoints = list( dict.fromkeys(tempHardpoints) ) #remove duplicates
 
                 try:
@@ -231,7 +229,7 @@ def get_ships(definitions: dict) -> dict:
                 engine = ship.engine()
                 linear_drag = ship.linear_drag + engine.linear_drag if engine else ship.linear_drag
                 force = thruster_force + ship.engine().max_force
-                maxThrust = int(force / linear_drag) if thrusterCount > 0 else ""
+                maxThrust = int(force / linear_drag) if thrusterCount > 0 else 0
 
                 mustUseMoors = False if ship.mission_property == 'can_use_berths' else True
 
