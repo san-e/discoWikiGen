@@ -233,6 +233,10 @@ def get_ships(definitions: dict) -> dict:
 
                 mustUseMoors = False if ship.mission_property == 'can_use_berths' else True
 
+                maxCruise = ship.engine().cruise_speed if ship.engine().cruise_speed != 0 else 350
+                if isinstance(maxCruise, list):
+                    maxCruise = maxCruise[0]
+
                 infocard = ship.infocard('plain').split("<p>")[0]
                 ships[ship.name()] = {
                     "nickname" : ship.nickname,
@@ -258,7 +262,7 @@ def get_ships(definitions: dict) -> dict:
                     "bot_limit" : ship.nanobot_limit,
                     "bat_limit" : ship.shield_battery_limit,
                     "power_output" : power_output,
-                    "maxCruise" : ship.engine().cruise_speed if ship.engine().cruise_speed != 0 else 350,
+                    "maxCruise" : maxCruise,
                     "power_recharge" : power_recharge,
                     "turnRate" : round(turnRate, 2),
                     "angularDistance0.5" : angularDistanceInTime,

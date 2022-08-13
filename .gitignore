@@ -4,3 +4,5 @@ extension/
 __pycache__/
 flData.json
 gen.bat
+scripts/wikitext.json
+scripts/botPassword.json

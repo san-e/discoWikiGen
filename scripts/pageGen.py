@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument('--html', action='store_true',help="Generate HTML instead of wikicode")
+parser.add_argument('--dump', action='store_true',help="Iterate over all objects and dump them into a file")
 arguments = parser.parse_args()
 
 def loadData(filename):
@@ -37,7 +38,7 @@ classToWikiType = {
 
 
 
-def main(template, data, config):
+def main(template, data, config, name = "", skipImage = False, skipOwner = False):
     houses = config["settings"]["houses"]
     if not arguments.html:
         if template.lower() == "ship":
@@ -310,21 +311,26 @@ def main(template, data, config):
             return False
     else:
         if template.lower() == "ship":
-            infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 270px; font-size: 11px; line-height: 14px; border: 2px solid black;" cellpadding="3">\n\n<tr>\n<td colspan="2" class="infobox-name"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" class="shipDisplay" style="padding: 0; text-align: center; padding: 5px 0px;"><div class="center"><div class="floatnone">[[File:{image}|center|254px]]</div></div>\n</td></tr>\n<tr>\n<td class="infobox-data-title" style="width: 120px;"><b>Ship Class</b>\n</td>\n<td style="padding-right: 1em;">{class}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Built by</b>\n</td>\n<td style="padding-right: 1em;">{built_by}\n</td></tr>\n<tr title="What column on the Tech Mix chart this ship belongs to">\n<td class="infobox-data-title">[http://discoverygc.com/techcompat/techcompat_table.php Tech Column]\n</td>\n<td style="padding-right: 1em;">{techcompat}\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section">Technical information\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Guns/Turrets</b>\n</td>\n<td style="padding-right: 1em; font-weight: bold; letter-spacing: 1px;">{gunCount} / {turretCount}\n</td></tr>\n<tr title="Maximum class of weapons that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. weapon class</b>\n</td>\n<td style="padding-right: 1em;">{maxwep}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Other equipment</b>\n</td>\n<td style="padding-right: 1em;">\n<ul>\n{other}\n</ul></td></tr>\n<tr title="Amount of hull hitpoints">\n<td class="infobox-data-title"><b>Hull strength</b>\n</td>\n<td style="padding-right: 1em; color: #009900; font-weight: bold;">{hull}\n</td></tr>\n<tr title="Maximum class of shield that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. shield class</b>\n</td>\n<td style="padding-right: 1em; color: #006699; font-weight: bold;">{maxShield}\n</td></tr>\n<tr title="Amount of cargo this ship is able to carry">\n<td class="infobox-data-title"><b>Cargo space</b>\n</td>\n<td style="padding-right: 1em;">{cargo} units\n</td></tr>\n<tr title="Maximum number of shield batteries carried by this ship">\n<td class="infobox-data-title"><b>Batteries</b>\n</td>\n<td style="padding-right: 1em;">{batteries}\n</td></tr>\n<tr title="Maximum number of shield nanobots carried by this ship">\n<td class="infobox-data-title"><b>Nanobots</b>\n</td>\n<td style="padding-right: 1em;">{bots}\n</td></tr>\n<tr title="Maximum speed of this ship on impulse drive">\n<td class="infobox-data-title"><b>Max. impulse speed</b>\n</td>\n<td style="padding-right: 1em;">{impulse} m/s\n</td></tr>\n<tr title="Maximum turning speed in degrees per second">\n<td class="infobox-data-title"><b>Max. turn speed</b>\n</td>\n<td style="padding-right: 1em;">{turnRate} deg/s\n</td></tr>\n<tr title="Maximum speed of this ship on thrusters">\n<td class="infobox-data-title"><b>Max. thrust speed</b>\n</td>\n<td style="padding-right: 1em;">{maxthrust} m/s\n</td></tr>\n<tr title="Maximum speed of this ship on cruise engines">\n<td class="infobox-data-title"><b>Max. cruise speed</b>\n</td>\n<td style="padding-right: 1em;">{maxCruise} m/s\n</td></tr>\n<tr title="Maximum reactor energy storage (capacitance)">\n<td class="infobox-data-title"><b>Power output</b>\n</td>\n<td style="padding-right: 1em;">{power_output} u\n</td></tr>\n<tr title="Amount of energy units generated per second">\n<td class="infobox-data-title"><b>Power recharge</b>\n</td>\n<td style="padding-right: 1em;">{power_recharge} u/s\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section">Additional information\n</td></tr>\n<tr title="Price of the ship without any mounted equipment">\n<td class="infobox-data-title"><b>Ship price</b>\n</td>\n<td style="padding-right: 1em;">${hull_price}\n</td></tr>\n<tr title="Price of the ship with the default equipment">\n<td class="infobox-data-title"><b>Package price</b>\n</td>\n<td style="padding-right: 1em;">${package_price}\n</td></tr></table>\n'
+            infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 270px; font-size: 11px; line-height: 14px; border: 2px solid black;" cellpadding="3">\n\n<tr title={nickname}>\n<td colspan="2" class="infobox-name"><p style="text-align:center"><b>{name}</b></p>\n</td></tr>\n<tr>\n<td colspan="2" class="shipDisplay" style="padding: 0; text-align: center; padding: 5px 0px;"><div class="center"><div class="floatnone">[[File:{image}|center|254px]]</div></div>\n</td></tr>\n<tr>\n<td class="infobox-data-title" style="width: 120px;"><b>Ship Class</b>\n</td>\n<td style="padding-right: 1em;">{class}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Built by</b>\n</td>\n<td style="padding-right: 1em;">{built_by}\n</td></tr>\n<tr title="What column on the Tech Mix chart this ship belongs to">\n<td class="infobox-data-title">[http://discoverygc.com/techcompat/techcompat_table.php Tech Column]\n</td>\n<td style="padding-right: 1em;">{techcompat}\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section"><b><u>Technical information</b></u>\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Guns/Turrets</b>\n</td>\n<td style="padding-right: 1em; font-weight: bold; letter-spacing: 1px;">{gunCount} / {turretCount}\n</td></tr>\n<tr title="Maximum class of weapons that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. weapon class</b>\n</td>\n<td style="padding-right: 1em;">{maxwep}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Other equipment</b>\n</td>\n<td style="padding-right: 1em;">\n<ul>\n{other}\n</ul></td></tr>\n<tr title="Amount of hull hitpoints">\n<td class="infobox-data-title"><b>Hull strength</b>\n</td>\n<td style="padding-right: 1em; color: #009900; font-weight: bold;">{hull}\n</td></tr>\n<tr title="Maximum class of shield that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. shield class</b>\n</td>\n<td style="padding-right: 1em; color: #006699; font-weight: bold;">{maxShield}\n</td></tr>\n<tr title="Amount of cargo this ship is able to carry">\n<td class="infobox-data-title"><b>Cargo space</b>\n</td>\n<td style="padding-right: 1em;">{cargo} units\n</td></tr>\n<tr title="Maximum number of shield batteries carried by this ship">\n<td class="infobox-data-title"><b>Batteries</b>\n</td>\n<td style="padding-right: 1em;">{batteries}\n</td></tr>\n<tr title="Maximum number of shield nanobots carried by this ship">\n<td class="infobox-data-title"><b>Nanobots</b>\n</td>\n<td style="padding-right: 1em;">{bots}\n</td></tr>\n<tr title="Maximum speed of this ship on impulse drive">\n<td class="infobox-data-title"><b>Max. impulse speed</b>\n</td>\n<td style="padding-right: 1em;">{impulse} m/s\n</td></tr>\n<tr title="Maximum turning speed in degrees per second">\n<td class="infobox-data-title"><b>Max. turn speed</b>\n</td>\n<td style="padding-right: 1em;">{turnRate} deg/s\n</td></tr>\n<tr title="Maximum speed of this ship on thrusters">\n<td class="infobox-data-title"><b>Max. thrust speed</b>\n</td>\n<td style="padding-right: 1em;">{maxthrust} m/s\n</td></tr>\n<tr title="Maximum speed of this ship on cruise engines">\n<td class="infobox-data-title"><b>Max. cruise speed</b>\n</td>\n<td style="padding-right: 1em;">{maxCruise} m/s\n</td></tr>\n<tr title="Maximum reactor energy storage (capacitance)">\n<td class="infobox-data-title"><b>Power output</b>\n</td>\n<td style="padding-right: 1em;">{power_output} u\n</td></tr>\n<tr title="Amount of energy units generated per second">\n<td class="infobox-data-title"><b>Power recharge</b>\n</td>\n<td style="padding-right: 1em;">{power_recharge} u/s\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section"><b><u>Additional information</b></u>\n</td></tr>\n<tr title="Price of the ship without any mounted equipment">\n<td class="infobox-data-title"><b>Ship price</b>\n</td>\n<td style="padding-right: 1em;">${hull_price}\n</td></tr>\n<tr title="Price of the ship with the default equipment">\n<td class="infobox-data-title"><b>Package price</b>\n</td>\n<td style="padding-right: 1em;">${package_price}\n</td></tr></table>\n'
             infocard = '<p>{infocard}\n</p><p><br/>\n</p>\n'
             handling = '<h2>Handling</h2>\n<ul>\n{handling}\n</ul>\n'
             hardpoints = '<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n'
             includes = '<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>'
             availability = '<h2>Availability</h2>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Buying Locations\n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Location\n</th></tr>\n{sold_at}\n</td></tr></table>\n</td></tr></table>'
+            category = '[[Category: Ships]]\n{built_by}'
 
             while True:
-                name = str(input("Enter ship name (as displayed in FLStat): "))
+                if name == "":
+                    name = str(input("Enter ship name (as displayed in FLStat): "))
                 try:
                     if data["Ships"][name]:
                         break
                 except:
                     print("Ship name could not be found in database, retrying...")
-            image = str(input("Enter image name (copy-paste from page source): "))
+            if not skipImage:
+                image = str(input("Enter image name (copy-paste from page source): "))
+            else:
+                image = ""
             if image == "":
                 image = f'{data["Ships"][name]["nickname"]}.png'
                 print(f'No Image has been specified, defaulting to {data["Ships"][name]["nickname"]}')
@@ -332,30 +338,34 @@ def main(template, data, config):
                 image = f'{data["Ships"][name]["nickname"]}.png'
                 print("Using Ship's nickname as image name.")
             
+            infobox = infobox.replace("{nickname}", data["Ships"][name]["nickname"])
             infobox = infobox.replace("{name}", data["Ships"][name]["longName"])
             infobox = infobox.replace("{image}", image)
             infobox = infobox.replace("{class}", data["Ships"][name]["type"])
             if data["Ships"][name]["built_by"] != "":
                 if data["Ships"][name]["built_by"] in houses:
-                    infobox = infobox.replace("{built_by}", f'[[File:Flag-{data["Ships"][name]["built_by"].lower()}.png|19px]] [[{data["Ships"][name]["built_by"]}]]')
+                    infobox = infobox.replace("{built_by}", f'[[File:Flag-{data["Ships"][name]["built_by"].lower()}.png|19px]] {data["Ships"][name]["built_by"]}')
                 else:
-                    infobox = infobox.replace("{built_by}", f'[[{data["Ships"][name]["built_by"]}]]')
+                    infobox = infobox.replace("{built_by}", f'{data["Ships"][name]["built_by"]}')
             else:
-                built = str(input("Enter ship owner faction: "))
-                if built in houses:
-                    infobox = infobox.replace("{built_by}", f"[[File:Flag-{built.lower()}.png|19px]] [[{built}]]")
+                if not skipOwner:
+                    built = str(input("Enter ship owner faction: "))
                 else:
-                    infobox = infobox.replace("{built_by}", f"[[{built}]]")
+                    built = "Unknown"
+                if built in houses:
+                    infobox = infobox.replace("{built_by}", f"[[File:Flag-{built.lower()}.png|19px]] {built}")
+                else:
+                    infobox = infobox.replace("{built_by}", f"{built}")
             infobox = infobox.replace("{techcompat}", data["Ships"][name]["techcompat"])
             infobox = infobox.replace("{gunCount}", str(data["Ships"][name]["gunCount"]))
             infobox = infobox.replace("{turretCount}", str(data["Ships"][name]["turretCount"]))
             other = ""
             if data["Ships"][name]["torpedoCount"] > 0:
-                other = f'{other}<li>{data["Ships"][name]["torpedoCount"]}x[[Cruise Disruptors|CD]]/[[Torpedoes|T]]</li>\n'
+                other = f'{other}<li>{data["Ships"][name]["torpedoCount"]}xCD/T</li>\n'
             if data["Ships"][name]["cmCount"] > 0:
-                other = f'{other}<li>{data["Ships"][name]["cmCount"]}x[[Countermeasures|CM]]</li>\n'
+                other = f'{other}<li>{data["Ships"][name]["cmCount"]}xCM</li>\n'
             if data["Ships"][name]["mineCount"] > 0:
-                other = f'{other}<li>{data["Ships"][name]["mineCount"]}x[[Mines|M]]</li>\n'
+                other = f'{other}<li>{data["Ships"][name]["mineCount"]}xM</li>\n'
             infobox = infobox.replace("{other}", other)
             if data["Ships"][name]["maxThrust"] > 0:
                 infobox = infobox.replace("{maxthrust}", str(data["Ships"][name]["maxThrust"]))
@@ -406,22 +416,37 @@ def main(template, data, config):
 
             sold_at = ""
             for base, owner, system, region in data["Ships"][name]["sold_at"]:
+                region = "Independent Worlds" if region == "Independent" else region
                 sold_at = f"{sold_at}<tr><td>{base}</td>\n<td>{owner}</td>\n<td>{system}</td>\n<td>{region}</td></tr>\n"
             availability = availability.replace("{sold_at}", sold_at)
 
-            return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}"
+            if data["Ships"][name]["built_by"] != "":
+                category = category.replace("{built_by}", f'[[Category: {data["Ships"][name]["built_by"]}]]')
+            else:
+                category = category.replace("{built_by}", '')
+
+            return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}"
         elif "sys" in template.lower():
             raise NotImplementedError
 loadedData = loadData("flData.json")
 configData = loadData("config.json")
 while True:
-    templates = ["Ship", "System"]
-    source = main(template = input(f"Select template ({templates}): "), data = loadedData, config = configData)
-    if source != False:
-        copy(source)
-        print("Page source copied!")
+    if not arguments.dump:
+        templates = ["Ship", "System"]
+        source = main(template = input(f"Select template ({templates}): "), data = loadedData, config = configData)
+        if source != False:
+            copy(source)
+            print("Page source copied!")
+        else:
+            print("Page source could not be copied.")
+        
+        repeat = input("Generate another page? (yes/No): ")
+        if repeat == "" or 'n' in repeat.lower(): break
     else:
-        print("Page source could not be copied.")
-    
-    repeat = input("Generate another page? (yes/No): ")
-    if repeat == "" or 'n' in repeat.lower(): break
+        sources = {}
+        for x in loadedData["Ships"].items():
+            source = main(template = "Ship", data = loadedData, config = configData, name = x[0], skipImage = True, skipOwner = True)
+            sources[x[0]] = source
+        with open("wikitext.json", "w") as f:
+            json.dump(sources, f, indent=1)
+        break
