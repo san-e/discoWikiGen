@@ -1,4 +1,4 @@
 @echo off
 cd scripts
-python pageGen.py
+python pageGen.py --html
 pause
