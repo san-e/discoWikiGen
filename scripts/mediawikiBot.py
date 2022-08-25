@@ -50,11 +50,31 @@ if exists("botPassword.json") and exists("wikitext.json"):
     print(data)
     csrfToken = data['query']['tokens']['csrftoken']
 
+    doLater = []
     for name, text in wikitext.items():
         edit_params = {
             "action": "edit",
             "title": name,
             "text": text,
+            "bot": True,
+            "format": "json",
+            "token": csrfToken
+        }
+        request = session.post(URL, data = edit_params)
+        data = request.json()
+        print(data)
+        try:
+            data['error']
+            doLater.append([name, text])
+        except:
+            pass
+        time.sleep(1)
+    for name, text in doLater:
+        edit_params = {
+            "action": "edit",
+            "title": name,
+            "text": text,
+            "bot": True,
             "format": "json",
             "token": csrfToken
         }
