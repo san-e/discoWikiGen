@@ -1,6 +1,7 @@
 import json
 from pyperclip import copy
 from os import getcwd
+from os.path import exists
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
@@ -271,6 +272,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
             planets = planets.replace("$", "}")
             planets = f"{planets}{brrt}"
             overview = overview.replace("{planets}", planets)
+            
             mineableCommodities = ""
             mineableCommodity = []
             for doesnt, matter, commodity in data["Systems"][name]["asteroids"]:
@@ -311,7 +313,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
             return False
     else:
         if template.lower() == "ship":
-            infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 270px; font-size: 11px; line-height: 14px; border: 2px solid black;" cellpadding="3">\n\n<tr title={nickname}>\n<td colspan="2" class="infobox-name"><p style="text-align:center"><b>{name}</b></p>\n</td></tr>\n<tr>\n<td colspan="2" class="shipDisplay" style="padding: 0; text-align: center; padding: 5px 0px;"><div class="center"><div class="floatnone">[[File:{image}|center|254px]]</div></div>\n</td></tr>\n<tr>\n<td class="infobox-data-title" style="width: 120px;"><b>Ship Class</b>\n</td>\n<td style="padding-right: 1em;">{class}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Built by</b>\n</td>\n<td style="padding-right: 1em;">{built_by}\n</td></tr>\n<tr title="What column on the Tech Mix chart this ship belongs to">\n<td class="infobox-data-title">[http://discoverygc.com/techcompat/techcompat_table.php Tech Column]\n</td>\n<td style="padding-right: 1em;">{techcompat}\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section"><b><u>Technical information</b></u>\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Guns/Turrets</b>\n</td>\n<td style="padding-right: 1em; font-weight: bold; letter-spacing: 1px;">{gunCount} / {turretCount}\n</td></tr>\n<tr title="Maximum class of weapons that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. weapon class</b>\n</td>\n<td style="padding-right: 1em;">{maxwep}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Other equipment</b>\n</td>\n<td style="padding-right: 1em;">\n<ul>\n{other}\n</ul></td></tr>\n<tr title="Amount of hull hitpoints">\n<td class="infobox-data-title"><b>Hull strength</b>\n</td>\n<td style="padding-right: 1em; color: #009900; font-weight: bold;">{hull}\n</td></tr>\n<tr title="Maximum class of shield that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. shield class</b>\n</td>\n<td style="padding-right: 1em; color: #006699; font-weight: bold;">{maxShield}\n</td></tr>\n<tr title="Amount of cargo this ship is able to carry">\n<td class="infobox-data-title"><b>Cargo space</b>\n</td>\n<td style="padding-right: 1em;">{cargo} units\n</td></tr>\n<tr title="Maximum number of shield batteries carried by this ship">\n<td class="infobox-data-title"><b>Batteries</b>\n</td>\n<td style="padding-right: 1em;">{batteries}\n</td></tr>\n<tr title="Maximum number of shield nanobots carried by this ship">\n<td class="infobox-data-title"><b>Nanobots</b>\n</td>\n<td style="padding-right: 1em;">{bots}\n</td></tr>\n<tr title="Maximum speed of this ship on impulse drive">\n<td class="infobox-data-title"><b>Max. impulse speed</b>\n</td>\n<td style="padding-right: 1em;">{impulse} m/s\n</td></tr>\n<tr title="Maximum turning speed in degrees per second">\n<td class="infobox-data-title"><b>Max. turn speed</b>\n</td>\n<td style="padding-right: 1em;">{turnRate} deg/s\n</td></tr>\n<tr title="Maximum speed of this ship on thrusters">\n<td class="infobox-data-title"><b>Max. thrust speed</b>\n</td>\n<td style="padding-right: 1em;">{maxthrust} m/s\n</td></tr>\n<tr title="Maximum speed of this ship on cruise engines">\n<td class="infobox-data-title"><b>Max. cruise speed</b>\n</td>\n<td style="padding-right: 1em;">{maxCruise} m/s\n</td></tr>\n<tr title="Maximum reactor energy storage (capacitance)">\n<td class="infobox-data-title"><b>Power output</b>\n</td>\n<td style="padding-right: 1em;">{power_output} u\n</td></tr>\n<tr title="Amount of energy units generated per second">\n<td class="infobox-data-title"><b>Power recharge</b>\n</td>\n<td style="padding-right: 1em;">{power_recharge} u/s\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section"><b><u>Additional information</b></u>\n</td></tr>\n<tr title="Price of the ship without any mounted equipment">\n<td class="infobox-data-title"><b>Ship price</b>\n</td>\n<td style="padding-right: 1em;">${hull_price}\n</td></tr>\n<tr title="Price of the ship with the default equipment">\n<td class="infobox-data-title"><b>Package price</b>\n</td>\n<td style="padding-right: 1em;">${package_price}\n</td></tr></table>\n'
+            infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<tr title={nickname}>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Ship Class</b>\n</td>\n<td style="padding-right: 1em;">{class}\n</td>\n<tr>\n<td class="infobox-data-title"><b>Built by</b>\n</td>\n<td style="padding-right: 1em;">{built_by}\n</td>\n<tr>\n<td class="infobox-data-title"><b>[http://discoverygc.com/techcompat/techcompat_table.php Tech Column]</b>\n</td>\n<td style="padding-right: 1em;">{techcompat}\n</td>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Technical Information\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Guns/Turrets</b>\n</td>\n<td style="padding-right: 1em; font-weight: bold; letter-spacing: 1px;">{gunCount} / {turretCount}\n</td></tr>\n<tr title="Maximum class of weapons that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. weapon class</b>\n</td>\n<td style="padding-right: 1em;">{maxwep}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Other equipment</b>\n</td>\n<td style="padding-right: 1em;">\n<ul>\n{other}\n</ul></td></tr>\n<tr title="Amount of hull hitpoints">\n<td class="infobox-data-title"><b>Hull strength</b>\n</td>\n<td style="padding-right: 1em; color: #009900; font-weight: bold;">{hull}\n</td></tr>\n<tr title="Maximum class of shield that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. shield class</b>\n</td>\n<td style="padding-right: 1em; color: #006699; font-weight: bold;">{maxShield}\n</td></tr>\n<tr title="Amount of cargo this ship is able to carry">\n<td class="infobox-data-title"><b>Cargo space</b>\n</td>\n<td style="padding-right: 1em;">{cargo} units\n</td></tr>\n<tr title="Maximum number of shield batteries carried by this ship">\n<td class="infobox-data-title"><b>Batteries</b>\n</td>\n<td style="padding-right: 1em;">{batteries}\n</td></tr>\n<tr title="Maximum number of shield nanobots carried by this ship">\n<td class="infobox-data-title"><b>Nanobots</b>\n</td>\n<td style="padding-right: 1em;">{bots}\n</td></tr>\n<tr title="Maximum speed of this ship on impulse drive">\n<td class="infobox-data-title"><b>Max. impulse speed</b>\n</td>\n<td style="padding-right: 1em;">{impulse} m/s\n</td></tr>\n<tr title="Maximum turning speed in degrees per second">\n<td class="infobox-data-title"><b>Max. turn speed</b>\n</td>\n<td style="padding-right: 1em;">{turnRate} deg/s\n</td></tr>\n<tr title="Maximum speed of this ship on thrusters">\n<td class="infobox-data-title"><b>Max. thrust speed</b>\n</td>\n<td style="padding-right: 1em;">{maxthrust} m/s\n</td></tr>\n<tr title="Maximum speed of this ship on cruise engines">\n<td class="infobox-data-title"><b>Max. cruise speed</b>\n</td>\n<td style="padding-right: 1em;">{maxCruise} m/s\n</td></tr>\n<tr title="Maximum reactor energy storage (capacitance)">\n<td class="infobox-data-title"><b>Power output</b>\n</td>\n<td style="padding-right: 1em;">{power_output} u\n</td></tr>\n<tr title="Amount of energy units generated per second">\n<td class="infobox-data-title"><b>Power recharge</b>\n</td>\n<td style="padding-right: 1em;">{power_recharge} u/s\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Additional Information\n</td></tr>\n<tr title="Price of the ship without any mounted equipment">\n<td class="infobox-data-title"><b>Ship price</b>\n</td>\n<td style="padding-right: 1em;">${hull_price}\n</td></tr>\n<tr title="Price of the ship with the default equipment">\n<td class="infobox-data-title"><b>Package price</b>\n</td>\n<td style="padding-right: 1em;">${package_price}\n</td></tr></table>\n'
             infocard = '<p>{infocard}\n</p><p><br/>\n</p>\n'
             handling = '<h2>Handling</h2>\n<ul>\n{handling}\n</ul>\n'
             hardpoints = '<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n'
@@ -320,7 +322,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
             category = '[[Category: Ships]]\n{built_by}'
 
             while True:
-                if name == "":
+                if not arguments.dump:
                     name = str(input("Enter ship name (as displayed in FLStat): "))
                 try:
                     if data["Ships"][name]:
@@ -333,7 +335,8 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
                 image = ""
             if image == "":
                 image = f'{data["Ships"][name]["nickname"]}.png'
-                print(f'No Image has been specified, defaulting to {data["Ships"][name]["nickname"]}')
+                if not arguments.dump:
+                    print(f'No Image has been specified, defaulting to {data["Ships"][name]["nickname"]}')
             elif image.lower() == "nickname":
                 image = f'{data["Ships"][name]["nickname"]}.png'
                 print("Using Ship's nickname as image name.")
@@ -427,7 +430,160 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
 
             return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}"
         elif "sys" in template.lower():
-            raise NotImplementedError
+            infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; width: 270px; font-size: 90%; line-height: 110%; margin-left: 1em; margin-bottom: 1em; border: 1px solid #aaa;" cellpadding="3">\n<tr>\n<td colspan="2" class="infobox-name" style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 185%; font-weight: 500; text-decoration: underline; text-align: center; line-height: 1.5em;">{name}\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center;"><div class="center"><div class="floatnone">[[File:{image}|center|220px]]</div></div>\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section" style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; font-weight: 500; text-decoration: underline; text-align: center; line-height: 1.5em;">System\n</td></tr>\n<tr title="">\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td>{governingHouse}\n</td></tr>\n<tr title="">\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td>{region}\n</td></tr>\n<tr title="">\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td>{systems}\n</td></tr></table>\n'
+            infocard = '<p>{infocard}</p>\n<br style="clear: both; height: 0px;" />\n</p>\n'
+            overview = '<h1><span class="mw-headline" id="System_Overview">System Overview</span></h1>\n<hr>\n<table style="width: 100%;">\n<tr>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Astronomical Bodies</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Stellar Objects</div>\n{suns}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Planetary Objects</div>\n{planets}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Nebulae &amp; Asteroids</div>\n{fields}\n</td>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Industrial Development</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Space Stations</div>\n{stations}\n<li class="mw-empty-elt"></li></ul>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Commodity Mining</div>\n{mining}\n</td>\n<td style="width: 33%; vertical-align: top; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Faction Presence</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Lawful Factions</div>\n{lawfuls}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Corporations &amp; Guilds</div>\n{corps}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Unlawful Factions</div>\n{unlawfuls}\n</td></tr></table>\n'
+            navmap = '<p><br style="clear: both; height: 0px;" />\n</p>\n<h1><span class="mw-headline" id="System_Map">System Map</span></h1>\n<hr>\n<p>[https://space.discoverygc.com/navmap/#q={name} Navmap]\n</p>\n'
+            AoI = "<h1>Areas of Interest</h1>\n<hr>\n"
+            nebulae = "<h2>Nebulae</h2>\n\n{nebulae}\n"
+            asteroids = "<h2>Asteroid Fields</h2>\n\n{asteroids}\n"
+            gates = '<h1>Jump Gates/Holes</h1>\n<hr>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Jump Hole/Gate Locations \n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Target System</th>\n<th>Location</th>\n<th>Type</th></tr>\n{gates}\n</td></tr></table>\n</td></tr></table>'
+            category = '\n[[Category: Systems]]\n{region}'
+
+            while True:
+                if name == "":
+                    name = str(input("Enter system name: "))
+                try:
+                    if data["Systems"][name]:
+                        break
+                except:
+                    print("System could not be found in database, retrying...")
+
+            infobox = infobox.replace("{name}", name)
+            infobox = infobox.replace("{image}", f'{data["Systems"][name]["nickname"]}.png')
+            
+            region = data["Systems"][name]["region"]
+            if region == "Independent": region = "Independent Worlds"
+            if region in config["settings"]["houses"]: 
+                infobox = infobox.replace("{governingHouse}", f'[[File:Flag-{region.lower()}.png|19px]] {region}')
+            else:
+                infobox = infobox.replace("{governingHouse}", 'Independent')
+            infobox = infobox.replace("{region}", region)
+            temp = ""        
+            for neighbor in data["Systems"][name]["neighbors"]:
+                temp = f"{temp}[[{neighbor}]]<br/>"
+            infobox = infobox.replace("{systems}", temp)
+
+            if exists(f'../infocards/systems/{data["Systems"][name]["nickname"]}.txt'):
+                with open(f'../infocards/systems/{data["Systems"][name]["nickname"]}.txt', 'r') as f:
+                    info = f.read()
+                infocard = infocard.replace("{infocard}", info)
+            else:
+                infocard = infocard.replace("{infocard}", "<i>No description available.</i>")
+            
+            temp = ""
+            for star, card in data["Systems"][name]["stars"].items():
+                temp = f"{temp}<b>{star}</b><ul>"
+                card = card[:-1]
+                card = card.split("\n")
+                for x in card: temp = f'{temp}<li>{x}</li>\n'
+                temp = f"{temp}</ul>"
+            overview = overview.replace("{suns}", temp)
+
+            planetTemplate = '<div style="float: left; width: 270px; height: 60px; border: 2px solid #2f6fab; padding: 5px; margin: 5px 5px 0px 0px;">\n<div style="float: left; width: 50px; height: 50px; margin-right: 6px; background: #111111; text-align: center; font: 9px/48px Tahoma;"><div class="floatleft">[[File:{nickname}.png|50px]]</div></div>\n<div style="float: left; font-weight: bold; line-height:20px;">[[{planet}]]<br/>\n<span style="font-size: 10px; font-style: italic;">{owner}</span></div>\n<div style="clear: left;"></div></div>\n'
+            temp = ""
+            i = 0
+            for planet, nickname, owner in data["Systems"][name]["planets"]:
+                inhabited = f"<i>Inhabited -- {owner}</i>" if owner != "" else "<i>Uninhabited</i>"
+                filledPlanetTemplate = planetTemplate.replace("{nickname}", nickname).replace("{planet}", planet).replace("{owner}", inhabited)
+                temp = f"{temp}{filledPlanetTemplate}"
+                i += 1
+            temp = f'{temp}{"<br/><br/>" * i}\n'
+            overview = overview.replace("{planets}", temp)
+            
+            temp = ""
+            temp2 = []
+            nebs = []
+            asts = []
+            for zone, nick, info in data["Systems"][name]["zones"]:
+                if zone in temp2: continue
+                temp2.append(zone)
+                temp = f"{temp}{zone}\n" if nick in [field[0] for field in data["Systems"][name]["asteroids"]] or nick in [nebula[0] for nebula in data["Systems"][name]["nebulae"]] else temp
+                if nick in [nebula[0] for nebula in data["Systems"][name]["nebulae"]]: nebs.append([zone, nick, info])
+                elif nick in [field[0] for field in data["Systems"][name]["asteroids"]]: asts.append([zone, nick, info])
+            temp = temp[:-1].split("\n")
+            temp.sort()
+            temp3 = ""
+            for x in temp: temp3 = f'{temp3}<li>{x}</li>\n'
+            temp3 = "<ul>\n" +  temp3 + "</ul>\n"
+            overview = overview.replace("{fields}", temp3)
+
+            temp = ""
+            bases = []
+            lawfulFactions = []
+            unlawfulFactions = []
+            corporateFactions = []
+            for base, dicty in data["Systems"][name]["bases"].items():
+                if dicty["type"] != "<class 'flint.entities.solars.PlanetaryBase'>":
+                    bases.append([base, dicty["owner"]])
+                if dicty["owner"] in [x[0] for x in config["settings"]["corporations"]]:
+                    corporateFactions.append(dicty["owner"])
+                elif dicty["factionLegality"] == "Lawful":
+                    lawfulFactions.append(dicty["owner"])
+                elif dicty["factionLegality"] == "Unlawful":
+                    unlawfulFactions.append(dicty["owner"])
+            stations = "<ul>"
+            for base, owner in bases:
+                stations = f"{stations}<li><b>[[{base}]]</b> -- <i>{owner}</i></li>\n"
+            stations = stations + "</ul>"
+            overview = overview.replace("{stations}", stations)
+
+            mineableCommodities = "<ul>"
+            mineableCommodity = []
+            for doesnt, matter, commodity in data["Systems"][name]["asteroids"]:
+                if commodity != None:
+                    mineableCommodity.append(commodity)
+            mineableCommodity = list(dict.fromkeys(mineableCommodity))
+            mineableCommodity.sort()
+            for commodity in mineableCommodity:
+                mineableCommodities = f"{mineableCommodities}<li>{commodity}</li>\n"
+            overview = overview.replace("{mining}", mineableCommodities)
+
+            lawfulFactions = list(dict.fromkeys(lawfulFactions))
+            corporateFactions = list(dict.fromkeys(corporateFactions))
+            unlawfulFactions = list(dict.fromkeys(unlawfulFactions))
+            lawfulFactions.sort()
+            corporateFactions.sort()
+            unlawfulFactions.sort()
+            lawfuls = "<ul>"
+            corporates = "<ul>"
+            unlawfuls = "<ul>"
+            for faction in lawfulFactions:
+                lawfuls = f"{lawfuls}<li>{faction}</li>\n"
+            for faction in corporateFactions:
+                corporates = f"{corporates}<li>{faction}</li>\n"
+            for faction in unlawfulFactions:
+                unlawfuls = f"{unlawfuls}<li>{faction}</li>\n"
+            lawfuls = lawfuls + "</ul>"
+            corporates = corporates + "</ul>"
+            unlawfuls = unlawfuls + "</ul>"
+            overview = overview.replace("{lawfuls}", lawfuls)
+            overview = overview.replace("{corps}", corporates)
+            overview = overview.replace("{unlawfuls}", unlawfuls)
+
+            navmap = navmap.replace("{name}", name.replace(" ", "%20"))
+
+            nebulas = ""
+            asteroiden = ""
+            for nebula, nick, card in nebs:
+                nebulas = f"{nebulas}<h3>{nebula}</h3>\n{card}"
+            for asteroid, nick, card in asts:
+                asteroiden = f"{asteroiden}<h3>{asteroid}</h3>\n{card}"
+            nebulae = nebulae.replace("{nebulae}", nebulas.replace("&nbsp;", ""))
+            asteroids = asteroids.replace("{asteroids}", asteroiden.replace("&nbsp;", ""))
+
+            jumps = ""
+            for target, type, location in data["Systems"][name]["holes"]:
+                jumps = f"{jumps}<tr><td>{target}</td>\n<td>{type}</td>\n<td>{location}</td></tr>\n"
+            gates = gates.replace("{gates}", jumps)
+
+            if data["Systems"][name]["region"] != "":
+                category = category.replace("{region}", f'[[Category: {data["Systems"][name]["region"]}]]')
+            else:
+                category = category.replace("{region}", '')
+
+            return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{gates}{category}"
+
 loadedData = loadData("flData.json")
 configData = loadData("config.json")
 while True:
@@ -444,9 +600,14 @@ while True:
         if repeat == "" or 'n' in repeat.lower(): break
     else:
         sources = {}
-        for x in loadedData["Ships"].items():
-            source = main(template = "Ship", data = loadedData, config = configData, name = x[0], skipImage = True, skipOwner = True)
-            sources[x[0]] = source
+        for name, attributes in loadedData["Systems"].items():
+            source = main(template = "System", data = loadedData, config = configData, name = name, skipImage = True, skipOwner = True)
+            sources[name] = source
+            print(f"Processed {name}")
+        for name, attributes in loadedData["Ships"].items():
+            source = main(template = "Ship", data = loadedData, config = configData, name = name, skipImage = True, skipOwner = True)        
+            sources[name] = source
+            print(f"Processed {name}")
         with open("wikitext.json", "w") as f:
-            json.dump(sources, f, indent=1)
+            json.dump(sources, f)
         break
