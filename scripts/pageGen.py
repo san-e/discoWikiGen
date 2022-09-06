@@ -319,7 +319,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
             hardpoints = '<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n'
             includes = '<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>'
             availability = '<h2>Availability</h2>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Buying Locations\n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Location\n</th></tr>\n{sold_at}\n</td></tr></table>\n</td></tr></table>'
-            category = '[[Category: Ships]]\n{built_by}'
+            category = '\n[[Category: Ships]]\n{built_by}\n{class}'
 
             while True:
                 if not arguments.dump:
@@ -373,7 +373,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
             if data["Ships"][name]["maxThrust"] > 0:
                 infobox = infobox.replace("{maxthrust}", str(data["Ships"][name]["maxThrust"]))
             else:
-                infobox = infobox.replace("{maxthrust} m/s", '<span style="color: #990000; font-style: italic;">Thruster not available</span>')
+                infobox = infobox.replace("{maxthrust} m/s", '<span style="color: #f7001d; font-style: italic;">Thruster not available</span>')
             infobox = infobox.replace("{hull}", "{:,}".format(data["Ships"][name]["hit_pts"]))
             infobox = infobox.replace("{cargo}", "{:,}".format(data["Ships"][name]["hold_size"]))
             infobox = infobox.replace("{batteries}", "{:,}".format(data["Ships"][name]["bat_limit"]))
@@ -414,7 +414,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
 
             included = ""
             for title, price in data["Ships"][name]["equipment"]:
-                included = f'{included}<li>{title} (${"{:,}".format(price)})'
+                included = f'{included}<li>{title} (${"{:,}".format(price)})</li>\n'
             includes = includes.replace("{includes}", included)
 
             sold_at = ""
@@ -427,6 +427,8 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
                 category = category.replace("{built_by}", f'[[Category: {data["Ships"][name]["built_by"]}]]')
             else:
                 category = category.replace("{built_by}", '')
+            category = category.replace("{class}", f'[[Category: {data["Ships"][name]["type"]}]]')
+
 
             return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}"
         elif "sys" in template.lower():
@@ -480,16 +482,12 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
                 temp = f"{temp}</ul>"
             overview = overview.replace("{suns}", temp)
 
-            planetTemplate = '<div style="float: left; width: 270px; height: 60px; border: 2px solid #2f6fab; padding: 5px; margin: 5px 5px 0px 0px;">\n<div style="float: left; width: 50px; height: 50px; margin-right: 6px; background: #111111; text-align: center; font: 9px/48px Tahoma;"><div class="floatleft">[[File:{nickname}.png|50px]]</div></div>\n<div style="float: left; font-weight: bold; line-height:20px;">[[{planet}]]<br/>\n<span style="font-size: 10px; font-style: italic;">{owner}</span></div>\n<div style="clear: left;"></div></div>\n'
-            temp = ""
-            i = 0
+            planets = "<ul>"
             for planet, nickname, owner in data["Systems"][name]["planets"]:
-                inhabited = f"<i>Inhabited -- {owner}</i>" if owner != "" else "<i>Uninhabited</i>"
-                filledPlanetTemplate = planetTemplate.replace("{nickname}", nickname).replace("{planet}", planet).replace("{owner}", inhabited)
-                temp = f"{temp}{filledPlanetTemplate}"
-                i += 1
-            temp = f'{temp}{"<br/><br/>" * i}\n'
-            overview = overview.replace("{planets}", temp)
+                inhabited = f"{owner}" if owner != "" else "Uninhabited"
+                planets = f"{planets}<li><b>[[{planet}]]</b> -- <i>{inhabited}</i></li>\n"
+            overview = overview.replace("{planets}", f"{planets}</ul>")
+
             
             temp = ""
             temp2 = []
@@ -525,8 +523,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
             stations = "<ul>"
             for base, owner in bases:
                 stations = f"{stations}<li><b>[[{base}]]</b> -- <i>{owner}</i></li>\n"
-            stations = stations + "</ul>"
-            overview = overview.replace("{stations}", stations)
+            overview = overview.replace("{stations}", f"{stations}</ul>")
 
             mineableCommodities = "<ul>"
             mineableCommodity = []
@@ -574,11 +571,11 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
 
             jumps = ""
             for target, type, location in data["Systems"][name]["holes"]:
-                jumps = f"{jumps}<tr><td>{target}</td>\n<td>{type}</td>\n<td>{location}</td></tr>\n"
+                jumps = f"{jumps}<tr><td>[[{target}]]</td>\n<td>{type}</td>\n<td>{location}</td></tr>\n"
             gates = gates.replace("{gates}", jumps)
 
-            if data["Systems"][name]["region"] != "":
-                category = category.replace("{region}", f'[[Category: {data["Systems"][name]["region"]}]]')
+            if region != "":
+                category = category.replace("{region}", f'[[Category: {region}]]')
             else:
                 category = category.replace("{region}", '')
 
@@ -609,5 +606,5 @@ while True:
             sources[name] = source
             print(f"Processed {name}")
         with open("wikitext.json", "w") as f:
-            json.dump(sources, f)
+            json.dump(sources, f, indent=1)
         break
