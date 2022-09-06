@@ -80,7 +80,7 @@ if exists("botPassword.json") and exists("wikitext.json"):
         print("Retrying failed uploads...")
         with alive_bar(len(doLater), dual_line=True, title="mediawikiBot.py") as bar:
             for name, text in doLater:
-                bar.text = f'-> Uploading: {name}: {error}'
+                bar.text = f'-> Uploading: {name}'
                 edit_params = {
                     "action": "edit",
                     "title": name,
@@ -93,9 +93,8 @@ if exists("botPassword.json") and exists("wikitext.json"):
                 data = request.json()
                 #print(data)
                 try:
-                    data['error']
-                    doLater.append([name, text])
-                    print(f"Error uploading {name}.")
+                    error = data['error']['code']
+                    print(f"Error uploading {name}: {error}.")
                 except:
                     pass
                 time.sleep(delay * 2.5)
