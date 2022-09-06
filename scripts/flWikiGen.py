@@ -272,10 +272,7 @@ def get_bases() -> dict:
     for base in fl.bases:
         if base.has_solar():
             try:
-                ships_sold = []
-                for x in base.sells_ships():
-                    ships_sold.append(x.name())
-
+                ships_sold = [x.name() for x in base.sells_ships()]
                 specifications = fl.formats.dll.lookup_as_html(base.solar().ids_info)
                 try:
                     synopsis = fl.formats.dll.lookup_as_html(infocardMap[base.solar().ids_info])
