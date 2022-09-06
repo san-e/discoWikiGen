@@ -469,7 +469,7 @@ def main(template, data, config, name = "", skipImage = False, skipOwner = False
             if exists(f'../infocards/systems/{data["Systems"][name]["nickname"]}.txt'):
                 with open(f'../infocards/systems/{data["Systems"][name]["nickname"]}.txt', 'r') as f:
                     info = f.read()
-                infocard = infocard.replace("{infocard}", info)
+                infocard = infocard.replace("{infocard}", info.replace("\n", "<p>"))
             else:
                 infocard = infocard.replace("{infocard}", "<i>No description available.</i>")
             
