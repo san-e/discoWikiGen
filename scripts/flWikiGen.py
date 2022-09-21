@@ -11,8 +11,8 @@ version = input("Enter game version: ")
 
 with open(f"{getcwd()}\\config.json", "r") as file:
     data = load(file)
-oorp = data["settings"]["oorpSystems"]
-shipBuilders = data["settings"]["shipBuilders"]
+oorp = data["oorpSystems"]
+shipBuilders = data["shipBuilders"]
 
 try:
     if path.exists(argv[1]):
@@ -26,47 +26,16 @@ except IndexError:
     quit()
 
 # LOOKUP TABLES
-gun_table = {}
-for x in fl.equipment:
-    try:
-        if str(type(x)) == "<class 'flint.entities.equipment.Gun'>" and x.is_valid():
-            gun_table[x.nickname] = x.name()
-    except:
-        pass
+gun_table = {x.nickname: x.name() for x in fl.equipment if str(type(x)) == "<class 'flint.entities.equipment.Gun'>" and x.is_valid()}
+base_table = {base.nickname: base.name() for base in fl.bases if base.has_solar()}
+commodity_table = {commodity.nickname: commodity.name() for commodity in fl.commodities}
+infocardMap = fl.interface.get_infocardmap()
 
-base_table = {}
-for base in fl.bases:
-    if base.has_solar():
-        try:
-            base_table[base.nickname] = base.name()
-        except TypeError:
-            pass
-
-commodity_table = {}
-for commodity in fl.commodities:
-    commodity_table[commodity.nickname] = commodity.name()
-
-infocardMap = {}
-map = fl.formats.ini.parse(f"{argv[1]}\\DATA\\INTERFACE\\infocardmap.ini")[0][1]["map"]
-for id0, id1 in map:
-    infocardMap[id0] = id1
+logs = []
 
 def degree(x):
     degree = (x * 180) / pi
     return degree
-
-def linear_search(array, to_find):
-	for i in range(0, len(array)):
-		if array[i] == to_find:
-			return True
-	return False
-
-def reverse_dict(myDict):
-    reversedDict = {}
-    for key in myDict:
-        val = myDict[key]
-        reversedDict[val] = key
-    return reversedDict
 
 def getMineableCommodites(path):
     content = fl.formats.ini.parse(f"{argv[1]}\\DATA\\{path}")
@@ -227,8 +196,8 @@ def get_ships(definitions: dict) -> dict:
                     maxCruise = maxCruise[0]
 
                 infocard = ship.infocard('plain').split("<p>")[0]
-                ships[ship.name()] = {
-                    "nickname" : ship.nickname,
+                ships[ship.nickname] = {
+                    "name" : ship.name(),
                     "longName" : ship.infocard('plain').split("\n")[0],
                     "maneuverability" : infocardMan,
                     "built_by" : built_by,
@@ -262,8 +231,8 @@ def get_ships(definitions: dict) -> dict:
                     "sold_at" : sold_at,
                     "hardpoints" : hardpoints
                 }
-            except TypeError:
-                pass
+            except TypeError as e:
+                logs.append({ship: e})
     return ships
 
 def get_bases() -> dict:
@@ -272,96 +241,105 @@ def get_bases() -> dict:
     for base in fl.bases:
         if base.has_solar():
             try:
-                ships_sold = [x.name() for x in base.sells_ships()]
+                ships_sold = [[ship.name(), ship.type(), price] for ship, price in base.sells_ships().items()]
                 specifications = fl.formats.dll.lookup_as_html(base.solar().ids_info)
                 try:
                     synopsis = fl.formats.dll.lookup_as_html(infocardMap[base.solar().ids_info])
                 except (IndexError, KeyError):
                     synopsis = fl.formats.dll.lookup_as_html(base.solar().ids_info + 1)
  
-                bases[base.name()] = {
-                    "nickname": base.nickname,
+                bases[base.nickname] = {
+                    "name": base.name(),
                     "specs": specifications,
                     "infocard" : synopsis,
                     "owner" : base.owner().name(),
                     "system" : base.system_().name(),
+                    "region": base.system_().region() if base.system_().region() != "Independent" else "Independent Worlds",
                     "sector" : base.sector(),
-                    "bribes": [fl.factions[faction].name() for faction in base.bribes()],
-                    "missions": [fl.factions[faction].name() for faction in base.missions()],
+                    "bribes": [faction.name() for faction in base.bribes()],
+                    "missions": [faction.name() for faction in base.missions()],
                     "rumors": {fl.factions[faction].name(): rumor for faction, rumor in base.rumors().items()},
+                    "commodities_buying": [x.name() for x in base.buys_commodities()],
+                    "commodities_selling": [x.name() for x in base.sells_commodities()],
                     "ships_sold" : ships_sold
                 }
-            except (TypeError, AttributeError):
-                pass
+            except (TypeError, AttributeError) as e:
+                logs.append({base: e})
     return bases
 
 def get_systems() -> dict:
     print("Reading system data...")
     systems = {}
     for system in fl.systems:
-        if system.nickname not in oorp:
-            bases = {}
-            planets = []
-            holes = []
-            neighbors = []
-            zones = []
-            stars = {}
-            nebulae = []
-            asteroids = []
-            for solar_type, attributes in system.contents_raw():
-                if solar_type.lower() == "nebula":
-                    try:
-                        nebulae.append([attributes['zone'], attributes['file']])
-                    except KeyError:
-                        pass
-                elif solar_type.lower() == "asteroids":
-                    try:
-                        asteroids.append([attributes['zone'], attributes['file']])
-                    except KeyError:
-                        pass
-            for x in asteroids:
-                x.append(getMineableCommodites(x[1]))
-            for base in system.bases():
-                bases[base.name()] = {
-                    "owner": base.owner().name(),
-                    "factionLegality": base.owner().legality(),
-                    "type": str(type(base))
-                }
-            for planet in system.planets():
-                if str(type(planet)) == "<class 'flint.entities.solars.PlanetaryBase'>":
-                    planets.append([
-                        planet.name(),
-                        planet.nickname,
-                        planet.owner().name() if len(planet.owner().name()) <= 20 else planet.owner().short_name()
-                        ])
-                else:
-                    planets.append([planet.name(), planet.nickname, ""])
-            for x in system.connections():
-                name = fl.systems[x.goto[0]].name()
-                neighbors.append(name)
-                holes.append([name, x.type(), x.sector()])
-                
-                
-            for x in system.zones():
-                zones.append([x.name(), x.nickname, x.infocard('html')])
-            for star in system.stars():
-                stars[star.name()] = star.infocard('plain')
-            neighbors = [x for x in neighbors if x != system.name()]
-            neighbors = list(dict.fromkeys(neighbors))
+        try:
+            if system.nickname not in oorp:
+                bases = {}
+                planets = []
+                holes = []
+                neighbors = []
+                zones = []
+                stars = {}
+                nebulae = []
+                asteroids = []
+                for solar_type, attributes in system.contents_raw():
+                    if solar_type.lower() == "nebula":
+                        try:
+                            nebulae.append([attributes['zone'], attributes['file']])
+                        except KeyError:
+                            pass
+                    elif solar_type.lower() == "asteroids":
+                        try:
+                            asteroids.append([attributes['zone'], attributes['file']])
+                        except KeyError:
+                            pass
+                for x in asteroids:
+                    x.append(getMineableCommodites(x[1]))
+                for base in system.bases():
+                    bases[base.name()] = {
+                        "owner": base.owner().name(),
+                        "factionLegality": base.owner().legality(),
+                        "type": str(type(base))
+                    }
+                for planet in system.planets():
+                    if str(type(planet)) == "<class 'flint.entities.solars.PlanetaryBase'>":
+                        planets.append([
+                            planet.name(),
+                            planet.nickname,
+                            planet.owner().name() if len(planet.owner().name()) <= 20 else planet.owner().short_name()
+                            ])
+                    else:
+                        planets.append([planet.name(), planet.nickname, ""])
+                for x in system.connections():
+                    name = fl.systems[x.goto[0]].name()
+                    neighbors.append(name)
+                    holes.append([name, x.type(), x.sector()])
+                    
+                    
+                for x in system.zones():
+                    zones.append([
+                        x.name(),
+                        x.nickname,
+                        x.infocard('html') if type(x.infocard('html')) == list else x.infocard('html')])
+                for star in system.stars():
+                    stars[star.name()] = star.infocard('plain')
+                neighbors = [x for x in neighbors if x != system.name()]
+                neighbors = list(dict.fromkeys(neighbors))
 
-            systems[system.name()] = {
-                "nickname" : system.nickname,
-                "infocard" : system.infocard('plain'),
-                "region" : system.region(),
-                "bases" : bases,
-                "planets": planets,
-                "stars": stars,
-                "holes" : holes,
-                "neighbors" : neighbors,
-                "zones" : zones,
-                "nebulae": nebulae,
-                "asteroids": asteroids
-            }
+                systems[system.nickname] = {
+                    "name" : system.name(),
+                    "infocard" : system.infocard('plain'),
+                    "region" : system.region(),
+                    "bases" : bases,
+                    "planets": planets,
+                    "stars": stars,
+                    "holes" : holes,
+                    "neighbors" : neighbors,
+                    "zones" : zones,
+                    "nebulae": nebulae,
+                    "asteroids": asteroids
+                }
+        except Exception as e:
+            logs.append({system: e})
     return systems
 
 def get_commodities() -> dict:
@@ -474,3 +452,4 @@ with open(f'{getcwd()}\\{filename}', 'w') as f:
     dump(data, f, indent=1)
 endTime = time()
 print(f"Done.\nReading and writing took {round(endTime-startTime, 2)}s")
+print(logs)

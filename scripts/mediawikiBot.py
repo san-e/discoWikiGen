@@ -54,6 +54,7 @@ if exists("botPassword.json") and exists("wikitext.json"):
     csrfToken = data['query']['tokens']['csrftoken']
 
     doLater = []
+    doLater2 = []
     with alive_bar(len(wikitext.keys()), dual_line=True, title="mediawikiBot.py") as bar:
         for name, text in wikitext.items():
             bar.text = f'-> Uploading: {name}'
@@ -76,26 +77,32 @@ if exists("botPassword.json") and exists("wikitext.json"):
                 pass
             time.sleep(delay)
             bar()
-    if doLater != []:
-        print("Retrying failed uploads...")
-        with alive_bar(len(doLater), dual_line=True, title="mediawikiBot.py") as bar:
-            for name, text in doLater:
-                bar.text = f'-> Uploading: {name}'
-                edit_params = {
-                    "action": "edit",
-                    "title": name,
-                    "text": text,
-                    "bot": True,
-                    "format": "json",
-                    "token": csrfToken
-                }
-                request = session.post(URL, data = edit_params)
-                data = request.json()
-                #print(data)
-                try:
-                    error = data['error']['code']
-                    print(f"Error uploading {name}: {error}.")
-                except:
-                    pass
-                time.sleep(delay * 2.5)
-                bar()
+    while True:
+        if doLater != []:
+            print("Retrying failed uploads...")
+            with alive_bar(len(doLater), dual_line=True, title="mediawikiBot.py") as bar:
+                for name, text in doLater:
+                    bar.text = f'-> Uploading: {name}'
+                    edit_params = {
+                        "action": "edit",
+                        "title": name,
+                        "text": text,
+                        "bot": True,
+                        "format": "json",
+                        "token": csrfToken
+                    }
+                    request = session.post(URL, data = edit_params)
+                    data = request.json()
+                    #print(data)
+                    try:
+                        error = data['error']["code"]
+                        doLater2.append([name, text])
+                        print(f"Error uploading {name}: {error}, trying again later...")
+                    except:
+                        pass
+                    time.sleep(delay * 2.5)
+                    bar()
+        else:
+            break
+        if doLater2 != []: doLater = doLater2
+        doLater2 = []
