@@ -1,7 +1,6 @@
-from json import dump, dumps
+from json import dump
 import urllib.request
 from time import time
-from pprint import pprint
 from bs4 import BeautifulSoup
 from html_table_parser.parser import HTMLTableParser
 import pandas as pd
@@ -79,8 +78,8 @@ def get_nicknames(path_to_freelancer):
         nicknames[ship.nickname] = ship.name()
     for equipment in fl.equipment:
         nicknames[equipment.nickname] = equipment.name()
-    for commoditie in fl.commodities:
-        nicknames[commoditie.nickname] = commoditie.name()
+    for commodity in fl.commodities:
+        nicknames[commodity.nickname] = commodity.name()
     for good in fl.goods:
         try:
             nicknames[good.nickname] = good.name()
