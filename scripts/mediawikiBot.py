@@ -144,7 +144,7 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
                         print(f"File {entry.name} already exists on the wiki. {error}")
                 except:
                     pass
-                time.sleep(delay)
+                #time.sleep(delay)
                 bar()
 
     while True:
@@ -173,7 +173,7 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
                             print(f"File {entry.name} already exists on the wiki. {error}")
                     except:
                         pass
-                    time.sleep(delay * 2.5)
+                    #time.sleep(delay * 2.5)
                     bar()
         else:
             break
