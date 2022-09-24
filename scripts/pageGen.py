@@ -342,7 +342,7 @@ def main(template, data, config, nickname):
 
         return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{rumors}{categories}"
         
-loadedData = loadData("flData.json")
+loadedData = loadData("../dumpedData/flData.json")
 configData = loadData("config.json")
 sources = {}
 
@@ -359,5 +359,5 @@ for name, attributes in loadedData["Bases"].items():
     source = main(template = "Base", data = loadedData, config = configData, nickname = name)        
     sources[attributes["name"]] = source
     print(f"Processed {name}")
-with open("wikitext.json", "w") as f:
+with open("../dumpedData/wikitext.json", "w") as f:
     json.dump(sources, f, indent=1)

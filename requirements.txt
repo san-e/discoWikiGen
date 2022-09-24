@@ -4,3 +4,4 @@ beautifulsoup4
 html-table-parser-python3
 pandas
 alive_progress
+pillow
