@@ -4,7 +4,6 @@ WIP dynamic wiki page source generator for Discovery Freelancer
 
 ## Dependencies
 - My [fork](https://github.com/BASEFlow1/flint) of [flint](https://github.com/biqqles/flint)
-- pyperclip
 - beautifulsoup4
 - html-table-parser-python3
 - pandas
@@ -12,7 +11,7 @@ WIP dynamic wiki page source generator for Discovery Freelancer
 
 To install, do:
 
-`pip install pyperclip beautifulsoup4 html-table-parser-python3 pandas alive_progress`
+`pip install beautifulsoup4 html-table-parser-python3 pandas alive_progress`
 
 `pip install https://github.com/baseflow1/flint/archive/master.zip -U`
 

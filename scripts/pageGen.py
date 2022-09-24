@@ -1,7 +1,6 @@
 import json
 from os import getcwd
 from os.path import exists
-from pyperclip import copy
 
 def loadData(filename):
     with open(f"{getcwd()}\\{filename}", "r") as file:
