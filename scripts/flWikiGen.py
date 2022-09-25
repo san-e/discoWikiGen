@@ -9,7 +9,7 @@ from os.path import exists
 from PIL import Image
 from io import BytesIO
 
-version = input("Enter game version: ")
+version = ""#input("Enter game version: ")
 
 with open(f"{getcwd()}\\config.json", "r") as file:
     data = load(file)
