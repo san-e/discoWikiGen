@@ -1,7 +1,8 @@
 flData.json
 .vscode/
 __pycache__/
-
+dumpedData/images/ships/*
+dumpedData/images/commodities/*
 flData.json
 wikitext.json
 gen.bat
