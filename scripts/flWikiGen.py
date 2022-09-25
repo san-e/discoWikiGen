@@ -216,7 +216,7 @@ def get_ships(definitions: dict) -> dict:
                     "type" : ship.type(),
                     "maxClass" : maxClass,
                     "maxShield" : maxShield,
-                    "infocard" : infocard,
+                    "infocard" : infocard.replace("&nbsp;", ""),
                     "hull_price" : hull_price,
                     "package_price" : ship.price(),
                     "impulse_speed" : int(ship.impulse_speed()),
