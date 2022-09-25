@@ -201,7 +201,10 @@ def get_ships(definitions: dict) -> dict:
 
                 icon = ship.icon()
                 image = Image.open(BytesIO(icon))
-                image.save(f'../dumpedData/images/ships/{ship.nickname}.png')
+                if image.size != (64, 64):
+                    image.save(f'../dumpedData/images/ships/{ship.nickname}.png')
+                else:
+                    image.resize((128,128)).save(f'../dumpedData/images/ships/{ship.nickname}.png')
 
                 ships[ship.nickname] = {
                     "name" : ship.name(),
