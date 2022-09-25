@@ -122,37 +122,8 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
     for directory in subdirectories:
         with alive_bar(len([x for x in scandir(directory)]), dual_line=True, title="Uploading Images") as bar:
             for entry in scandir(directory):
-                bar.text = f'-> Uploading: {entry.name} from folder {split(directory)[-1]}'
-                upload_params = {
-                    "action": "upload",
-                    "filename": entry.name,
-                    "format": "json",
-                    "token": csrfToken,
-                    "ignorewarnings": 1
-                    }
-                with open(entry.path, 'rb') as fileParam:
-                    file = {'file':(entry.name, fileParam, 'multipart/form-data')}
-                    request = session.post(URL, files=file, data=upload_params)
-                data = request.json()
-
-                try:
-                    error = data['error']["code"]
-                    if not error == "fileexists-no-change":
-                        print(f"Error uploading {entry.name}: {error}, trying again later...")
-                        doLater.append(entry)
-                    else:
-                        print(f"File {entry.name} already exists on the wiki. {error}")
-                except:
-                    pass
-                #time.sleep(delay)
-                bar()
-
-    while True:
-        if doLater != []:
-            print("Retrying failed uploads...")
-            with alive_bar(len(doLater), dual_line=True, title="Uploading Images") as bar:
-                for entry in doLater:
-                    bar.text = f'-> Uploading: {entry.name}'
+                if entry.name.split(".")[-1] == "png":
+                    bar.text = f'-> Uploading: {entry.name} from folder {split(directory)[-1]}'
                     upload_params = {
                         "action": "upload",
                         "filename": entry.name,
@@ -164,17 +135,48 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
                         file = {'file':(entry.name, fileParam, 'multipart/form-data')}
                         request = session.post(URL, files=file, data=upload_params)
                     data = request.json()
+
                     try:
                         error = data['error']["code"]
                         if not error == "fileexists-no-change":
                             print(f"Error uploading {entry.name}: {error}, trying again later...")
-                            doLater2.append(entry)
+                            doLater.append(entry)
                         else:
                             print(f"File {entry.name} already exists on the wiki. {error}")
                     except:
                         pass
-                    #time.sleep(delay * 2.5)
+                    #time.sleep(delay)
                     bar()
+
+    while True:
+        if doLater != []:
+            print("Retrying failed uploads...")
+            with alive_bar(len(doLater), dual_line=True, title="Uploading Images") as bar:
+                for entry in doLater:
+                    if entry.name.split(".")[-1] == "png":
+                        bar.text = f'-> Uploading: {entry.name}'
+                        upload_params = {
+                            "action": "upload",
+                            "filename": entry.name,
+                            "format": "json",
+                            "token": csrfToken,
+                            "ignorewarnings": 1
+                            }
+                        with open(entry.path, 'rb') as fileParam:
+                            file = {'file':(entry.name, fileParam, 'multipart/form-data')}
+                            request = session.post(URL, files=file, data=upload_params)
+                        data = request.json()
+                        try:
+                            error = data['error']["code"]
+                            if not error == "fileexists-no-change":
+                                print(f"Error uploading {entry.name}: {error}, trying again later...")
+                                doLater2.append(entry)
+                            else:
+                                print(f"File {entry.name} already exists on the wiki. {error}")
+                        except:
+                            pass
+                        #time.sleep(delay * 2.5)
+                        bar()
         else:
             break
         if doLater2 != []: doLater = doLater2
@@ -183,5 +185,5 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
 
 if __name__ == "__main__":
     loginData = login()
-    uploadText(loginData[0], loginData[1])
+    #uploadText(loginData[0], loginData[1])
     uploadImages(loginData[0], loginData[1])
