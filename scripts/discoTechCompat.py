@@ -1,4 +1,4 @@
-from json import dump
+from json import dump, load
 import urllib.request
 from time import time
 from bs4 import BeautifulSoup
@@ -7,13 +7,15 @@ import pandas as pd
 import flint as fl
 from json import dump
 
+with open("config.json", "r") as f:
+    config = load(f)
 
 def url_get_contents(url):
     request = urllib.request.Request(url=url)
     open = urllib.request.urlopen(request)
     return open.read()
 
-html = url_get_contents('https://discoverygc.com/techcompat/techcompat_table.php').decode('utf-8')
+html = url_get_contents(config["techcompatURL"]).decode('utf-8')
 
 def get_techcells():
     parser = HTMLTableParser()

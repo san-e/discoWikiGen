@@ -129,5 +129,6 @@
     "titleText": "mediawikiBot.py | Uploading Text ",
     "titleImage": "mediawikiBot.py | Uploading Images ",
     "images" : "../dumpedData/images"
-  }
+  },
+  "techcompatURL": "https://discoverygc.com/techcompat/techcompat_table.php"
 }
