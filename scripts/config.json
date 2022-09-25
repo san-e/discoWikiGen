@@ -119,7 +119,14 @@
     "col_": "Crayter Republic",
     "or_": "The Order",
     "no_": "Nomads",
-    "no2_": "Nomads"
+    "no2_": "Nomads",
+    "core_": "The Core",
+    "gc_": "Golden Chrysanthemums",
+    "img_": "Independent Miners Guild",
+    "gmg": "Gas Miners Guild",
+    "bh_": "Bounty Hunters",
+    "molly_": "Mollys",
+    "z_": "Zoners"
   },
   "bot": {
     "URL": "https://disco-freelancer.fandom.com/api.php",
@@ -130,5 +137,11 @@
     "titleImage": "mediawikiBot.py | Uploading Images ",
     "images" : "../dumpedData/images"
   },
-  "techcompatURL": "https://discoverygc.com/techcompat/techcompat_table.php"
+  "techcompatURL": "https://discoverygc.com/techcompat/techcompat_table.php",
+  "dumpedData": "../dumpedData/",
+  "createDir": [
+    "../dumpedData/",
+    "../dumpedData/images",
+    "../dumpedData/images/ships"
+  ]
 }
