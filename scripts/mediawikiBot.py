@@ -184,16 +184,15 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
 
 if __name__ == "__main__":
     loginData = login(config["bot"]["botPassword"])
-    uploadImages(
-        session = loginData[0],
-        csrfToken = loginData[1],
-        titleImage = config["bot"]["titleImage"],
-        path = config["bot"]["images"]
-    )    
     uploadText(
         session = loginData[0],
         csrfToken = loginData[1],
         wikitextPath = config["bot"]["wikitext"],
         titleText = config["bot"]["titleText"]
     )
-
+    uploadImages(
+        session = loginData[0],
+        csrfToken = loginData[1],
+        titleImage = config["bot"]["titleImage"],
+        path = config["bot"]["images"]
+    )    
