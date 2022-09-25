@@ -205,6 +205,7 @@ def get_ships(definitions: dict) -> dict:
                     image.save(f'../dumpedData/images/ships/{ship.nickname}.png')
                 else:
                     image.resize((128,128)).save(f'../dumpedData/images/ships/{ship.nickname}.png')
+                    
 
                 ships[ship.nickname] = {
                     "name" : ship.name(),
