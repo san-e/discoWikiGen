@@ -5,20 +5,19 @@ from os import scandir
 import time
 from alive_progress import alive_bar
 
-URL = "https://disco-freelancer.fandom.com/api.php"
-delay = 1
+with open("config.json", "r") as f:
+    config = load(f)
+
+URL = config["bot"]["URL"]
+delay = config["bot"]["delay"]
 
 
-def login():
-    if exists("botPassword.json"):
-        with open("botPassword.json", "r") as f:
+def login(botPasswordPath):
+    if exists(botPasswordPath):
+        with open(botPasswordPath, "r") as f:
             data = load(f)
             botName, botPassword = data[0], data[1]
         
-        headerData = {
-            'Content-Type': 'multipart/form-data'
-        }
-
         session = requests.Session()
 
         loginToken_params = {
@@ -53,13 +52,13 @@ def login():
 
         return session, csrfToken
 
-def uploadText(session, csrfToken):
-        if exists("../dumpedData/wikitext.json"):
-            with open("../dumpedData/wikitext.json", "r") as f:
+def uploadText(session, csrfToken, wikitextPath, titleText):
+        if exists(wikitextPath):
+            with open(wikitextPath, "r") as f:
                 wikitext = load(f)
             doLater = []
             doLater2 = []
-            with alive_bar(len(wikitext.keys()), dual_line=True, title="mediawikiBot.py") as bar:
+            with alive_bar(len(wikitext.keys()), dual_line=True, title=titleText) as bar:
                 for name, text in wikitext.items():
                     bar.text = f'-> Uploading: {name}'
                     edit_params = {
@@ -83,7 +82,7 @@ def uploadText(session, csrfToken):
             while True:
                 if doLater != []:
                     print("Retrying failed uploads...")
-                    with alive_bar(len(doLater), dual_line=True, title="Uploading Text") as bar:
+                    with alive_bar(len(doLater), dual_line=True, title=titleText) as bar:
                         for name, text in doLater:
                             bar.text = f'-> Uploading: {name}'
                             edit_params = {
@@ -109,7 +108,7 @@ def uploadText(session, csrfToken):
                 if doLater2 != []: doLater = doLater2
                 doLater2 = []
 
-def uploadImages(session, csrfToken, path = "../dumpedData/images"):
+def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
     subdirectories = []
     if exists(path):
         with scandir(path) as dirs:
@@ -120,7 +119,7 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
     doLater = [] 
     doLater2 = []
     for directory in subdirectories:
-        with alive_bar(len([x for x in scandir(directory)]), dual_line=True, title="Uploading Images") as bar:
+        with alive_bar(len([x for x in scandir(directory)]), dual_line=True, title=titleImage) as bar:
             for entry in scandir(directory):
                 if entry.name.split(".")[-1] == "png":
                     bar.text = f'-> Uploading: {entry.name} from folder {split(directory)[-1]}'
@@ -151,7 +150,7 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
     while True:
         if doLater != []:
             print("Retrying failed uploads...")
-            with alive_bar(len(doLater), dual_line=True, title="Uploading Images") as bar:
+            with alive_bar(len(doLater), dual_line=True, title=titleImage) as bar:
                 for entry in doLater:
                     if entry.name.split(".")[-1] == "png":
                         bar.text = f'-> Uploading: {entry.name}'
@@ -184,6 +183,17 @@ def uploadImages(session, csrfToken, path = "../dumpedData/images"):
 
 
 if __name__ == "__main__":
-    loginData = login()
-    #uploadText(loginData[0], loginData[1])
-    uploadImages(loginData[0], loginData[1])
+    loginData = login(config["bot"]["botPassword"])
+    uploadImages(
+        session = loginData[0],
+        csrfToken = loginData[1],
+        titleImage = config["bot"]["titleImage"],
+        path = config["bot"]["images"]
+    )    
+    uploadText(
+        session = loginData[0],
+        csrfToken = loginData[1],
+        wikitextPath = config["bot"]["wikitext"],
+        titleText = config["bot"]["titleText"]
+    )
+
