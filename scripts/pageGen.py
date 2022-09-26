@@ -118,7 +118,7 @@ def main(template, data, config, nickname):
     elif "sys" in template.lower():
         sys_entry = data["Systems"][nickname]
         name = data["Systems"][nickname]["name"]
-        infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; width: 270px; font-size: 90%; line-height: 110%; margin-left: 1em; margin-bottom: 1em; border: 1px solid #aaa;" cellpadding="3">\n<tr>\n<td colspan="2" class="infobox-name" style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 185%; font-weight: 500; text-decoration: underline; text-align: center; line-height: 1.5em;">{name}\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center;"><div class="center"><div class="floatnone">[[File:{image}|center|220px]]</div></div>\n</td></tr>\n<tr>\n<td colspan="2" class="infobox-section" style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; font-weight: 500; text-decoration: underline; text-align: center; line-height: 1.5em;">System\n</td></tr>\n<tr title="">\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td>{governingHouse}\n</td></tr>\n<tr title="">\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td>{region}\n</td></tr>\n<tr title="">\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td>{systems}\n</td></tr></table>\n'
+        infobox = '<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">System\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
         infocard = '<p>{infocard}</p>\n<br style="clear: both; height: 0px;" />\n</p>\n'
         overview = '<h1><span class="mw-headline" id="System_Overview">System Overview</span></h1>\n<hr>\n<table style="width: 100%;">\n<tr>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Astronomical Bodies</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Stellar Objects</div>\n{suns}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Planetary Objects</div>\n{planets}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Nebulae &amp; Asteroids</div>\n{fields}\n</td>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Industrial Development</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Space Stations</div>\n{stations}\n<li class="mw-empty-elt"></li></ul>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Commodity Mining</div>\n{mining}\n</td>\n<td style="width: 33%; vertical-align: top; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Faction Presence</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Lawful Factions</div>\n{lawfuls}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Corporations &amp; Guilds</div>\n{corps}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Unlawful Factions</div>\n{unlawfuls}\n</td></tr></table>\n'
         navmap = '<p><br style="clear: both; height: 0px;" />\n</p>\n<h1><span class="mw-headline" id="System_Map">System Map</span></h1>\n<hr>\n<p>[https://space.discoverygc.com/navmap/#q={name} Navmap]\n</p>\n'
@@ -159,11 +159,15 @@ def main(template, data, config, nickname):
             temp = f"{temp}</ul>"
         overview = overview.replace("{suns}", temp)
 
-        planets = "<ul>"
+        planets = '<table class="wikitable sortable">\n<tr>\n<th>Planet</th>\n<th>Owner</th>\n</tr>\n'
+        edited = False
         for planet, nickname, owner in sys_entry["planets"]:
             inhabited = f"{owner}" if owner != "" else "Uninhabited"
-            planets = f"{planets}<li><b>[[{planet}]]</b> -- <i>{inhabited}</i></li>\n"
-        overview = overview.replace("{planets}", f"{planets}</ul>")
+            planets = f"{planets}<tr><td><b>[[{planet}]]</b></td> <td>{inhabited}</td></tr>\n\n"
+            edited = True
+        if not edited:  planets = ""
+        else:       planets = f"{planets}</table>"
+        overview = overview.replace("{planets}", planets)
 
         
         temp = ""
@@ -197,10 +201,15 @@ def main(template, data, config, nickname):
                 lawfulFactions.append(dicty["owner"])
             elif dicty["factionLegality"] == "Unlawful":
                 unlawfulFactions.append(dicty["owner"])
-        stations = "<ul>"
+
+        stations = '<table class="wikitable sortable">\n<tr>\n<th>Station</th>\n<th>Owner</th>\n</tr>\n'
+        edited = False
         for base, owner in bases:
-            stations = f"{stations}<li><b>[[{base}]]</b> -- <i>{owner}</i></li>\n"
-        overview = overview.replace("{stations}", f"{stations}</ul>")
+            stations = f"{stations}<tr><td><b>[[{base}]]</b></td> <td>{owner}</td></tr>\n"
+            edited = True
+        if not edited:  stations = ""
+        else:       stations = f"{stations}</table>"
+        overview = overview.replace("{stations}", stations)
 
         mineableCommodities = "<ul>"
         mineableCommodity = []
