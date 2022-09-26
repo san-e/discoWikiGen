@@ -19,4 +19,5 @@ To install, do:
 or navigate to the `requirements.txt` file and do `pip install -r requirements.txt`
 
 ---
+
 Developed and tested on Python 3.10.4
