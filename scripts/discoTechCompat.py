@@ -15,7 +15,7 @@ def url_get_contents(url):
     open = urllib.request.urlopen(request)
     return open.read()
 
-html = url_get_contents(config["techcompatURL"]).decode('utf-8')
+html = url_get_contents(config["techcompat"]["techcompatURL"]).decode('utf-8')
 
 def get_techcells():
     parser = HTMLTableParser()

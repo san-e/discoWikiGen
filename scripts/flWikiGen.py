@@ -13,8 +13,8 @@ version = ""#input("Enter game version: ")
 
 with open(f"{getcwd()}\\config.json", "r") as file:
     config = load(file)
-oorp = config["oorpSystems"]
-shipBuilders = config["shipBuilders"]
+oorp = config["wikiGen"]["oorpSystems"]
+shipBuilders = config["wikiGen"]["shipBuilders"]
 
 try:
     if exists(argv[1]):
@@ -27,8 +27,8 @@ except IndexError:
     print(f"Path to Freelancer directory not given.\nUsage: python {basename(__file__)} [path_to_freelancer]")
     quit()
 
-if not exists(config["dumpedData"]):
-    for folder in config["createDir"]:
+if not exists(config["wikiGen"]["dumpedData"]):
+    for folder in config["wikiGen"]["createDir"]:
         makedirs(folder)
 
 # LOOKUP TABLES

@@ -14,8 +14,8 @@ def chunkList(toBeChunked, chunkSize):
     return chunkedList
 
 def main(template, data, config, nickname):
-    houses = config["houses"]
-    corps = config["corporations"]
+    houses = config["pageGen"]["houses"]
+    corps = config["pageGen"]["corporations"]
     if template.lower() == "ship":
         ship_entry = data["Ships"][nickname]
         name = data["Ships"][nickname]["name"]
