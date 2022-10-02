@@ -4,7 +4,7 @@ from json import dump, load
 from time import time
 from math import pi
 from sys import argv
-from os import getcwd, mkdir
+from os import getcwd, makedirs
 from os.path import exists, basename
 from PIL import Image
 from io import BytesIO
@@ -29,7 +29,7 @@ except IndexError:
 
 if not exists(config["dumpedData"]):
     for folder in config["createDir"]:
-        mkdir(folder)
+        makedirs(folder)
 
 # LOOKUP TABLES
 gun_table = {x.nickname: x.name() for x in fl.equipment if str(type(x)) == "<class 'flint.entities.equipment.Gun'>" and x.is_valid()}
