@@ -254,7 +254,7 @@ def get_bases() -> dict:
     print("Reading base data...")
     bases = {}
     for base in fl.bases:
-        if base.has_solar():
+        if base.has_solar() and base.system_().nickname not in config["wikiGen"]["oorpSystems"]:
             try:
                 ships_sold = [[ship.name(), ship.type(), price] for ship, price in base.sells_ships().items()]
                 specifications = fl.formats.dll.lookup_as_html(base.solar().ids_info)
@@ -343,7 +343,7 @@ def get_systems() -> dict:
                 systems[system.nickname] = {
                     "name" : system.name(),
                     "infocard" : system.infocard('plain'),
-                    "region" : system.region(),
+                    "region" : system.region() if system.region() != "Independent" else "Independent Worlds",
                     "bases" : bases,
                     "planets": planets,
                     "stars": stars,
@@ -356,6 +356,9 @@ def get_systems() -> dict:
         except Exception as e:
             logs.append({system: e})
     return systems
+
+def get_factions() -> dict:
+    pass
 
 if __name__ == "__main__":
     filename = "flData.json"
