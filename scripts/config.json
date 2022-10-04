@@ -141,9 +141,11 @@
     "delay": 1,
     "botPassword": "botPassword.json",
     "wikitext": "../dumpedData/wikitext.json",
-    "titleText": "mediawikiBot.py | Uploading Text ",
-    "titleImage": "mediawikiBot.py | Uploading Images ",
+    "titleText": "mediawikiBot.py | Uploading Text",
+    "titleImage": "mediawikiBot.py | Uploading Images",
+    "titleNuke": "mediawikiBot.py | Nuking wiki",
     "images" : "../dumpedData/images",
+    "nukeCategory" : "Category:NukeOnPatch",
     "categories": [
       "Ships",
       "Systems",

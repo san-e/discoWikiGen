@@ -4,6 +4,11 @@ from os.path import exists, isdir, split
 from os import scandir
 import time
 from alive_progress import alive_bar
+import argparse
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument("-n", "--nuke", help="Nuke all generated pages on the wiki", action="store_true")
+args = argparser.parse_args()
 
 with open("config.json", "r") as f:
     config = load(f)
@@ -181,18 +186,54 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
         if doLater2 != []: doLater = doLater2
         doLater2 = []
 
+def nukeTheWiki(session, csrfToken, titleNuke):
+    queryNuke_params = {
+        "action": "query",
+        "generator": "categorymembers",
+        "gcmtitle": config["bot"]["nukeCategory"],
+        "prop": "categories",
+        "cllimit": "max",
+        "gcmlimit": "max",
+        "format": "json"
+    }
+
+    request = session.post(URL, data=queryNuke_params)
+    idsToNuke = list(request.json()["query"]["pages"].keys())
+
+    with alive_bar(len(idsToNuke), dual_line=True, title=titleNuke) as bar:
+        for id in idsToNuke:
+            bar.text = f"Nuking pageID {id}"
+            nuke_params = {
+                "action": "delete",
+                "format": "json",
+                "pageid": id,
+                "token": csrfToken
+            }
+
+            request = session.post(URL, nuke_params)
+            print(request.json())
+
+            #time.sleep(delay) seemingly not neccessary
+            bar()
 
 if __name__ == "__main__":
     loginData = login(config["bot"]["botPassword"])
-    uploadText(
-        session = loginData[0],
-        csrfToken = loginData[1],
-        wikitextPath = config["bot"]["wikitext"],
-        titleText = config["bot"]["titleText"]
-    )
-    uploadImages(
-        session = loginData[0],
-        csrfToken = loginData[1],
-        titleImage = config["bot"]["titleImage"],
-        path = config["bot"]["images"]
-    )    
+    if args.nuke:
+        nukeTheWiki(
+            session = loginData[0],
+            csrfToken = loginData[1],
+            titleNuke = config["bot"]["titleNuke"]
+        )
+    else:
+        uploadText(
+            session = loginData[0],
+            csrfToken = loginData[1],
+            wikitextPath = config["bot"]["wikitext"],
+            titleText = config["bot"]["titleText"]
+        )
+        uploadImages(
+            session = loginData[0],
+            csrfToken = loginData[1],
+            titleImage = config["bot"]["titleImage"],
+            path = config["bot"]["images"]
+        )    
