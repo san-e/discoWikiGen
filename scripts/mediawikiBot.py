@@ -206,6 +206,7 @@ def nukeTheWiki(session, csrfToken, titleNuke):
             nuke_params = {
                 "action": "delete",
                 "format": "json",
+                "reason": "This page has been nuked!",
                 "pageid": id,
                 "token": csrfToken
             }
