@@ -25,7 +25,7 @@ def main(template, data, config, nickname):
         hardpoints = '<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n'
         includes = '<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>'
         availability = '<h2>Availability</h2>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Buying Locations\n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Location\n</th></tr>\n{sold_at}\n</td></tr></table>\n</td></tr></table>'
-        category = '\n[[Category: Ships]]\n{built_by}\n{class}'
+        category = '\n[[Category: Ships]]\n[[Category: nukeOnPatch]]\n{built_by}\n{class}'
 
 
         image = f'{nickname}.png'
@@ -126,7 +126,7 @@ def main(template, data, config, nickname):
         nebulae = "<h2>Nebulae</h2>\n\n{nebulae}\n"
         asteroids = "<h2>Asteroid Fields</h2>\n\n{asteroids}\n"
         gates = '<h1>Jump Gates/Holes</h1>\n<hr>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Jump Hole/Gate Locations \n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Target System</th>\n<th>Type</th>\n<th>Sector</th></tr>\n{gates}\n</td></tr></table>\n</td></tr></table>'
-        category = '\n[[Category: Systems]]\n{region}'
+        category = '\n[[Category: Systems]]\n[[Category: nukeOnPatch]]\n{region}'
 
         infobox = infobox.replace("{name}", sys_entry["name"])
         infobox = infobox.replace("{image}", f'{nickname}.png')
@@ -276,7 +276,7 @@ def main(template, data, config, nickname):
         commodities = '<h2>Commodities</h2>\n\n{imports}\n{exports}\n<p><br style="clear: both; height: 0px;" />\n'
         ships = '<h2>Ships sold</h2>\n\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n<th>Price</th>\n</tr>\n{ships_sold}\n</td></tr></table>\n<p><br style="clear: both; height: 0px;" />\n</p>\n'
         rumors = '<h2>Rumors</h2>\n{rumors}'
-        categories = "\n[[Category: Bases]]\n{other}"
+        categories = "\n[[Category: Bases]]\n[[Category: nukeOnPatch]]\n{other}"
 
 
         infobox = infobox.replace("{nickname}", nickname)
