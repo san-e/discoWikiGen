@@ -361,7 +361,7 @@ def get_factions() -> dict:
     print("Reading faction data...")
     factions = {}
     for faction in fl.factions:
-        if faction.nickname != faction.name():
+        if faction.nickname not in faction.name() and not faction.name().isspace():
             alignment = "Corporation" if faction.name() in config["pageGen"]["corporations"] else faction.legality()
 
             reps = {faction.name(): rep for faction, rep in faction.rep_sheet().items() if rep}
@@ -373,7 +373,8 @@ def get_factions() -> dict:
                 "alignment": alignment,
                 "infocard": '<p style="padding: 0px; margin: 0px;">' + faction.infocard().replace("<p>", '<p style="padding: 0px; margin: 0px;">'),
                 "ships": [[ship.name(), ship.type()] for nickname, ship in faction.ships().items()],
-                "bribes": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bribes().items()],
+                "bases": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bases().items() if base.system_().nickname not in oorp],
+                "bribes": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bribes().items() if base.system_().nickname not in oorp],
                 "repsheet": reps
             }
     return factions

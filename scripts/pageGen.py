@@ -119,7 +119,7 @@ def main(template, data, config, nickname):
     elif "sys" in template.lower():
         sys_entry = data["Systems"][nickname]
         name = data["Systems"][nickname]["name"]
-        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">System\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
+        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">System\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
         infocard = '<p>{infocard}</p>\n<br style="clear: both; height: 0px;" />\n</p>\n'
         overview = '<h1><span class="mw-headline" id="System_Overview">System Overview</span></h1>\n<hr>\n<table style="width: 100%;">\n<tr>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Astronomical Bodies</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Stellar Objects</div>\n{suns}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Planetary Objects</div>\n{planets}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Nebulae &amp; Asteroids</div>\n{fields}\n</td>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Industrial Development</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Space Stations</div>\n{stations}\n<li class="mw-empty-elt"></li></ul>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Commodity Mining</div>\n{mining}\n</td>\n<td style="width: 33%; vertical-align: top; padding: .5em 1em; margin: 1em;">\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Faction Presence</div>\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Lawful Factions</div>\n{lawfuls}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Corporations &amp; Guilds</div>\n{corps}\n<div style="font-family: Agency FB,​Verdana,​Arial,​sans-serif; font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Unlawful Factions</div>\n{unlawfuls}\n</td></tr></table>\n'
         navmap = '<p><br style="clear: both; height: 0px;" />\n</p>\n<h1><span class="mw-headline" id="System_Map">System Map</span></h1>\n<hr>\n<p>[https://space.discoverygc.com/navmap/#q={name} Navmap]\n</p>\n'
@@ -341,22 +341,74 @@ def main(template, data, config, nickname):
         categories = categories.replace("{other}", other)
 
         return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{rumors}{categories}"
+    elif "faction" in template.lower():
+        faction_entry = data["Factions"][nickname]
         
+        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff", title = "{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Alignment</b>\n</td>\n<td style="padding-right: 1em">{alignment}\n</td></tr>\n</table>\n'
+        infocard = '{infocard}\n'
+        ships = '<h2 title="The ships this faction\'s NPC\'s use, as defined in faction_prop.ini">Ships used</h2>\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n</tr>\n{ships}\n</td></tr></table>\n'
+        bases = '<h2 title="All bases that are owned by this faction">Bases owned</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bases}\n</td></tr></table>\n</td></tr></table>\n'
+        bribes = '<h2 title="All bases that offer bribes for this faction">Bribes</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bribes}\n</td></tr></table>\n</td></tr></table>\n'
+        rep_sheet = '<h2 title="This faction\'s rep sheet">Reputation</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th></tr>\n<tr>\n<td>\n{{Faction Diplomacy/begin}}\n{repsheet}\n{{Faction Diplomacy/end}}\n</td></tr></table>'
+        categories = "\n[[Category: Factions]]\n[[Category: nukeOnPatch]]\n"
+
+
+        infobox = infobox.replace("{nickname}", nickname)
+        infobox = infobox.replace("{name}", faction_entry["name"])
+        infobox = infobox.replace("{alignment}", faction_entry["alignment"])
+
+
+        infocard = infocard.replace("{infocard}", faction_entry["infocard"])
+
+        shippos = ""
+        for ship, type in faction_entry["ships"]:
+            shippos = f"{shippos}<tr>\n<td>[[{ship}]]</td>\n<td>{type}</td>\n</tr>\n"
+
+        ships = ships.replace("{ships}", shippos)
+        
+
+        boses = ""
+        for base, owner, system, region in faction_entry["bases"]:
+            boses = f"{boses}<tr>\n<td>[[{base}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td>\n</tr>\n"
+
+        bases = bases.replace("{bases}", boses)
+
+        brobes = ""
+        for base, owner, system, region in faction_entry["bribes"]:
+            brobes = f"{brobes}<tr>\n<td>[[{base}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td>\n</tr>\n"
+
+        bribes = bribes.replace("{bribes}", brobes)
+
+
+        repsheet = ""
+        for faction, rep in faction_entry["repsheet"].items():
+            rep = f"+{rep}" if rep > 0 else rep
+            repsheet = f"{repsheet}((FD | {faction} | {rep}))\n".replace("((", "{{").replace("))", "}}")
+
+        rep_sheet = rep_sheet.replace("{repsheet}", repsheet[:-1])
+
+        return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{categories}"
+
+
 loadedData = loadData("../dumpedData/flData.json")
 configData = loadData("config.json")
 sources = {}
 
 
-for name, attributes in loadedData["Systems"].items():
-    source = main(template = "System", data = loadedData, config = configData, nickname = name)
-    sources[attributes["name"]] = source
-    print(f"Processed {name}")
-for name, attributes in loadedData["Ships"].items():
-    source = main(template = "Ship", data = loadedData, config = configData, nickname = name)        
-    sources[attributes["name"]] = source
-    print(f"Processed {name}")
-for name, attributes in loadedData["Bases"].items():
-    source = main(template = "Base", data = loadedData, config = configData, nickname = name)        
+# for name, attributes in loadedData["Systems"].items():
+#     source = main(template = "System", data = loadedData, config = configData, nickname = name)
+#     sources[attributes["name"]] = source
+#     print(f"Processed {name}")
+# for name, attributes in loadedData["Ships"].items():
+#     source = main(template = "Ship", data = loadedData, config = configData, nickname = name)        
+#     sources[attributes["name"]] = source
+#     print(f"Processed {name}")
+# for name, attributes in loadedData["Bases"].items():
+#     source = main(template = "Base", data = loadedData, config = configData, nickname = name)        
+#     sources[attributes["name"]] = source
+#     print(f"Processed {name}")
+for name, attributes in loadedData["Factions"].items():
+    source = main(template = "Faction", data = loadedData, config = configData, nickname = name)        
     sources[attributes["name"]] = source
     print(f"Processed {name}")
 with open("../dumpedData/wikitext.json", "w") as f:
