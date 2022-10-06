@@ -25,7 +25,7 @@ def main(template, data, config, nickname):
         hardpoints = '<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n'
         includes = '<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>'
         availability = '<h2>Availability</h2>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Buying Locations\n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Location\n</th></tr>\n{sold_at}\n</td></tr></table>\n</td></tr></table>'
-        category = '\n[[Category: Ships]]\n[[Category: nukeOnPatch]]\n{built_by}\n{class}'
+        category = '\n[[Category: Ships]]\n[[Category: nukeOnPatch]]\n{built_by}\n{class}\n{techcompat}'
 
 
         image = f'{nickname}.png'
@@ -112,6 +112,7 @@ def main(template, data, config, nickname):
         else:
             category = category.replace("{built_by}", '')
         category = category.replace("{class}", f'[[Category: {ship_entry["type"]}]]')
+        category = category.replace("{techcompat}", f'[[Category: {ship_entry["techcompat"]}]]')
 
 
         return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}"
