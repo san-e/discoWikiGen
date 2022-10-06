@@ -372,8 +372,8 @@ def get_factions() -> dict:
                 "name": faction.name(),
                 "alignment": alignment,
                 "infocard": faction.infocard(),
-                "ships": [name.name() for nickname, name in faction.ships().items()],
-                "bribes": [name.name() for nickname, name in faction.bribes().items()],
+                "ships": [[ship.name(), ship.type()] for nickname, ship in faction.ships().items()],
+                "bribes": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bribes().items()],
                 "repsheet": reps
             }
     return factions
