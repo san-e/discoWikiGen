@@ -269,7 +269,7 @@ def get_bases() -> dict:
                     "infocard" : synopsis,
                     "owner" : base.owner().name(),
                     "system" : base.system_().name(),
-                    "region": base.system_().region() if base.system_().region() != "Independent" else "Independent Worlds",
+                    "region": base.system_().region(),
                     "sector" : base.sector(),
                     "bribes": [faction.name() for faction in base.bribes()],
                     "missions": [faction.name() for faction in base.missions()],
