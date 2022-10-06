@@ -364,13 +364,17 @@ def get_factions() -> dict:
         if faction.nickname != faction.name():
             alignment = "Corporation" if faction.name() in config["pageGen"]["corporations"] else faction.legality()
 
+            reps = {faction.name(): rep for faction, rep in faction.rep_sheet().items() if rep}
+            reps = sorted(reps.items(), key=lambda x:x[1])
+            reps = dict(reps)
+
             factions[faction.nickname] = {
                 "name": faction.name(),
                 "alignment": alignment,
                 "infocard": faction.infocard(),
                 "ships": [name.name() for nickname, name in faction.ships().items()],
                 "bribes": [name.name() for nickname, name in faction.bribes().items()],
-                "repsheet": {faction.name(): rep for faction, rep in faction.rep_sheet().items() if rep}
+                "repsheet": reps
             }
     return factions
 
