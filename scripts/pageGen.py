@@ -273,7 +273,7 @@ def main(template, data, config, nickname):
         infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: #555555; color: #ffffff", title="{nickname}"><b>{name}</b>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;">\n<div class="center">\n<div class="floatnone">[[File:{nickname}.png|250px]]</div>\n</div>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Owner\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{owner}\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Location\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{location}\n</td>\n</tr>\n</table>\n'
         infocard = '{infocard}\n'
         bribesNmissions = '<h2>Bribes & Missions Offered</h2>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Bribes</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{bribes}\n</td>\n</tr>\n</table>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Missions</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{missions}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
-        commodities = '<h2>Commodities</h2>\n\n{imports}\n{exports}\n<p><br style="clear: both; height: 0px;" />\n'
+        commodities = '<h2>Commodities</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Imports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{imports}\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Exports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{exports}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
         ships = '<h2>Ships sold</h2>\n\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n<th>Price</th>\n</tr>\n{ships_sold}\n</td></tr></table>\n<p><br style="clear: both; height: 0px;" />\n</p>\n'
         rumors = '<h2>Rumors</h2>\n{rumors}'
         categories = "\n[[Category: Bases]]\n[[Category: nukeOnPatch]]\n{other}"
@@ -300,26 +300,17 @@ def main(template, data, config, nickname):
         bribesNmissions = bribesNmissions.replace("{bribes}", bribes)
         bribesNmissions = bribesNmissions.replace("{missions}", missions)
 
-        importTemplate = '<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Imports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{imports}\n</td>\n</tr>\n</table>\n'
-        exportTemplate = '<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Exports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{exports}\n</td>\n</tr>\n</table>\n'
-        chunkedImports = chunkList(base_entry["commodities_buying"], 50)
-        chunkedExports = chunkList(base_entry["commodities_selling"], 50)
-        imports = ""
-        exports = ""
+        imports = "<ul>\n"
+        exports = "<ul>\n"
 
-        for importList in chunkedImports:
-            temp = "<ul>\n"
-            for faction in importList:
-                temp = f"{temp}<li>{faction}</li>\n"
-            temp = f"{temp}</ul>\n"
-            imports = f"{imports}{importTemplate.replace('{imports}', temp)}"
+        for commodity in base_entry["commodities_buying"]:
+            imports = f"{imports}<li>{commodity}</li>\n"
+                
+        for commodity in base_entry["commodities_selling"]:
+            exports = f"{exports}<li>{commodity}</li>\n"
         
-        for exportList in chunkedExports:
-            temp = "<ul>\n"
-            for faction in exportList:
-                temp = f"{temp}<li>{faction}</li>\n"
-            temp = f"{temp}</ul>\n"
-            exports = f"{exports}{exportTemplate.replace('{exports}', temp)}"
+        imports = f"{imports}</ul>\n"
+        exports = f"{exports}</ul>\n"
 
         commodities = commodities.replace("{imports}", imports)
         commodities = commodities.replace("{exports}", exports)
