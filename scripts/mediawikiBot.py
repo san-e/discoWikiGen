@@ -212,7 +212,7 @@ def nukeTheWiki(session, csrfToken, titleNuke):
             }
 
             request = session.post(URL, nuke_params)
-            print(request.json())
+            #print(request.json())
 
             #time.sleep(delay) seemingly not neccessary
             bar()
