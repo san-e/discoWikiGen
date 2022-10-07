@@ -395,18 +395,18 @@ configData = loadData("config.json")
 sources = {}
 
 
-# for name, attributes in loadedData["Systems"].items():
-#     source = main(template = "System", data = loadedData, config = configData, nickname = name)
-#     sources[attributes["name"]] = source
-#     print(f"Processed {name}")
-# for name, attributes in loadedData["Ships"].items():
-#     source = main(template = "Ship", data = loadedData, config = configData, nickname = name)        
-#     sources[attributes["name"]] = source
-#     print(f"Processed {name}")
-# for name, attributes in loadedData["Bases"].items():
-#     source = main(template = "Base", data = loadedData, config = configData, nickname = name)        
-#     sources[attributes["name"]] = source
-#     print(f"Processed {name}")
+for name, attributes in loadedData["Systems"].items():
+    source = main(template = "System", data = loadedData, config = configData, nickname = name)
+    sources[attributes["name"]] = source
+    print(f"Processed {name}")
+for name, attributes in loadedData["Ships"].items():
+    source = main(template = "Ship", data = loadedData, config = configData, nickname = name)        
+    sources[attributes["name"]] = source
+    print(f"Processed {name}")
+for name, attributes in loadedData["Bases"].items():
+    source = main(template = "Base", data = loadedData, config = configData, nickname = name)        
+    sources[attributes["name"]] = source
+    print(f"Processed {name}")
 for name, attributes in loadedData["Factions"].items():
     source = main(template = "Faction", data = loadedData, config = configData, nickname = name)        
     sources[attributes["name"]] = source
