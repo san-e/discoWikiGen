@@ -133,6 +133,7 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
                         "filename": entry.name,
                         "format": "json",
                         "token": csrfToken,
+                        "bot": True,
                         "ignorewarnings": 1
                         }
                     with open(entry.path, 'rb') as fileParam:
@@ -163,6 +164,7 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
                             "action": "upload",
                             "filename": entry.name,
                             "format": "json",
+                            "bot": True,
                             "token": csrfToken,
                             "ignorewarnings": 1
                             }
@@ -192,6 +194,7 @@ def nukeTheWiki(session, csrfToken, titleNuke):
         "generator": "categorymembers",
         "gcmtitle": config["bot"]["nukeCategory"],
         "prop": "categories",
+        "bot": True,
         "cllimit": "max",
         "gcmlimit": "max",
         "format": "json"
