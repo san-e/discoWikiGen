@@ -138,7 +138,7 @@
   },
   "bot": {
     "URL": "https://disco-freelancer.fandom.com/api.php",
-    "delay": 1,
+    "delay": 0,
     "botPassword": "botPassword.json",
     "wikitext": "../dumpedData/wikitext.json",
     "titleText": "mediawikiBot.py | Uploading Text",
