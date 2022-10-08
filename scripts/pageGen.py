@@ -343,7 +343,8 @@ def main(template, data, config, nickname):
         ships = '<h2 title="The ships this faction\'s NPC\'s use, as defined in faction_prop.ini">Ships used</h2>\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n</tr>\n{ships}\n</td></tr></table>\n'
         bases = '<h2 title="All bases that are owned by this faction">Bases owned</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bases}\n</td></tr></table>\n</td></tr></table>\n'
         bribes = '<h2 title="All bases that offer bribes for this faction">Bribes</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bribes}\n</td></tr></table>\n</td></tr></table>\n'
-        rep_sheet = '<h2 title="This faction\'s rep sheet">Reputation</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th></tr>\n<tr>\n<td>\n{{Faction Diplomacy/begin}}\n{repsheet}\n{{Faction Diplomacy/end}}\n</td></tr></table>'
+        rep_sheet = '<h2 title="This faction\'s rep sheet">Diplomacy</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th></tr>\n<tr>\n<td>\n{{Faction Diplomacy/begin}}\n{repsheet}\n{{Faction Diplomacy/end}}\n</td></tr></table>'
+        rumors = '<h2>Rumors</h2>\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n{rumors}\n</td></tr></table>'
         categories = "\n[[Category: Factions]]\n[[Category: nukeOnPatch]]\n"
 
 
@@ -381,33 +382,53 @@ def main(template, data, config, nickname):
 
         rep_sheet = rep_sheet.replace("{repsheet}", repsheet[:-1])
 
-        return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{categories}"
+        rum = ""
+        rumorTemplate = '<table style="margin-bottom: 10px; margin-left: 1em; width:90%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>[[{rumorBase}]]</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{rumors}\n</td>\n</tr>\n</table>\n'
+        for base, rumorList in faction_entry["rumors"].items():
+            temp = "<ul>"
+            for rumor in rumorList:
+                temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li>\n"
+            temp = f"{temp}</ul>"
+            rum = f'{rum}{rumorTemplate.replace("{rumors}", temp).replace("{rumorBase}", base)}'
+
+        rumors = rumors.replace("{rumors}", rum)
+
+        return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{rumors}{categories}"
 
 
 loadedData = loadData("../dumpedData/flData.json")
 configData = loadData("config.json")
 sources = {}
 
+sysSource = {}
 print("Processing Systems")
 for name, attributes in loadedData["Systems"].items():
     source = main(template = "System", data = loadedData, config = configData, nickname = name)
-    sources[attributes["name"]] = source
+    sysSource[attributes["name"]] = source
+sources["Systems"] = sysSource
 
+shipSource = {}
 print("Processing Ships")
 for name, attributes in loadedData["Ships"].items():
     source = main(template = "Ship", data = loadedData, config = configData, nickname = name)        
-    sources[attributes["name"]] = source
+    shipSource[attributes["name"]] = source
+sources["Ships"] = shipSource
 
+baseSource = {}
 print("Processing Bases")
 for name, attributes in loadedData["Bases"].items():
     source = main(template = "Base", data = loadedData, config = configData, nickname = name)
-    name = attributes["name"] if attributes["name"] not in sources.keys() else f'{attributes["name"]} (b)'
-    sources[name] = source
+    name = attributes["name"] if attributes["name"] not in sources["Ships"].keys() else f'{attributes["name"]} (b)'
+    baseSource[name] = source
+sources["Bases"] = baseSource
 
+factionSource = {}
 print("Processing Factions")
 for name, attributes in loadedData["Factions"].items():
     source = main(template = "Faction", data = loadedData, config = configData, nickname = name)        
-    sources[attributes["name"]] = source
+    factionSource [attributes["name"]] = source
+sources["Factions"] = factionSource
 print("DONE")
+
 with open("../dumpedData/wikitext.json", "w") as f:
     json.dump(sources, f, indent=1)

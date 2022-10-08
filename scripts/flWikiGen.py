@@ -375,7 +375,8 @@ def get_factions() -> dict:
                 "ships": [[ship.name(), ship.type()] for nickname, ship in faction.ships().items()],
                 "bases": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bases().items() if base.system_().nickname not in oorp],
                 "bribes": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bribes().items() if base.system_().nickname not in oorp],
-                "repsheet": reps
+                "repsheet": reps,
+                "rumors": {fl.bases[base].name(): text for base, text in faction.rumors().items()}
             }
     return factions
 

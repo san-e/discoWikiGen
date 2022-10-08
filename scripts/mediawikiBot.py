@@ -8,6 +8,11 @@ import argparse
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument("-n", "--nuke", help="Nuke all generated pages on the wiki", action="store_true")
+argparser.add_argument("--systems", help="Update system pages", action="store_true")
+argparser.add_argument("--ships", help="Update system pages", action="store_true")
+argparser.add_argument("-b", "--bases", help="Update base pages", action="store_true")
+argparser.add_argument("-f", "--factions", help="Update faction pages", action="store_true")
+argparser.add_argument("-i", "--images", help="Upload images", action="store_true")
 args = argparser.parse_args()
 
 with open("config.json", "r") as f:
@@ -57,61 +62,58 @@ def login(botPasswordPath):
 
         return session, csrfToken
 
-def uploadText(session, csrfToken, wikitextPath, titleText):
-        if exists(wikitextPath):
-            with open(wikitextPath, "r") as f:
-                wikitext = load(f)
-            doLater = []
+def uploadText(session, csrfToken, wikitext, titleText):
+        doLater = []
+        doLater2 = []
+        with alive_bar(len(wikitext.keys()), dual_line=True, title=titleText) as bar:
+            for name, text in wikitext.items():
+                bar.text = f'-> Editing: {name}'
+                edit_params = {
+                    "action": "edit",
+                    "title": name,
+                    "text": text,
+                    "bot": True,
+                    "format": "json",
+                    "token": csrfToken
+                }
+                request = session.post(URL, data = edit_params)
+                data = request.json()
+                try:
+                    error = data['error']["code"]
+                    doLater.append([name, text])
+                    print(f"Error editing {name}: {error}, trying again later...")
+                except:
+                    pass
+                time.sleep(delay)
+                bar()
+        while True:
+            if doLater != []:
+                print("Retrying failed edits...")
+                with alive_bar(len(doLater), dual_line=True, title=titleText) as bar:
+                    for name, text in doLater:
+                        bar.text = f'-> Editing: {name}'
+                        edit_params = {
+                            "action": "edit",
+                            "title": name,
+                            "text": text,
+                            "bot": True,
+                            "format": "json",
+                            "token": csrfToken
+                        }
+                        request = session.post(URL, data = edit_params)
+                        data = request.json()
+                        try:
+                            error = data['error']["code"]
+                            doLater2.append([name, text])
+                            print(f"Error editing {name}: {error}, trying again later...")
+                        except:
+                            pass
+                        time.sleep(delay * 2.5)
+                        bar()
+            else:
+                break
+            if doLater2 != []: doLater = doLater2
             doLater2 = []
-            with alive_bar(len(wikitext.keys()), dual_line=True, title=titleText) as bar:
-                for name, text in wikitext.items():
-                    bar.text = f'-> Editing: {name}'
-                    edit_params = {
-                        "action": "edit",
-                        "title": name,
-                        "text": text,
-                        "bot": True,
-                        "format": "json",
-                        "token": csrfToken
-                    }
-                    request = session.post(URL, data = edit_params)
-                    data = request.json()
-                    try:
-                        error = data['error']["code"]
-                        doLater.append([name, text])
-                        print(f"Error editing {name}: {error}, trying again later...")
-                    except:
-                        pass
-                    time.sleep(delay)
-                    bar()
-            while True:
-                if doLater != []:
-                    print("Retrying failed edits...")
-                    with alive_bar(len(doLater), dual_line=True, title=titleText) as bar:
-                        for name, text in doLater:
-                            bar.text = f'-> Editing: {name}'
-                            edit_params = {
-                                "action": "edit",
-                                "title": name,
-                                "text": text,
-                                "bot": True,
-                                "format": "json",
-                                "token": csrfToken
-                            }
-                            request = session.post(URL, data = edit_params)
-                            data = request.json()
-                            try:
-                                error = data['error']["code"]
-                                doLater2.append([name, text])
-                                print(f"Error editing {name}: {error}, trying again later...")
-                            except:
-                                pass
-                            time.sleep(delay * 2.5)
-                            bar()
-                else:
-                    break
-                if doLater2 != []: doLater = doLater2
-                doLater2 = []
 
 def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
     subdirectories = []
@@ -222,6 +224,20 @@ def nukeTheWiki(session, csrfToken, titleNuke):
 
 if __name__ == "__main__":
     loginData = login(config["bot"]["botPassword"])
+
+    with open(config["bot"]["wikitext"], "r") as f:
+        wikidata = load(f)
+    
+    wikitext = {}
+    if args.systems:
+        wikitext = wikitext | wikidata["Systems"]
+    if args.ships:
+        wikitext = wikitext | wikidata["Ships"]
+    if args.bases:
+        wikitext = wikitext | wikidata["Bases"]
+    if args.factions:
+        wikitext = wikitext | wikidata["Factions"]
+
     if args.nuke:
         nukeTheWiki(
             session = loginData[0],
@@ -232,12 +248,13 @@ if __name__ == "__main__":
         uploadText(
             session = loginData[0],
             csrfToken = loginData[1],
-            wikitextPath = config["bot"]["wikitext"],
+            wikitext = wikitext,
             titleText = config["bot"]["titleText"]
         )
-        uploadImages(
-            session = loginData[0],
-            csrfToken = loginData[1],
-            titleImage = config["bot"]["titleImage"],
-            path = config["bot"]["images"]
-        )    
+        if args.images:
+            uploadImages(
+                session = loginData[0],
+                csrfToken = loginData[1],
+                titleImage = config["bot"]["titleImage"],
+                path = config["bot"]["images"]
+            )    
