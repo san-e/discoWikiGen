@@ -31,7 +31,7 @@ def login(botPasswordPath):
             "meta": "tokens",
             "type": "login"
         }
-
+        
         request = session.get(url=URL, params=loginToken_params)
         data = request.json()
         loginToken = data['query']['tokens']['logintoken']
@@ -65,7 +65,7 @@ def uploadText(session, csrfToken, wikitextPath, titleText):
             doLater2 = []
             with alive_bar(len(wikitext.keys()), dual_line=True, title=titleText) as bar:
                 for name, text in wikitext.items():
-                    bar.text = f'-> Uploading: {name}'
+                    bar.text = f'-> Editing: {name}'
                     edit_params = {
                         "action": "edit",
                         "title": name,
@@ -79,17 +79,17 @@ def uploadText(session, csrfToken, wikitextPath, titleText):
                     try:
                         error = data['error']["code"]
                         doLater.append([name, text])
-                        print(f"Error uploading {name}: {error}, trying again later...")
+                        print(f"Error editing {name}: {error}, trying again later...")
                     except:
                         pass
                     time.sleep(delay)
                     bar()
             while True:
                 if doLater != []:
-                    print("Retrying failed uploads...")
+                    print("Retrying failed edits...")
                     with alive_bar(len(doLater), dual_line=True, title=titleText) as bar:
                         for name, text in doLater:
-                            bar.text = f'-> Uploading: {name}'
+                            bar.text = f'-> Editing: {name}'
                             edit_params = {
                                 "action": "edit",
                                 "title": name,
@@ -103,7 +103,7 @@ def uploadText(session, csrfToken, wikitextPath, titleText):
                             try:
                                 error = data['error']["code"]
                                 doLater2.append([name, text])
-                                print(f"Error uploading {name}: {error}, trying again later...")
+                                print(f"Error editing {name}: {error}, trying again later...")
                             except:
                                 pass
                             time.sleep(delay * 2.5)

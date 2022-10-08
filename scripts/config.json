@@ -141,7 +141,7 @@
     "delay": 0.5,
     "botPassword": "botPassword.json",
     "wikitext": "../dumpedData/wikitext.json",
-    "titleText": "mediawikiBot.py | Uploading Text",
+    "titleText": "mediawikiBot.py | Editing Text",
     "titleImage": "mediawikiBot.py | Uploading Images",
     "titleNuke": "mediawikiBot.py | Nuking wiki",
     "images" : "../dumpedData/images",
