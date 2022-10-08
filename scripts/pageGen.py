@@ -7,12 +7,6 @@ def loadData(filename):
         data = json.load(file)
     return data
 
-def chunkList(toBeChunked, chunkSize):
-    chunkedList = []
-    for i in range(0, len(toBeChunked), chunkSize):
-        chunkedList.append(toBeChunked[i:i+chunkSize])
-    return chunkedList
-
 def main(template, data, config, nickname):
     houses = config["pageGen"]["houses"]
     corps = config["pageGen"]["corporations"]
