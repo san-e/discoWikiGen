@@ -378,7 +378,7 @@ def main(template, data, config, nickname):
         repsheet = ""
         for faction, rep in faction_entry["repsheet"].items():
             rep = f"+{rep}" if rep > 0 else rep
-            repsheet = f"{repsheet}((FD | {faction} | {rep}))\n".replace("((", "{{").replace("))", "}}")
+            repsheet = f"{repsheet}((FD | [[{faction}]] | {rep}))\n".replace("((", "{{").replace("))", "}}")
 
         rep_sheet = rep_sheet.replace("{repsheet}", repsheet[:-1])
 
