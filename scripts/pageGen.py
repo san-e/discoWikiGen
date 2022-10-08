@@ -394,22 +394,26 @@ loadedData = loadData("../dumpedData/flData.json")
 configData = loadData("config.json")
 sources = {}
 
-
+print("Processing Systems")
 for name, attributes in loadedData["Systems"].items():
     source = main(template = "System", data = loadedData, config = configData, nickname = name)
     sources[attributes["name"]] = source
-    print(f"Processed {name}")
+
+print("Processing Ships")
 for name, attributes in loadedData["Ships"].items():
     source = main(template = "Ship", data = loadedData, config = configData, nickname = name)        
     sources[attributes["name"]] = source
-    print(f"Processed {name}")
+
+print("Processing Bases")
 for name, attributes in loadedData["Bases"].items():
-    source = main(template = "Base", data = loadedData, config = configData, nickname = name)        
-    sources[attributes["name"]] = source
-    print(f"Processed {name}")
+    source = main(template = "Base", data = loadedData, config = configData, nickname = name)
+    name = attributes["name"] if attributes["name"] not in sources.keys() else f'{attributes["name"]} (b)'
+    sources[name] = source
+
+print("Processing Factions")
 for name, attributes in loadedData["Factions"].items():
     source = main(template = "Faction", data = loadedData, config = configData, nickname = name)        
     sources[attributes["name"]] = source
-    print(f"Processed {name}")
+print("DONE")
 with open("../dumpedData/wikitext.json", "w") as f:
     json.dump(sources, f, indent=1)
