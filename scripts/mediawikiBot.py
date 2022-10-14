@@ -9,10 +9,11 @@ import argparse
 argparser = argparse.ArgumentParser()
 argparser.add_argument("-n", "--nuke", help="Nuke all generated pages on the wiki", action="store_true")
 argparser.add_argument("--systems", help="Update system pages", action="store_true")
-argparser.add_argument("--ships", help="Update system pages", action="store_true")
+argparser.add_argument("--ships", help="Update ship pages", action="store_true")
 argparser.add_argument("-b", "--bases", help="Update base pages", action="store_true")
 argparser.add_argument("-f", "--factions", help="Update faction pages", action="store_true")
 argparser.add_argument("-i", "--images", help="Upload images", action="store_true")
+argparser.add_argument("-c", "--commodities", help="Update commodities", action="store_true")
 args = argparser.parse_args()
 
 with open("config.json", "r") as f:
@@ -67,7 +68,7 @@ def uploadText(session, csrfToken, wikitext, titleText):
         doLater2 = []
         with alive_bar(len(wikitext.keys()), dual_line=True, title=titleText) as bar:
             for name, text in wikitext.items():
-                bar.text = f'-> Editing: {name}'
+                bar.text = f'-> Updating: {name}'
                 edit_params = {
                     "action": "edit",
                     "title": name,
@@ -81,7 +82,7 @@ def uploadText(session, csrfToken, wikitext, titleText):
                 try:
                     error = data['error']["code"]
                     doLater.append([name, text])
-                    print(f"Error editing {name}: {error}, trying again later...")
+                    print(f"Error updating {name}: {error}, trying again later...")
                 except:
                     pass
                 time.sleep(delay)
@@ -91,7 +92,7 @@ def uploadText(session, csrfToken, wikitext, titleText):
                 print("Retrying failed edits...")
                 with alive_bar(len(doLater), dual_line=True, title=titleText) as bar:
                     for name, text in doLater:
-                        bar.text = f'-> Editing: {name}'
+                        bar.text = f'-> Updating: {name}'
                         edit_params = {
                             "action": "edit",
                             "title": name,
@@ -105,7 +106,7 @@ def uploadText(session, csrfToken, wikitext, titleText):
                         try:
                             error = data['error']["code"]
                             doLater2.append([name, text])
-                            print(f"Error editing {name}: {error}, trying again later...")
+                            print(f"Error updating {name}: {error}, trying again later...")
                         except:
                             pass
                         time.sleep(delay * 2.5)
@@ -237,6 +238,8 @@ if __name__ == "__main__":
         wikitext = wikitext | wikidata["Bases"]
     if args.factions:
         wikitext = wikitext | wikidata["Factions"]
+    if args.commodities:
+        wikitext = wikitext | wikidata["Commodities"]
 
     if args.nuke:
         nukeTheWiki(

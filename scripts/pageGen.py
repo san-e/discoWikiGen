@@ -406,6 +406,39 @@ def main(template, data, config, nickname):
         time = time.replace("{time}", entry["time"])
 
         return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{rumors}{time}{categories}"
+    elif "commodity" in template.lower():
+        entry = data["Commodities"][nickname]
+
+        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The number of units of cargo this commodity uses"><b>Cargo Space</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The rate at which this commodity decays per second"><b>Decay Rate</b>\n</td>\n<td style="padding-right: 1em">{decay}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Default Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n</table>\n'
+        infocard = '{infocard}\n'
+        availability = '<h2>Availability</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Buy locations</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{buyBases}\n</td></tr></table>\n\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Sell locations</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{sellBases}\n</td></tr></table>\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n<br style="clear: both; height: 0px;" />\n'
+        time = '<i>NOTE: {time}<i>'
+        categories = '[[Category: Commodities]]\n[[Category: nukeOnPatch]]\n'
+
+        infobox = infobox.replace("{nickname}", nickname)
+        infobox = infobox.replace("{name}", entry["name"])
+        infobox = infobox.replace("{volume}", str(entry["volume"]))
+        infobox = infobox.replace("{decay}", str(entry["decay"]) if entry["decay"] else "<i>no decay</i>")
+        infobox = infobox.replace("{price}", '{:,}'.format(entry["defaultPrice"]) + '$')
+
+
+        infocard = infocard.replace("{infocard}", entry["infocard"].replace("&nbsp;", ""))
+
+        boughtAt = ""
+        soldAt = ""
+        for base in entry["boughtAt"]:
+            name, owner, system, region, price = base[0], base[1], base[2], base[3], base[4]
+            boughtAt = f"{boughtAt}<tr>\n<td>[[{name}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td>\n<td>{'{:,}'.format(price)}$</td>\n</tr>\n"
+        for base in entry["soldAt"]:
+            name, owner, system, region, price = base[0], base[1], base[2], base[3], base[4]
+            soldAt = f"{soldAt}<tr>\n<td>[[{name}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td>\n<td>{'{:,}'.format(price)}$</td>\n</tr>\n"
+
+        availability = availability.replace("{buyBases}", boughtAt)
+        availability = availability.replace("{sellBases}", soldAt)
+
+        time = time.replace("{time}", entry["time"])
+
+        return f"{infobox}{infocard}{availability}{time}{categories}"
 
 loadedData = loadData("../dumpedData/flData.json")
 configData = loadData("config.json")
@@ -437,8 +470,15 @@ factionSource = {}
 print("Processing Factions")
 for name, attributes in loadedData["Factions"].items():
     source = main(template = "Faction", data = loadedData, config = configData, nickname = name)        
-    factionSource [attributes["name"]] = source
+    factionSource[attributes["name"]] = source
 sources["Factions"] = factionSource
+
+commoditySource = {}
+print("Processing Commodities")
+for name, attributes in loadedData["Commodities"].items():
+    source = main(template = "Commodity", data = loadedData, config = configData, nickname = name)        
+    commoditySource[attributes["name"]] = source
+sources["Commodities"] = commoditySource
 print("DONE")
 
 with open("../dumpedData/wikitext.json", "w") as f:

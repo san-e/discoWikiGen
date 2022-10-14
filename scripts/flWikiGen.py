@@ -64,11 +64,7 @@ def get_ships(definitions: dict) -> dict:
                         built_by = fullName
                         break
 
-                sold_at = []
-                for x in ship.sold_at():
-                    if x.has_solar():
-                        sold_at.append([x.name(), x.owner().name(), x.system_().name(), x.system_().region()])
-
+             
                 equipment = []
                 for x in ship.equipment():
                     equipment.append([x.name(), x.price()])
@@ -244,7 +240,7 @@ def get_ships(definitions: dict) -> dict:
                     "responseTime" : responseTime,
                     "mustUseMoors" : mustUseMoors,
                     "equipment" : equipment,
-                    "sold_at" : sold_at,
+                    "sold_at" : [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for base in ship.sold_at() if base.has_solar() and base.system_().nickname not in oorp],
                     "hardpoints" : hardpoints,
                     "time": datetime.now().strftime('Page generated on the %d/%m/%Y at %H:%M:%S')
                 }
@@ -405,8 +401,8 @@ def get_commodities() -> dict:
             "volume": commodity.volume,
             "decay" : commodity.decay_per_second,
             "defaultPrice": commodity.price(),
-            "boughtAt": {base.name(): price for base, price in commodity.bought_at().items()},
-            "soldAt": {base.name(): price for base, price in commodity.sold_at().items()},
+            "boughtAt": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region(), price] for base, price in commodity.bought_at().items() if base.system_().nickname not in oorp],
+            "soldAt": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region(), price] for base, price in commodity.sold_at().items() if base.system_().nickname not in oorp],
             "time": datetime.now().strftime('This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself.')
         }
     return commodities
