@@ -385,6 +385,32 @@ def get_factions() -> dict:
             }
     return factions
 
+def get_commodities() -> dict:
+    print("Reading commodity data...")
+    commodities = {}
+    for commodity in fl.commodities:
+        try:
+            icon = commodity.icon()
+            image = Image.open(BytesIO(icon))
+            if image.size != (64, 64):
+                image.save(f'../dumpedData/images/commodities/{commodity.nickname}.png')
+            else:
+                image.resize((128,128)).save(f'../dumpedData/images/commodities/{commodity.nickname}.png')
+        except FileNotFoundError:
+            pass
+
+        commodities[commodity.nickname] = {
+            "name": commodity.name(),
+            "infocard": commodity.infocard(),
+            "volume": commodity.volume,
+            "decay" : commodity.decay_per_second,
+            "defaultPrice": commodity.price(),
+            "boughtAt": {base.name(): price for base, price in commodity.bought_at().items()},
+            "soldAt": {base.name(): price for base, price in commodity.sold_at().items()},
+            "time": datetime.now().strftime('This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself.')
+        }
+    return commodities
+
 if __name__ == "__main__":
     filename = "flData.json"
     print("Reading game files...")
@@ -393,7 +419,8 @@ if __name__ == "__main__":
             "Ships" : get_ships(definitions = tech.get_definitions()),
             "Systems" : get_systems(),
             "Bases" : get_bases(),
-            "Factions": get_factions()
+            "Factions": get_factions(),
+            "Commodities": get_commodities()
             }
     print(f"Game files read, writing {filename}...")
     with open(f'../dumpedData/{filename}', 'w') as f:
