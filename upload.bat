@@ -1,4 +1,4 @@
 @echo off
 cd scripts
-python mediawikiBot.py
+python mediawikiBot.py --faction --systems --ships --bases
 pause
