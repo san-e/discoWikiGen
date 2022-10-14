@@ -18,8 +18,9 @@ def main(template, data, config, nickname):
         handling = '<h2>Handling</h2>\n<ul>\n{handling}\n</ul>\n'
         hardpoints = '<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n'
         includes = '<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>'
-        availability = '<h2>Availability</h2>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Buying Locations\n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Location\n</th></tr>\n{sold_at}\n</td></tr></table>\n</td></tr></table>'
-        category = '\n[[Category: Ships]]\n[[Category: nukeOnPatch]]\n{built_by}\n{class}\n{techcompat}'
+        availability = '<h2>Availability</h2>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Buying Locations\n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Location\n</th></tr>\n{sold_at}\n</td></tr></table>\n</td></tr></table>\n'
+        time = '<i>NOTE: {time}<i>'
+        category = '\n[[Category: Ships]]\n[[Category: nukeOnPatch]]\n{rest}'
 
 
         image = f'{nickname}.png'
@@ -101,15 +102,17 @@ def main(template, data, config, nickname):
             sold_at = f"{sold_at}<tr><td>[[{base}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td></tr>\n"
         availability = availability.replace("{sold_at}", sold_at)
 
+        time = time.replace("{time}", ship_entry["time"])
+
+        rest = ""
         if ship_entry["built_by"] != "":
-            category = category.replace("{built_by}", f'[[Category: {ship_entry["built_by"]}]]')
-        else:
-            category = category.replace("{built_by}", '')
-        category = category.replace("{class}", f'[[Category: {ship_entry["type"]}]]')
-        category = category.replace("{techcompat}", f'[[Category: {ship_entry["techcompat"]}]]')
+            rest = rest +  f'[[Category: {ship_entry["built_by"]}]]\n'
+        rest = rest +  f'[[Category: {ship_entry["type"]}]]'
+        rest = rest +  f'[[Category: {ship_entry["techcompat"]}]]'
 
+        category = category.replace("{rest}", rest)
 
-        return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{category}"
+        return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{time}{category}"
     elif "sys" in template.lower():
         sys_entry = data["Systems"][nickname]
         name = data["Systems"][nickname]["name"]
@@ -120,7 +123,8 @@ def main(template, data, config, nickname):
         AoI = "<h1>Areas of Interest</h1>\n<hr>\n"
         nebulae = "<h2>Nebulae</h2>\n\n{nebulae}\n"
         asteroids = "<h2>Asteroid Fields</h2>\n\n{asteroids}\n"
-        gates = '<h1>Jump Gates/Holes</h1>\n<hr>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Jump Hole/Gate Locations \n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Target System</th>\n<th>Type</th>\n<th>Sector</th></tr>\n{gates}\n</td></tr></table>\n</td></tr></table>'
+        gates = '<h1>Jump Gates/Holes</h1>\n<hr>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Jump Hole/Gate Locations \n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Target System</th>\n<th>Type</th>\n<th>Sector</th></tr>\n{gates}\n</td></tr></table>\n</td></tr></table>\n'
+        time = '<i>NOTE: {time}<i>'
         category = '\n[[Category: Systems]]\n[[Category: nukeOnPatch]]\n{region}'
 
         infobox = infobox.replace("{name}", sys_entry["name"])
@@ -255,12 +259,14 @@ def main(template, data, config, nickname):
             jumps = f"{jumps}<tr><td>[[{target}]]</td>\n<td>{type}</td>\n<td>{location}</td></tr>\n"
         gates = gates.replace("{gates}", jumps)
 
+        time = time.replace("{time}", sys_entry["time"])
+
         if region != "":
             category = category.replace("{region}", f'[[Category: {region}]]')
         else:
             category = category.replace("{region}", '')
 
-        return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{gates}{category}"
+        return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{gates}{time}{category}"
     elif "base" in template.lower():
         base_entry = data["Bases"][nickname]
         name = base_entry["name"]        
@@ -270,7 +276,8 @@ def main(template, data, config, nickname):
         bribesNmissions = '<h2>Bribes & Missions Offered</h2>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Bribes</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{bribes}\n</td>\n</tr>\n</table>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Missions</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{missions}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
         commodities = '<h2>Commodities</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Imports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{imports}\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Exports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{exports}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
         ships = '<h2>Ships sold</h2>\n\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n<th>Price</th>\n</tr>\n{ships_sold}\n</td></tr></table>\n<p><br style="clear: both; height: 0px;" />\n</p>\n'
-        rumors = '<h2>Rumors</h2>\n{rumors}'
+        rumors = '<h2>Rumors</h2>\n{rumors}\n'
+        time = '<i>NOTE: {time}<i>'
         categories = "\n[[Category: Bases]]\n[[Category: nukeOnPatch]]\n{other}"
 
 
@@ -331,10 +338,12 @@ def main(template, data, config, nickname):
         
         rumors = rumors.replace("{rumors}", rum)
 
+        time = time.replace("{time}", base_entry["time"])
+
         other = f'[[Category: {base_entry["owner"]}]]\n[[Category: {base_entry["region"]}]]\n[[Category: {base_entry["system"]}]]\n'
         categories = categories.replace("{other}", other)
 
-        return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{rumors}{categories}"
+        return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{rumors}{time}{categories}"
     elif "faction" in template.lower():
         faction_entry = data["Factions"][nickname]
         
@@ -344,7 +353,8 @@ def main(template, data, config, nickname):
         bases = '<h2 title="All bases that are owned by this faction">Bases owned</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bases}\n</td></tr></table>\n</td></tr></table>\n'
         bribes = '<h2 title="All bases that offer bribes for this faction">Bribes</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bribes}\n</td></tr></table>\n</td></tr></table>\n'
         rep_sheet = '<h2 title="This faction\'s rep sheet">Diplomacy</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th></tr>\n<tr>\n<td>\n{{Faction Diplomacy/begin}}\n{repsheet}\n{{Faction Diplomacy/end}}\n</td></tr></table>'
-        rumors = '<h2>Rumors</h2>\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n{rumors}\n</td></tr></table>'
+        rumors = '<h2>Rumors</h2>\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n{rumors}\n</td></tr></table>\n'
+        time = '<i>NOTE: {time}<i>'
         categories = "\n[[Category: Factions]]\n[[Category: nukeOnPatch]]\n"
 
 
@@ -393,7 +403,9 @@ def main(template, data, config, nickname):
 
         rumors = rumors.replace("{rumors}", rum)
 
-        return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{rumors}{categories}"
+        time = time.replace("{time}", faction_entry["time"])
+
+        return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{rumors}{time}{categories}"
 
 
 loadedData = loadData("../dumpedData/flData.json")

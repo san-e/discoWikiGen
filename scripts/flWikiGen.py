@@ -8,6 +8,7 @@ from os import getcwd, makedirs
 from os.path import exists, basename
 from PIL import Image
 from io import BytesIO
+from datetime import datetime
 
 version = ""#input("Enter game version: ")
 
@@ -244,7 +245,8 @@ def get_ships(definitions: dict) -> dict:
                     "mustUseMoors" : mustUseMoors,
                     "equipment" : equipment,
                     "sold_at" : sold_at,
-                    "hardpoints" : hardpoints
+                    "hardpoints" : hardpoints,
+                    "time": datetime.now().strftime('Page generated on the %d/%m/%Y at %H:%M:%S')
                 }
             except TypeError as e:
                 logs.append({ship: e})
@@ -276,7 +278,8 @@ def get_bases() -> dict:
                     "rumors": {fl.factions[faction].name(): rumor for faction, rumor in base.rumors().items()},
                     "commodities_buying": [x.name() for x in base.buys_commodities()],
                     "commodities_selling": [x.name() for x in base.sells_commodities()],
-                    "ships_sold" : ships_sold
+                    "ships_sold" : ships_sold,
+                    "time": datetime.now().strftime('Page generated on the %d/%m/%Y at %H:%M:%S')
                 }
             except (TypeError, AttributeError) as e:
                 logs.append({base: e})
@@ -351,7 +354,8 @@ def get_systems() -> dict:
                     "neighbors" : neighbors,
                     "zones" : zones,
                     "nebulae": nebulae,
-                    "asteroids": asteroids
+                    "asteroids": asteroids,
+                    "time": datetime.now().strftime('Page generated on the %d/%m/%Y at %H:%M:%S')
                 }
         except Exception as e:
             logs.append({system: e})
@@ -376,7 +380,8 @@ def get_factions() -> dict:
                 "bases": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bases().items() if base.system_().nickname not in oorp],
                 "bribes": [[base.name(), base.owner().name(), base.system_().name(), base.system_().region()] for nickname, base in faction.bribes().items() if base.system_().nickname not in oorp],
                 "repsheet": reps,
-                "rumors": {fl.bases[base].name(): text for base, text in faction.rumors().items()}
+                "rumors": {fl.bases[base].name(): text for base, text in faction.rumors().items()},
+                "time": datetime.now().strftime('Page generated on the %d/%m/%Y at %H:%M:%S')
             }
     return factions
 
