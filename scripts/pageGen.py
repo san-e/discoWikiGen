@@ -114,7 +114,7 @@ def main(template, data, config, nickname):
 
         return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{time}{category}"
     elif "sys" in template.lower():
-        sys_entry = data["Systems"][nickname]
+        entry = data["Systems"][nickname]
         name = data["Systems"][nickname]["name"]
         infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">System\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
         infocard = '<p>{infocard}</p>\n<br style="clear: both; height: 0px;" />\n</p>\n'
@@ -127,10 +127,10 @@ def main(template, data, config, nickname):
         time = '<i>NOTE: {time}<i>'
         category = '\n[[Category: Systems]]\n[[Category: nukeOnPatch]]\n{region}'
 
-        infobox = infobox.replace("{name}", sys_entry["name"])
+        infobox = infobox.replace("{name}", entry["name"])
         infobox = infobox.replace("{image}", f'{nickname}.png')
         
-        region = sys_entry["region"]
+        region = entry["region"]
         if region == "Independent": region = "Independent Worlds"
         if region in houses: 
             infobox = infobox.replace("{governingHouse}", f'[[File:Flag-{region.lower()}.png|19px]] {region}')
@@ -138,7 +138,7 @@ def main(template, data, config, nickname):
             infobox = infobox.replace("{governingHouse}", 'Independent')
         infobox = infobox.replace("{region}", region)
         temp = ""        
-        for neighbor in sys_entry["neighbors"]:
+        for neighbor in entry["neighbors"]:
             temp = f"{temp}[[{neighbor}]]<br/>"
         infobox = infobox.replace("{systems}", temp)
 
@@ -150,7 +150,7 @@ def main(template, data, config, nickname):
             infocard = infocard.replace("{infocard}", "<i>No description available.</i>")
         
         temp = ""
-        for star, card in sys_entry["stars"].items():
+        for star, card in entry["stars"].items():
             temp = f"{temp}<b>{star}</b><ul>"
             card = card[:-1]
             card = card.split("\n")
@@ -160,7 +160,7 @@ def main(template, data, config, nickname):
 
         planets = '<table class="wikitable sortable">\n<tr>\n<th>Planet</th>\n<th>Owner</th>\n</tr>\n'
         edited = False
-        for planet, nickname, owner in sys_entry["planets"]:
+        for planet, nickname, owner in entry["planets"]:
             inhabited = f"{owner}" if owner != "" else "Uninhabited"
             planets = f"{planets}<tr><td><b>[[{planet}]]</b></td> <td>{inhabited}</td></tr>\n\n"
             edited = True
@@ -173,12 +173,12 @@ def main(template, data, config, nickname):
         temp2 = []
         nebs = []
         asts = []
-        for zone, nick, info in sys_entry["zones"]:
+        for zone, nick, info in entry["zones"]:
             if zone in temp2: continue
             temp2.append(zone)
-            temp = f"{temp}{zone}\n" if nick in [field[0] for field in sys_entry["asteroids"]] or nick in [nebula[0] for nebula in sys_entry["nebulae"]] else temp
-            if nick in [nebula[0] for nebula in sys_entry["nebulae"]]: nebs.append([zone, nick, info])
-            elif nick in [field[0] for field in sys_entry["asteroids"]]: asts.append([zone, nick, info])
+            temp = f"{temp}{zone}\n" if nick in [field[0] for field in entry["asteroids"]] or nick in [nebula[0] for nebula in entry["nebulae"]] else temp
+            if nick in [nebula[0] for nebula in entry["nebulae"]]: nebs.append([zone, nick, info])
+            elif nick in [field[0] for field in entry["asteroids"]]: asts.append([zone, nick, info])
         temp = temp[:-1].split("\n")
         temp.sort()
         temp3 = ""
@@ -191,7 +191,7 @@ def main(template, data, config, nickname):
         lawfulFactions = []
         unlawfulFactions = []
         corporateFactions = []
-        for base, dicty in sys_entry["bases"].items():
+        for base, dicty in entry["bases"].items():
             if dicty["type"] != "<class 'flint.entities.solars.PlanetaryBase'>":
                 bases.append([base, dicty["owner"]])
             if dicty["owner"] in corps:
@@ -212,7 +212,7 @@ def main(template, data, config, nickname):
 
         mineableCommodities = "<ul>"
         mineableCommodity = []
-        for doesnt, matter, commodity in sys_entry["asteroids"]:
+        for doesnt, matter, commodity in entry["asteroids"]:
             if commodity != None:
                 mineableCommodity.append(commodity)
         mineableCommodity = list(dict.fromkeys(mineableCommodity))
@@ -255,11 +255,11 @@ def main(template, data, config, nickname):
         asteroids = asteroids.replace("{asteroids}", asteroiden.replace("&nbsp;", ""))
 
         jumps = ""
-        for target, type, location in sys_entry["holes"]:
+        for target, type, location in entry["holes"]:
             jumps = f"{jumps}<tr><td>[[{target}]]</td>\n<td>{type}</td>\n<td>{location}</td></tr>\n"
         gates = gates.replace("{gates}", jumps)
 
-        time = time.replace("{time}", sys_entry["time"])
+        time = time.replace("{time}", entry["time"])
 
         if region != "":
             category = category.replace("{region}", f'[[Category: {region}]]')
@@ -268,8 +268,8 @@ def main(template, data, config, nickname):
 
         return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{gates}{time}{category}"
     elif "base" in template.lower():
-        base_entry = data["Bases"][nickname]
-        name = base_entry["name"]        
+        entry = data["Bases"][nickname]
+        name = entry["name"]        
         
         infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: #555555; color: #ffffff", title="{nickname}"><b>{name}</b>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;">\n<div class="center">\n<div class="floatnone">[[File:{nickname}.png|250px]]</div>\n</div>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Owner\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{owner}\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Location\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{location}\n</td>\n</tr>\n</table>\n'
         infocard = '{infocard}\n'
@@ -283,20 +283,20 @@ def main(template, data, config, nickname):
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", name)
-        infobox = infobox.replace("{owner}", f'[[{base_entry["owner"]}]]')  
-        infobox = infobox.replace("{location}", f"<b>{base_entry['sector']}</b>, [[{base_entry['system']}]]")
+        infobox = infobox.replace("{owner}", f'[[{entry["owner"]}]]')  
+        infobox = infobox.replace("{location}", f"<b>{entry['sector']}</b>, [[{entry['system']}]]")
 
 
-        info = base_entry["specs"] + "</font>" + "<p >" + base_entry["infocard"]
+        info = entry["specs"] + "</font>" + "<p >" + entry["infocard"]
         infocard = infocard.replace("{infocard}", '<p style="padding: 0px; margin: 0px;">' + info.replace('<p>', '<p style="padding: 0px; margin: 0px;">'))
 
 
         bribes = "<ul>\n"
-        for faction in base_entry["bribes"]: bribes = f"{bribes}<li>{faction}</li>\n"
+        for faction in entry["bribes"]: bribes = f"{bribes}<li>{faction}</li>\n"
         bribes = f"{bribes}</ul>"
 
         missions = "<ul>\n"
-        for faction in base_entry["missions"]: missions = f"{missions}<li>{faction}</li>\n"
+        for faction in entry["missions"]: missions = f"{missions}<li>{faction}</li>\n"
         missions = f"{missions}</ul>"
 
         bribesNmissions = bribesNmissions.replace("{bribes}", bribes)
@@ -305,10 +305,10 @@ def main(template, data, config, nickname):
         imports = "<ul>\n"
         exports = "<ul>\n"
 
-        for commodity in base_entry["commodities_buying"]:
+        for commodity in entry["commodities_buying"]:
             imports = f"{imports}<li>{commodity}</li>\n"
                 
-        for commodity in base_entry["commodities_selling"]:
+        for commodity in entry["commodities_selling"]:
             exports = f"{exports}<li>{commodity}</li>\n"
         
         imports = f"{imports}</ul>\n"
@@ -318,7 +318,7 @@ def main(template, data, config, nickname):
         commodities = commodities.replace("{exports}", exports)
 
         shippos = ""
-        for ship, type, price in base_entry["ships_sold"]:
+        for ship, type, price in entry["ships_sold"]:
             temp = "<tr>\n"
             temp = f'{temp}<td>[[{ship}]]</td>\n<td>{type}</td>\n<td>{"{:,}".format(price)}$</td>\n'
             temp = f"{temp}</tr>\n"
@@ -329,7 +329,7 @@ def main(template, data, config, nickname):
 
         rumorTemplate = '<table style="margin-bottom: 10px; margin-left: 1em; width:90%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>[[{rumorFaction}]]</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{rumors}\n</td>\n</tr>\n</table>\n'
         rum = ""
-        for faction, rumorList in base_entry["rumors"].items():
+        for faction, rumorList in entry["rumors"].items():
             temp = "<ul>"
             for rumor in rumorList:
                 temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li>\n"
@@ -338,14 +338,14 @@ def main(template, data, config, nickname):
         
         rumors = rumors.replace("{rumors}", rum)
 
-        time = time.replace("{time}", base_entry["time"])
+        time = time.replace("{time}", entry["time"])
 
-        other = f'[[Category: {base_entry["owner"]}]]\n[[Category: {base_entry["region"]}]]\n[[Category: {base_entry["system"]}]]\n'
+        other = f'[[Category: {entry["owner"]}]]\n[[Category: {entry["region"]}]]\n[[Category: {entry["system"]}]]\n'
         categories = categories.replace("{other}", other)
 
         return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{rumors}{time}{categories}"
     elif "faction" in template.lower():
-        faction_entry = data["Factions"][nickname]
+        entry = data["Factions"][nickname]
         
         infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff", title = "{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Alignment</b>\n</td>\n<td style="padding-right: 1em">{alignment}\n</td></tr>\n</table>\n'
         infocard = '{infocard}\n'
@@ -359,34 +359,34 @@ def main(template, data, config, nickname):
 
 
         infobox = infobox.replace("{nickname}", nickname)
-        infobox = infobox.replace("{name}", faction_entry["name"])
-        infobox = infobox.replace("{alignment}", faction_entry["alignment"])
+        infobox = infobox.replace("{name}", entry["name"])
+        infobox = infobox.replace("{alignment}", entry["alignment"])
 
 
-        infocard = infocard.replace("{infocard}", faction_entry["infocard"])
+        infocard = infocard.replace("{infocard}", entry["infocard"])
 
         shippos = ""
-        for ship, type in faction_entry["ships"]:
+        for ship, type in entry["ships"]:
             shippos = f"{shippos}<tr>\n<td>[[{ship}]]</td>\n<td>{type}</td>\n</tr>\n"
 
         ships = ships.replace("{ships}", shippos)
         
 
         boses = ""
-        for base, owner, system, region in faction_entry["bases"]:
+        for base, owner, system, region in entry["bases"]:
             boses = f"{boses}<tr>\n<td>[[{base}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td>\n</tr>\n"
 
         bases = bases.replace("{bases}", boses)
 
         brobes = ""
-        for base, owner, system, region in faction_entry["bribes"]:
+        for base, owner, system, region in entry["bribes"]:
             brobes = f"{brobes}<tr>\n<td>[[{base}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td>\n</tr>\n"
 
         bribes = bribes.replace("{bribes}", brobes)
 
 
         repsheet = ""
-        for faction, rep in faction_entry["repsheet"].items():
+        for faction, rep in entry["repsheet"].items():
             rep = f"+{rep}" if rep > 0 else rep
             repsheet = f"{repsheet}((FD | [[{faction}]] | {rep}))\n".replace("((", "{{").replace("))", "}}")
 
@@ -394,7 +394,7 @@ def main(template, data, config, nickname):
 
         rum = ""
         rumorTemplate = '<table style="margin-bottom: 10px; margin-left: 1em; width:90%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>[[{rumorBase}]]</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{rumors}\n</td>\n</tr>\n</table>\n'
-        for base, rumorList in faction_entry["rumors"].items():
+        for base, rumorList in entry["rumors"].items():
             temp = "<ul>"
             for rumor in rumorList:
                 temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li>\n"
@@ -403,10 +403,9 @@ def main(template, data, config, nickname):
 
         rumors = rumors.replace("{rumors}", rum)
 
-        time = time.replace("{time}", faction_entry["time"])
+        time = time.replace("{time}", entry["time"])
 
         return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{rumors}{time}{categories}"
-
 
 loadedData = loadData("../dumpedData/flData.json")
 configData = loadData("config.json")
