@@ -147,6 +147,7 @@
     "titleNuke": "mediawikiBot.py | Nuking wiki",
     "images" : "../dumpedData/images",
     "nukeCategory" : "Category:NukeOnPatch",
+    "comment": "replaceOnPatch",
     "categories": [
       "Ships",
       "Systems",

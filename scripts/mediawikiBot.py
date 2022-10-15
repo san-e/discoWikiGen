@@ -134,6 +134,7 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
                     upload_params = {
                         "action": "upload",
                         "filename": entry.name,
+                        "comment": config["bot"]["comment"],
                         "format": "json",
                         "token": csrfToken,
                         "bot": True,
@@ -166,6 +167,7 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
                         upload_params = {
                             "action": "upload",
                             "filename": entry.name,
+                            "comment": config["bot"]["comment"],
                             "format": "json",
                             "bot": True,
                             "token": csrfToken,
