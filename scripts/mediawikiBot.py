@@ -124,12 +124,30 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
                 if isdir(entry.path):
                     subdirectories.append(entry.path)
     
+    allimages_params = {
+        "action": "query",
+        "format": "json",
+        "list": "allimages",
+        "aiprop": "comment",
+        "ailimit": 5000
+    }
+    allimages = session.post(URL, data=allimages_params)
+    allimages = allimages.json()["query"]["allimages"]
+    allimages = {dic["name"].lower(): dic["comment"] for dic in allimages}
+
     doLater = [] 
     doLater2 = []
     for directory in subdirectories:
         with alive_bar(len([x for x in scandir(directory)]), dual_line=True, title=titleImage) as bar:
             for entry in scandir(directory):
-                if entry.name.split(".")[-1] == "png":
+                if entry.name.endswith("png"):
+                    try:
+                        if allimages[entry.name] != config["bot"]["comment"]:
+                            print(f"Skipping {entry.name}, probably shouldn't be replaced.")
+                            bar()
+                            continue
+                    except:
+                        pass
                     bar.text = f'-> Uploading: {entry.name} from folder {split(directory)[-1]}'
                     upload_params = {
                         "action": "upload",
@@ -162,7 +180,7 @@ def uploadImages(session, csrfToken, titleImage, path = "../dumpedData/images"):
             print("Retrying failed uploads...")
             with alive_bar(len(doLater), dual_line=True, title=titleImage) as bar:
                 for entry in doLater:
-                    if entry.name.split(".")[-1] == "png":
+                    if entry.name.endswith("png"):
                         bar.text = f'-> Uploading: {entry.name}'
                         upload_params = {
                             "action": "upload",
