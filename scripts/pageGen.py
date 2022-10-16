@@ -292,11 +292,11 @@ def main(template, data, config, nickname):
 
 
         bribes = "<ul>\n"
-        for faction in entry["bribes"]: bribes = f"{bribes}<li>{faction}</li>\n"
+        for faction in entry["bribes"]: bribes = f"{bribes}<li>[[{faction}]]</li>\n"
         bribes = f"{bribes}</ul>"
 
         missions = "<ul>\n"
-        for faction in entry["missions"]: missions = f"{missions}<li>{faction}</li>\n"
+        for faction in entry["missions"]: missions = f"{missions}<li>[[{faction}]]</li>\n"
         missions = f"{missions}</ul>"
 
         bribesNmissions = bribesNmissions.replace("{bribes}", bribes)
