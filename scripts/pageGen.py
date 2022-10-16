@@ -306,10 +306,10 @@ def main(template, data, config, nickname):
         exports = "<ul>\n"
 
         for commodity in entry["commodities_buying"]:
-            imports = f"{imports}<li>{commodity}</li>\n"
+            imports = f"{imports}<li>[[{commodity}]]</li>\n"
                 
         for commodity in entry["commodities_selling"]:
-            exports = f"{exports}<li>{commodity}</li>\n"
+            exports = f"{exports}<li>[[{commodity}]]</li>\n"
         
         imports = f"{imports}</ul>\n"
         exports = f"{exports}</ul>\n"
