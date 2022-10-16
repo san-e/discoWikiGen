@@ -287,7 +287,7 @@ def main(template, data, config, nickname):
         infobox = infobox.replace("{location}", f"<b>{entry['sector']}</b>, [[{entry['system']}]]")
 
 
-        info = entry["specs"] + "</font>" + "<p >" + entry["infocard"]
+        info = entry["specs"] + "</font></font></b></i>" + "<p >" + entry["infocard"]
         infocard = infocard.replace("{infocard}", '<p style="padding: 0px; margin: 0px;">' + info.replace('<p>', '<p style="padding: 0px; margin: 0px;">'))
 
 
