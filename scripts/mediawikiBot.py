@@ -14,6 +14,7 @@ argparser.add_argument("-b", "--bases", help="Update base pages", action="store_
 argparser.add_argument("-f", "--factions", help="Update faction pages", action="store_true")
 argparser.add_argument("-i", "--images", help="Upload images", action="store_true")
 argparser.add_argument("-c", "--commodities", help="Update commodities", action="store_true")
+argparser.add_argument("--special", help="Update Special Pages", action="store_true")
 args = argparser.parse_args()
 
 with open("config.json", "r") as f:
@@ -260,6 +261,8 @@ def main():
         wikitext = wikitext | wikidata["Factions"]
     if args.commodities:
         wikitext = wikitext | wikidata["Commodities"]
+    if args.special:
+        wikitext = wikitext | wikidata["Special"]        
 
     if args.nuke:
         nukeTheWiki(

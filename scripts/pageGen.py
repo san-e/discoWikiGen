@@ -441,6 +441,34 @@ def generatePage(template, data, config, nickname):
         return f"{infobox}{infocard}{availability}{time}{categories}"
 
 
+def generateSpecial(ships = None, systems = None, bases = None, factions = None, commodities = None):
+    shipTemplate0 = """A list of all ships in this wiki. Click [Expand] below to show a sortable table of all ships\n\n{| class="sortable wikitable mw-collapsible mw-collapsed" width="100%"\n|+ \n|-\n!rowspan="2" style="padding: 3px; text-align: center;"|Name\n!rowspan="2" style="padding: 3px; text-align: center;"|Techcell\n!rowspan="2" style="padding: 3px; text-align: center;"|Class\n!rowspan="1" style="padding: 3px; text-align: center;"|Guns\n!rowspan="1" style="padding: 3px; text-align: center;"|Turrets\n!rowspan="1" style="padding: 3px; text-align: center;"|Mines\n!rowspan="1" style="padding: 3px; text-align: center;"|CDs/Ts\n!rowspan="1" style="padding: 3px; text-align: center;"|CMs\n!rowspan="2" style="padding: 3px; text-align: center;"|Turn<br>Rate\n!rowspan="2" style="padding: 3px; text-align: center;"|Hit<br>Points\n!rowspan="2" style="padding: 3px; text-align: center;"|Power<br>Core\n!rowspan="2" style="padding: 3px; text-align: center;"|Nanobots\n!rowspan="2" style="padding: 3px; text-align: center;"|Shield Batteries\n!rowspan="2" style="padding: 3px; text-align: center;"|Hold<br>Size\n!rowspan="2" style="padding: 3px; text-align: center;"|Package<br>Price\n|-\n!colspan="6" style="padding: 3px; text-align: center;"|Hardpoint Types\n"""
+    shipTemplate1 = """|-\n|{name}\n|{faction}\n|{class}\n|style="text-align: center;"|{guns}\n|style="text-align: center;"|{turrets}\n|style="text-align: center;"|{mines} \n|style="text-align: center;"|{cds}\n|style="text-align: center;"|{cms}\n|style="text-align: center;"|{turnrate}\n|style="text-align: center;"|{hitpoints}\n|style="text-align: center;"|{powercore}\n|style="text-align: center;"|{bots}\n|style="text-align: center;"|{bats}\n|style="text-align: center;"|{cargo} \n|style="text-align: center;"|{price}"""
+    
+    pages = {}
+
+    temps = ""
+    for name, attributes in ships.items():
+        temps = f"{temps}\n{shipTemplate1}"
+        
+        temps = temps.replace("{name}", f'[[{attributes["name"]}]]')
+        temps = temps.replace("{faction}", str(attributes["techcompat"]))
+        temps = temps.replace("{class}", str(attributes["type"]))
+        temps = temps.replace("{guns}", str(attributes["gunCount"]))
+        temps = temps.replace("{turrets}", str(attributes["turretCount"]))
+        temps = temps.replace("{mines}", str(attributes["mineCount"]))
+        temps = temps.replace("{cds}", str(attributes["torpedoCount"]))
+        temps = temps.replace("{cms}", str(attributes["cmCount"]))
+        temps = temps.replace("{turnrate}", str(attributes["turnRate"]))
+        temps = temps.replace("{hitpoints}", "{:,}".format(attributes["hit_pts"]))
+        temps = temps.replace("{powercore}", "{:,}".format(attributes["power_output"]))
+        temps = temps.replace("{bots}", str(attributes["bot_limit"]))
+        temps = temps.replace("{bats}", str(attributes["bat_limit"]))
+        temps = temps.replace("{cargo}", str(attributes["hold_size"]))
+        temps = temps.replace("{price}", '$' + "{:,}".format(attributes["package_price"]))
+
+    return {"Category:Ships": f"{shipTemplate0}{temps}\n" + "|}\n<hr>"}
+
 def main():
     loadedData = loadData("../dumpedData/flData.json")
     configData = loadData("config.json")
@@ -481,6 +509,16 @@ def main():
         source = generatePage(template = "Commodity", data = loadedData, config = configData, nickname = name)        
         commoditySource[attributes["name"]] = source
     sources["Commodities"] = commoditySource
+
+    print("Processing Special")
+    sources["Special"] = generateSpecial(
+        ships = loadedData["Ships"],
+        bases = loadedData["Bases"],
+        systems = loadedData["Systems"],
+        factions = loadedData["Factions"],
+        commodities = loadedData["Commodities"]
+    )
+    
     print("DONE")
 
     with open("../dumpedData/wikitext.json", "w") as f:
