@@ -7,7 +7,7 @@ def loadData(filename):
         data = json.load(file)
     return data
 
-def main(template, data, config, nickname):
+def generatePage(template, data, config, nickname):
     houses = config["pageGen"]["houses"]
     corps = config["pageGen"]["corporations"]
     if template.lower() == "ship":
@@ -440,46 +440,51 @@ def main(template, data, config, nickname):
 
         return f"{infobox}{infocard}{availability}{time}{categories}"
 
-loadedData = loadData("../dumpedData/flData.json")
-configData = loadData("config.json")
-sources = {}
 
-sysSource = {}
-print("Processing Systems")
-for name, attributes in loadedData["Systems"].items():
-    source = main(template = "System", data = loadedData, config = configData, nickname = name)
-    sysSource[attributes["name"]] = source
-sources["Systems"] = sysSource
+def main():
+    loadedData = loadData("../dumpedData/flData.json")
+    configData = loadData("config.json")
+    sources = {}
 
-shipSource = {}
-print("Processing Ships")
-for name, attributes in loadedData["Ships"].items():
-    source = main(template = "Ship", data = loadedData, config = configData, nickname = name)        
-    shipSource[attributes["name"]] = source
-sources["Ships"] = shipSource
+    sysSource = {}
+    print("Processing Systems")
+    for name, attributes in loadedData["Systems"].items():
+        source = generatePage(template = "System", data = loadedData, config = configData, nickname = name)
+        sysSource[attributes["name"]] = source
+    sources["Systems"] = sysSource
 
-baseSource = {}
-print("Processing Bases")
-for name, attributes in loadedData["Bases"].items():
-    source = main(template = "Base", data = loadedData, config = configData, nickname = name)
-    name = attributes["name"] if attributes["name"] not in sources["Ships"].keys() else f'{attributes["name"]} (b)'
-    baseSource[name] = source
-sources["Bases"] = baseSource
+    shipSource = {}
+    print("Processing Ships")
+    for name, attributes in loadedData["Ships"].items():
+        source = generatePage(template = "Ship", data = loadedData, config = configData, nickname = name)        
+        shipSource[attributes["name"]] = source
+    sources["Ships"] = shipSource
 
-factionSource = {}
-print("Processing Factions")
-for name, attributes in loadedData["Factions"].items():
-    source = main(template = "Faction", data = loadedData, config = configData, nickname = name)        
-    factionSource[attributes["name"]] = source
-sources["Factions"] = factionSource
+    baseSource = {}
+    print("Processing Bases")
+    for name, attributes in loadedData["Bases"].items():
+        source = generatePage(template = "Base", data = loadedData, config = configData, nickname = name)
+        name = attributes["name"] if attributes["name"] not in sources["Ships"].keys() else f'{attributes["name"]} (b)'
+        baseSource[name] = source
+    sources["Bases"] = baseSource
 
-commoditySource = {}
-print("Processing Commodities")
-for name, attributes in loadedData["Commodities"].items():
-    source = main(template = "Commodity", data = loadedData, config = configData, nickname = name)        
-    commoditySource[attributes["name"]] = source
-sources["Commodities"] = commoditySource
-print("DONE")
+    factionSource = {}
+    print("Processing Factions")
+    for name, attributes in loadedData["Factions"].items():
+        source = generatePage(template = "Faction", data = loadedData, config = configData, nickname = name)        
+        factionSource[attributes["name"]] = source
+    sources["Factions"] = factionSource
 
-with open("../dumpedData/wikitext.json", "w") as f:
-    json.dump(sources, f, indent=1)
+    commoditySource = {}
+    print("Processing Commodities")
+    for name, attributes in loadedData["Commodities"].items():
+        source = generatePage(template = "Commodity", data = loadedData, config = configData, nickname = name)        
+        commoditySource[attributes["name"]] = source
+    sources["Commodities"] = commoditySource
+    print("DONE")
+
+    with open("../dumpedData/wikitext.json", "w") as f:
+        json.dump(sources, f, indent=1)
+
+if __name__ == "__main__":
+    main()

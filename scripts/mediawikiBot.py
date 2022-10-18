@@ -243,7 +243,7 @@ def nukeTheWiki(session, csrfToken, titleNuke):
             #time.sleep(delay) seemingly not neccessary
             bar()
 
-if __name__ == "__main__":
+def main():
     loginData = login(config["bot"]["botPassword"])
 
     with open(config["bot"]["wikitext"], "r") as f:
@@ -281,3 +281,6 @@ if __name__ == "__main__":
                 titleImage = config["bot"]["titleImage"],
                 path = config["bot"]["images"]
             )    
+
+if __name__ == "__main__":
+    main()
