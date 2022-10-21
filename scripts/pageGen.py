@@ -332,7 +332,7 @@ def generatePage(template, data, config, nickname):
         for faction, rumorList in entry["rumors"].items():
             temp = "<ul>"
             for rumor in rumorList:
-                temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li>\n"
+                temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li><hr>\n"
             temp = f"{temp}</ul>"
             rum = f'{rum}{rumorTemplate.replace("{rumors}", temp).replace("{rumorFaction}", faction)}'
         
@@ -397,7 +397,7 @@ def generatePage(template, data, config, nickname):
         for base, rumorList in entry["rumors"].items():
             temp = "<ul>"
             for rumor in rumorList:
-                temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li>\n"
+                temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li><hr>\n"
             temp = f"{temp}</ul>"
             rum = f'{rum}{rumorTemplate.replace("{rumors}", temp).replace("{rumorBase}", base)}'
 
