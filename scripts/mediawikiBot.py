@@ -15,6 +15,7 @@ argparser.add_argument("-f", "--factions", help="Update faction pages", action="
 argparser.add_argument("-i", "--images", help="Upload images", action="store_true")
 argparser.add_argument("-c", "--commodities", help="Update commodities", action="store_true")
 argparser.add_argument("--special", help="Update Special Pages", action="store_true")
+argparser.add_argument("-a" , "--all", help="Update all Pages + Upload Images", action="store_true")
 args = argparser.parse_args()
 
 with open("config.json", "r") as f:
@@ -251,17 +252,17 @@ def main():
         wikidata = load(f)
     
     wikitext = {}
-    if args.systems:
+    if args.systems or args.all:
         wikitext = wikitext | wikidata["Systems"]
-    if args.ships:
+    if args.ships or args.all:
         wikitext = wikitext | wikidata["Ships"]
-    if args.bases:
+    if args.bases or args.all:
         wikitext = wikitext | wikidata["Bases"]
-    if args.factions:
+    if args.factions or args.all:
         wikitext = wikitext | wikidata["Factions"]
-    if args.commodities:
+    if args.commodities or args.all:
         wikitext = wikitext | wikidata["Commodities"]
-    if args.special:
+    if args.special or args.all:
         wikitext = wikitext | wikidata["Special"]        
 
     if args.nuke:
@@ -277,7 +278,7 @@ def main():
             wikitext = wikitext,
             titleText = config["bot"]["titleText"]
         )
-        if args.images:
+        if args.images or args.all:
             uploadImages(
                 session = loginData[0],
                 csrfToken = loginData[1],

@@ -411,7 +411,7 @@ def generatePage(template, data, config, nickname):
 
         infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The number of units of cargo this commodity uses"><b>Cargo Space</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The rate at which this commodity decays per second"><b>Decay Rate</b>\n</td>\n<td style="padding-right: 1em">{decay}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Default Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n</table>\n'
         infocard = '{infocard}\n'
-        availability = '<h2>Availability</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Buy locations</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{buyBases}\n</td></tr></table>\n\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Sell locations</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{sellBases}\n</td></tr></table>\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n<br style="clear: both; height: 0px;" />\n'
+        availability = '<h2>Availability</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which buy this commodity"><b>Bases buying</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{buyBases}\n</td></tr></table>\n\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which sell this commodity"><b>Bases selling</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{sellBases}\n</td></tr></table>\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n<br style="clear: both; height: 0px;" />\n'
         time = '<i>NOTE: {time}<i>'
         categories = '[[Category: Commodities]]\n[[Category: nukeOnPatch]]\n'
 
@@ -442,13 +442,13 @@ def generatePage(template, data, config, nickname):
 
 
 def generateSpecial(ships = None, systems = None, bases = None, factions = None, commodities = None):
-    shipTemplate0 = """A list of all ships in this wiki. Click [Expand] below to show a sortable table of all ships\n\n{| class="sortable wikitable mw-collapsible mw-collapsed" width="100%"\n|+ \n|-\n!rowspan="2" style="padding: 3px; text-align: center;"|Name\n!rowspan="2" style="padding: 3px; text-align: center;"|Techcell\n!rowspan="2" style="padding: 3px; text-align: center;"|Class\n!rowspan="1" style="padding: 3px; text-align: center;"|Guns\n!rowspan="1" style="padding: 3px; text-align: center;"|Turrets\n!rowspan="1" style="padding: 3px; text-align: center;"|Mines\n!rowspan="1" style="padding: 3px; text-align: center;"|CDs/Ts\n!rowspan="1" style="padding: 3px; text-align: center;"|CMs\n!rowspan="2" style="padding: 3px; text-align: center;"|Turn<br>Rate\n!rowspan="2" style="padding: 3px; text-align: center;"|Hit<br>Points\n!rowspan="2" style="padding: 3px; text-align: center;"|Power<br>Core\n!rowspan="2" style="padding: 3px; text-align: center;"|Nanobots\n!rowspan="2" style="padding: 3px; text-align: center;"|Shield Batteries\n!rowspan="2" style="padding: 3px; text-align: center;"|Hold<br>Size\n!rowspan="2" style="padding: 3px; text-align: center;"|Package<br>Price\n|-\n!colspan="6" style="padding: 3px; text-align: center;"|Hardpoint Types\n"""
+    shipTemplate0 = """A list of all ships in this wiki. Click [Expand] below to show a sortable table of all ships\n\n{| class="sortable wikitable mw-collapsible mw-collapsed" width="100%"\n|+ \n|-\n!rowspan="2" style="text-align: center;"|Name\n!rowspan="2" style="text-align: center;"|Techcell\n!rowspan="2" style="text-align: center;"|Class\n!rowspan="1" style="text-align: center;"|Guns\n!rowspan="1" style="text-align: center;"|Turrets\n!rowspan="1" style="text-align: center;"|Mines\n!rowspan="1" style="text-align: center;"|CDs/Ts\n!rowspan="1" style="text-align: center;"|CMs\n!rowspan="2" style="text-align: center;"|Turn<br>Rate\n!rowspan="2" style="text-align: center;"|Hit<br>Points\n!rowspan="2" style="text-align: center;"|Power<br>Core\n!rowspan="2" style="text-align: center;"|Nanobots\n!rowspan="2" style="text-align: center;"|Shield Batteries\n!rowspan="2" style="text-align: center;"|Hold<br>Size\n!rowspan="2" style="text-align: center;"|Package<br>Price\n|-\n!colspan="6" style="text-align: center;"|Hardpoint Types\n"""
     shipTemplate1 = """|-\n|{name}\n|{faction}\n|{class}\n|style="text-align: center;"|{guns}\n|style="text-align: center;"|{turrets}\n|style="text-align: center;"|{mines} \n|style="text-align: center;"|{cds}\n|style="text-align: center;"|{cms}\n|style="text-align: center;"|{turnrate}\n|style="text-align: center;"|{hitpoints}\n|style="text-align: center;"|{powercore}\n|style="text-align: center;"|{bots}\n|style="text-align: center;"|{bats}\n|style="text-align: center;"|{cargo} \n|style="text-align: center;"|{price}"""
     
     pages = {}
 
     temps = ""
-    for name, attributes in ships.items():
+    for nickname, attributes in ships.items():
         temps = f"{temps}\n{shipTemplate1}"
         
         temps = temps.replace("{name}", f'[[{attributes["name"]}]]')
@@ -466,8 +466,21 @@ def generateSpecial(ships = None, systems = None, bases = None, factions = None,
         temps = temps.replace("{bats}", str(attributes["bat_limit"]))
         temps = temps.replace("{cargo}", str(attributes["hold_size"]))
         temps = temps.replace("{price}", '$' + "{:,}".format(attributes["package_price"]))
+    pages["Category:Ships"] = f"{shipTemplate0}{temps}\n" + "|}\n<hr>"
 
-    return {"Category:Ships": f"{shipTemplate0}{temps}\n" + "|}\n<hr>"}
+    commodityTemplate0 = """A list of all commodities in this wiki. Click [Expand] below to show a sortable table of all commodities\n\n{| class="sortable wikitable mw-collapsible mw-collapsed" width="100%"\n|+ \n|-\n! Commodity\n! Cargo Space\n! Decay rate<br />\n! Default price\n{a}\n|}\n<hr>"""
+    commodityTemplate1 = """|-\n| {name}\n| {cargo}\n| {decay}\n| {price}\n"""
+
+    temps = ""
+    for nickname, attributes in commodities.items():
+        temps = f"{temps}\n{commodityTemplate1}"
+        temps = temps.replace("{name}", f'[[{attributes["name"]}]]')
+        temps = temps.replace("{cargo}", "{:,}".format(int(attributes["volume"])))
+        temps = temps.replace("{decay}", "{:,}".format(attributes["decay"]))
+        temps = temps.replace("{price}", '$' + "{:,}".format(attributes["defaultPrice"]))
+    pages["Category:Commodities"] = commodityTemplate0.replace("{a}", temps)
+
+    return pages
 
 def main():
     loadedData = loadData("../dumpedData/flData.json")
