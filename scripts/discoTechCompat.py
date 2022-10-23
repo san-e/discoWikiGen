@@ -10,12 +10,15 @@ from json import dump
 with open("config.json", "r") as f:
     config = load(f)
 
+
 def url_get_contents(url):
     request = urllib.request.Request(url=url)
     open = urllib.request.urlopen(request)
     return open.read()
 
-html = url_get_contents(config["techcompat"]["techcompatURL"]).decode('utf-8')
+
+html = url_get_contents(config["techcompat"]["techcompatURL"]).decode("utf-8")
+
 
 def get_techcells():
     parser = HTMLTableParser()
@@ -23,7 +26,7 @@ def get_techcells():
 
     df = pd.DataFrame(parser.tables[0])
 
-    delete = [len(df)-1]
+    delete = [len(df) - 1]
     for x in range(len(df)):
         if x != 0:
             if x % 11 == 0:
@@ -54,22 +57,26 @@ def get_techcells():
 
     for row in range(1, len(df)):
         for column in range(1, len(df.columns)):
-            ae[tech_categories[column]] = int(df[column][row].strip('%')) if df[column][row] != '' else 0
+            ae[tech_categories[column]] = (
+                int(df[column][row].strip("%")) if df[column][row] != "" else 0
+            )
         final[faction_names[row]] = ae
         ae = {}
     return final
 
+
 def get_definitions():
-    data = BeautifulSoup(html, 'html.parser')
-    data = data.find('ul', {"id": "techcompat_techs"})
+    data = BeautifulSoup(html, "html.parser")
+    data = data.find("ul", {"id": "techcompat_techs"})
     names_are_hard = {}
     for li in data.find_all("li"):
         temp = str(li).split("br/>")[1]
         temp = temp.split("</li>")[0]
         temp = temp.split(", ")
-        names_are_hard[li.find('strong').text] = temp
+        names_are_hard[li.find("strong").text] = temp
         temp = ""
     return names_are_hard
+
 
 def get_nicknames(path_to_freelancer):
     fl.set_install_path(path_to_freelancer)
@@ -90,8 +97,13 @@ def get_nicknames(path_to_freelancer):
 
     return nicknames
 
+
 def writeData():
-    to_dump = {"techcells" : get_techcells(), "definitions" : get_definitions(), "nicknames" : get_nicknames("A:/Spiele/Freelancer/Discovery Freelancer")}
+    to_dump = {
+        "techcells": get_techcells(),
+        "definitions": get_definitions(),
+        "nicknames": get_nicknames("A:/Spiele/Freelancer/Discovery Freelancer"),
+    }
 
     with open(f"./saves/data{int(time())}.json", "w") as f:
         dump(to_dump, f, indent=1)
