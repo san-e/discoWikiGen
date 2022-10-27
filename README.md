@@ -21,4 +21,4 @@ or navigate to the `requirements.txt` file and do `pip install -r requirements.t
 
 ---
 
-Developed and tested on Python 3.10.4
+Developed and tested on Python 3.11.0
