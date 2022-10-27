@@ -462,6 +462,7 @@ def get_factions() -> dict:
 
             factions[faction.nickname] = {
                 "name": faction.name(),
+                "shortName": faction.short_name(),
                 "alignment": alignment,
                 "infocard": '<p style="padding: 0px; margin: 0px;">'
                 + faction.infocard().replace(

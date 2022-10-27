@@ -546,6 +546,7 @@ def main():
     loadedData = loadData("../dumpedData/flData.json")
     configData = loadData("config.json")
     sources = {}
+    redirects = {}
 
     sysSource = {}
     print("Processing Systems")
@@ -563,6 +564,8 @@ def main():
             template="Ship", data=loadedData, config=configData, nickname=name
         )
         shipSource[attributes["name"]] = source
+        # if attributes["name"] != attributes["longName"]:
+        #     redirects[attributes["longName"]] = f"""#REDIRECT[[{attributes["name"]}]]"""
     sources["Ships"] = shipSource
 
     baseSource = {}
@@ -582,10 +585,13 @@ def main():
     factionSource = {}
     print("Processing Factions")
     for name, attributes in loadedData["Factions"].items():
-        source = generatePage(
-            template="Faction", data=loadedData, config=configData, nickname=name
-        )
-        factionSource[attributes["name"]] = source
+        if not "Guard" in attributes["name"]:
+            source = generatePage(
+                template="Faction", data=loadedData, config=configData, nickname=name
+            )
+            factionSource[attributes["name"]] = source
+            if attributes["name"] != attributes["shortName"]:
+                redirects[attributes["shortName"]] = f"""#REDIRECT[[{attributes["name"]}]]"""
     sources["Factions"] = factionSource
 
     commoditySource = {}
@@ -597,6 +603,9 @@ def main():
         commoditySource[attributes["name"]] = source
     sources["Commodities"] = commoditySource
 
+    print("Processing Redirects")
+    sources["Redirects"] = redirects
+
     print("Processing Special")
     sources["Special"] = generateSpecial(
         ships=loadedData["Ships"],
@@ -605,6 +614,7 @@ def main():
         factions=loadedData["Factions"],
         commodities=loadedData["Commodities"],
     )
+
 
     print("DONE")
 

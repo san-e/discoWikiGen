@@ -24,6 +24,7 @@ argparser.add_argument("--special", help="Update Special Pages", action="store_t
 argparser.add_argument(
     "-a", "--all", help="Update all Pages + Upload Images", action="store_true"
 )
+argparser.add_argument("-r", "--redirects", help="Update Redirects", action="store_true")
 args = argparser.parse_args()
 
 with open("config.json", "r") as f:
@@ -288,6 +289,8 @@ def main():
         wikitext = wikitext | wikidata["Factions"]
     if args.commodities or args.all:
         wikitext = wikitext | wikidata["Commodities"]
+    if args.redirects or args.all:
+        wikitext = wikitext | wikidata["Redirects"]
     if args.special or args.all:
         wikitext = wikitext | wikidata["Special"]
 
