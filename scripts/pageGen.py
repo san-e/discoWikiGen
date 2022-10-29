@@ -22,7 +22,7 @@ def generatePage(template, data, config, nickname):
         includes = "<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>"
         availability = '<h2>Availability</h2>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Buying Locations\n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Location\n</th></tr>\n{sold_at}\n</td></tr></table>\n</td></tr></table>\n'
         time = "<i>NOTE: {time}<i>"
-        category = "\n[[Category: Ships]]\n[[Category: nukeOnPatch]]\n{rest}"
+        category = "\n[[Category: Ships]]\n{rest}"
 
         image = f"{nickname}.png"
 
@@ -141,7 +141,7 @@ def generatePage(template, data, config, nickname):
         asteroids = "<h2>Asteroid Fields</h2>\n\n{asteroids}\n"
         gates = '<h1>Jump Gates/Holes</h1>\n<hr>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Jump Hole/Gate Locations \n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Target System</th>\n<th>Type</th>\n<th>Sector</th></tr>\n{gates}\n</td></tr></table>\n</td></tr></table>\n'
         time = "<i>NOTE: {time}<i>"
-        category = "\n[[Category: Systems]]\n[[Category: nukeOnPatch]]\n{region}"
+        category = "\n[[Category: Systems]]\n{region}"
 
         infobox = infobox.replace("{name}", entry["name"])
         infobox = infobox.replace("{image}", f"{nickname}.png")
@@ -314,7 +314,7 @@ def generatePage(template, data, config, nickname):
         ships = '<h2>Ships sold</h2>\n\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n<th>Price</th>\n</tr>\n{ships_sold}\n</td></tr></table>\n<p><br style="clear: both; height: 0px;" />\n</p>\n'
         rumors = "<h2>Rumors</h2>\n{rumors}\n"
         time = "<i>NOTE: {time}<i>"
-        categories = "\n[[Category: Bases]]\n[[Category: nukeOnPatch]]\n{other}"
+        categories = "\n[[Category: Bases]]\n{other}"
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", name)
@@ -395,7 +395,7 @@ def generatePage(template, data, config, nickname):
         rep_sheet = '<h2 title="This faction\'s rep sheet">Diplomacy</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th></tr>\n<tr>\n<td>\n{{Faction Diplomacy/begin}}\n{repsheet}\n{{Faction Diplomacy/end}}\n</td></tr></table>'
         rumors = '<h2>Rumors</h2>\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n{rumors}\n</td></tr></table>\n'
         time = "<i>NOTE: {time}<i>"
-        categories = "\n[[Category: Factions]]\n[[Category: nukeOnPatch]]\n"
+        categories = "\n[[Category: Factions]]\n"
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", entry["name"])
@@ -451,7 +451,7 @@ def generatePage(template, data, config, nickname):
         infocard = "{infocard}\n"
         availability = '<h2>Availability</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which buy this commodity"><b>Bases buying</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{buyBases}\n</td></tr></table>\n\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which sell this commodity"><b>Bases selling</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{sellBases}\n</td></tr></table>\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n<br style="clear: both; height: 0px;" />\n'
         time = "<i>NOTE: {time}<i>"
-        categories = "[[Category: Commodities]]\n[[Category: nukeOnPatch]]\n"
+        categories = "[[Category: Commodities]]\n"
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", entry["name"])
@@ -553,7 +553,7 @@ def main():
     for name, attributes in loadedData["Systems"].items():
         source = generatePage(
             template="System", data=loadedData, config=configData, nickname=name
-        )
+        ) 
         sysSource[attributes["name"]] = source
     sources["Systems"] = sysSource
 
@@ -562,10 +562,10 @@ def main():
     for name, attributes in loadedData["Ships"].items():
         source = generatePage(
             template="Ship", data=loadedData, config=configData, nickname=name
-        )
+        ) + "[[Category: NukeOnPatch]]"
         shipSource[attributes["name"]] = source
-        # if attributes["name"] != attributes["longName"]:
-        #     redirects[attributes["longName"]] = f"""#REDIRECT[[{attributes["name"]}]]"""
+        if attributes["name"] != attributes["longName"]:
+            redirects[attributes["longName"]] = f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
     sources["Ships"] = shipSource
 
     baseSource = {}
@@ -573,7 +573,7 @@ def main():
     for name, attributes in loadedData["Bases"].items():
         source = generatePage(
             template="Base", data=loadedData, config=configData, nickname=name
-        )
+        ) + "[[Category: NukeOnPatch]]"
         name = (
             attributes["name"]
             if attributes["name"] not in sources["Ships"].keys()
@@ -588,10 +588,10 @@ def main():
         if not "Guard" in attributes["name"]:
             source = generatePage(
                 template="Faction", data=loadedData, config=configData, nickname=name
-            )
+            ) + "[[Category: NukeOnPatch]]"
             factionSource[attributes["name"]] = source
             if attributes["name"] != attributes["shortName"]:
-                redirects[attributes["shortName"]] = f"""#REDIRECT[[{attributes["name"]}]]"""
+                redirects[attributes["shortName"]] = f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
     sources["Factions"] = factionSource
 
     commoditySource = {}
@@ -599,7 +599,7 @@ def main():
     for name, attributes in loadedData["Commodities"].items():
         source = generatePage(
             template="Commodity", data=loadedData, config=configData, nickname=name
-        )
+        ) + "[[Category: NukeOnPatch]]"
         commoditySource[attributes["name"]] = source
     sources["Commodities"] = commoditySource
 
