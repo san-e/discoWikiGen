@@ -15,7 +15,7 @@ To install, do:
 
 `pip install beautifulsoup4 pillow html-table-parser-python3 pandas alive_progress requests`
 
-`pip install https://github.com/baseflow1/flint/archive/master.zip -U`
+`pip install https://github.com/baseflow1/flint/archive/wiki.zip -U`
 
 or navigate to the `requirements.txt` file and do `pip install -r requirements.txt`
 
