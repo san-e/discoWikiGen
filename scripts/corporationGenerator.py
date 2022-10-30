@@ -17,3 +17,6 @@ for faction in fl.factions:
 
 pprint(results)
 config["pageGen"]["corporations"] = results
+
+with open("config.json", "w") as f:
+    json.dump(config, f)
