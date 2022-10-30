@@ -1,3 +1,4 @@
+from distutils.fancy_getopt import wrap_text
 import json
 from os import getcwd
 from os.path import exists
@@ -542,14 +543,15 @@ def generateSpecial(
     return pages
 
 
-def main():
-    loadedData = loadData("../dumpedData/flData.json")
+def main(loadedData = None):
+    if not loadedData:
+        loadedData = loadData("../dumpedData/flData.json")
     configData = loadData("config.json")
     sources = {}
     redirects = {}
 
     sysSource = {}
-    print("Processing Systems")
+    print("Assembling System pages")
     for name, attributes in loadedData["Systems"].items():
         source = generatePage(
             template="System", data=loadedData, config=configData, nickname=name
@@ -558,7 +560,7 @@ def main():
     sources["Systems"] = sysSource
 
     shipSource = {}
-    print("Processing Ships")
+    print("Assembling Ship pages")
     for name, attributes in loadedData["Ships"].items():
         source = generatePage(
             template="Ship", data=loadedData, config=configData, nickname=name
@@ -569,7 +571,7 @@ def main():
     sources["Ships"] = shipSource
 
     baseSource = {}
-    print("Processing Bases")
+    print("Assembling Base pages")
     for name, attributes in loadedData["Bases"].items():
         source = generatePage(
             template="Base", data=loadedData, config=configData, nickname=name
@@ -583,7 +585,7 @@ def main():
     sources["Bases"] = baseSource
 
     factionSource = {}
-    print("Processing Factions")
+    print("Assembling Faction pages")
     for name, attributes in loadedData["Factions"].items():
         if not "Guard" in attributes["name"]:
             source = generatePage(
@@ -595,7 +597,7 @@ def main():
     sources["Factions"] = factionSource
 
     commoditySource = {}
-    print("Processing Commodities")
+    print("Assembling Commodity pages")
     for name, attributes in loadedData["Commodities"].items():
         source = generatePage(
             template="Commodity", data=loadedData, config=configData, nickname=name
@@ -603,10 +605,10 @@ def main():
         commoditySource[attributes["name"]] = source
     sources["Commodities"] = commoditySource
 
-    print("Processing Redirects")
+    print("Assembling Redirect pages")
     sources["Redirects"] = redirects
 
-    print("Processing Special")
+    print("Assembling Special pages")
     sources["Special"] = generateSpecial(
         ships=loadedData["Ships"],
         bases=loadedData["Bases"],
@@ -618,8 +620,11 @@ def main():
 
     print("DONE")
 
-    with open("../dumpedData/wikitext.json", "w") as f:
-        json.dump(sources, f, indent=1)
+    if not loadedData:
+        with open("../dumpedData/wikitext.json", "w") as f:
+            json.dump(sources, f, indent=1)
+    else:
+        return sources
 
 
 if __name__ == "__main__":

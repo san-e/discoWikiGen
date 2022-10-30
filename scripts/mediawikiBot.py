@@ -38,7 +38,7 @@ def login(botPasswordPath):
     if exists(botPasswordPath):
         with open(botPasswordPath, "r") as f:
             data = load(f)
-            botName, botPassword = data[0], data[1]
+            botName, botPassword = data["botCredentials"][0], data["botCredentials"][1]
 
         session = requests.Session()
 
@@ -272,48 +272,49 @@ def nukeTheWiki(session, csrfToken, titleNuke):
             bar()
 
 
-def main():
+def main(wikidata = None, choices = None):      
     loginData = login(config["bot"]["botPassword"])
 
-    with open(config["bot"]["wikitext"], "r") as f:
-        wikidata = load(f)
+    if not wikidata:
+        with open(config["bot"]["wikitext"], "r") as f:
+            wikidata = load(f)
 
     wikitext = {}
-    if args.systems or args.all:
+    if args.systems or args.all or "systems" in choices:
         wikitext = wikitext | wikidata["Systems"]
-    if args.ships or args.all:
+    if args.ships or args.all or "ships" in choices:
         wikitext = wikitext | wikidata["Ships"]
-    if args.bases or args.all:
+    if args.bases or args.all or "bases" in choices:
         wikitext = wikitext | wikidata["Bases"]
-    if args.factions or args.all:
+    if args.factions or args.all or "factions" in choices:
         wikitext = wikitext | wikidata["Factions"]
-    if args.commodities or args.all:
+    if args.commodities or args.all or "commodities" in choices:
         wikitext = wikitext | wikidata["Commodities"]
-    if args.redirects or args.all:
+    if args.redirects or args.all or "redirects" in choices:
         wikitext = wikitext | wikidata["Redirects"]
-    if args.special or args.all:
+    if args.special or args.all or "special" in choices:
         wikitext = wikitext | wikidata["Special"]
 
-    if args.nuke:
+    if args.nuke or "nuke" in choices:
         nukeTheWiki(
             session=loginData[0],
             csrfToken=loginData[1],
             titleNuke=config["bot"]["titleNuke"],
         )
-    else:
-        uploadText(
+
+    uploadText(
+        session=loginData[0],
+        csrfToken=loginData[1],
+        wikitext=wikitext,
+        titleText=config["bot"]["titleText"],
+    )
+    if args.images or args.all or "images" in choices:
+        uploadImages(
             session=loginData[0],
             csrfToken=loginData[1],
-            wikitext=wikitext,
-            titleText=config["bot"]["titleText"],
+            titleImage=config["bot"]["titleImage"],
+            path=config["bot"]["images"],
         )
-        if args.images or args.all:
-            uploadImages(
-                session=loginData[0],
-                csrfToken=loginData[1],
-                titleImage=config["bot"]["titleImage"],
-                path=config["bot"]["images"],
-            )
 
 
 if __name__ == "__main__":
