@@ -71,6 +71,11 @@ def login(botPasswordPath):
         return session, csrfToken
 
 
+def regenerateTokens():
+    global session
+    global csrfToken
+    session, csrfToken = login(config["bot"]["botPassword"])
+
 def uploadText(session, csrfToken, wikitext, titleText):
     doLater = []
     doLater2 = []
@@ -91,6 +96,8 @@ def uploadText(session, csrfToken, wikitext, titleText):
                 error = data["error"]["code"]
                 doLater.append([name, text])
                 print(f"Error updating {name}: {error}, trying again later...")
+                if error == "badtoken":
+                    regenerateTokens()
             except:
                 pass
             time.sleep(delay)
@@ -115,9 +122,11 @@ def uploadText(session, csrfToken, wikitext, titleText):
                         error = data["error"]["code"]
                         doLater2.append([name, text])
                         print(f"Error updating {name}: {error}, trying again later...")
+                        if error == "badtoken":
+                            regenerateTokens()
                     except:
                         pass
-                    time.sleep(delay * 2.5)
+                    time.sleep(delay * 2)
                     bar()
         else:
             break
