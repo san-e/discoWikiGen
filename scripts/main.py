@@ -47,7 +47,7 @@ def firstTimeSetup():
 with open("./config.json", "r") as f:
     config =  json.load(f)
 
-print("Welcome to wikiUpdater")
+
 if not config["firstTimeSetupRan"]:
     print("Running first time setup...")
     firstTimeSetup()
@@ -95,6 +95,7 @@ if 'y' in input():
     clearConsole()
     flData = flWikiGen.main()
     wikitext = pageGen.main(flData)
+    clearConsole()
     mediawikiBot.main(wikidata = wikitext, choices=choices)
 else:
     quit()
