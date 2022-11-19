@@ -137,7 +137,7 @@
  },
  "bot": {
   "URL": "https://disco-freelancer.fandom.com/api.php",
-  "delay": 1,
+  "delay": 1.5,
   "botPassword": "cconfig.json",
   "wikitext": "../dumpedData/wikitext.json",
   "titleText": "mediawikiBot.py | Updating Text",
@@ -154,6 +154,5 @@
  },
  "techcompat": {
   "techcompatURL": "https://discoverygc.com/techcompat/techcompat_table.php"
- },
- "firstTimeSetupRan": false
+ }
 }

@@ -311,7 +311,7 @@ def get_bases() -> dict:
                     "bribes": [faction.name() for faction in base.bribes()],
                     "missions": [faction.name() for faction in base.missions()],
                     "rumors": {
-                        fl.factions[faction].name(): rumor
+                        faction.name(): list(rumor)
                         for faction, rumor in base.rumors().items()
                     },
                     "commodities_buying": [x.name() for x in base.buys_commodities()],
@@ -360,10 +360,7 @@ def get_systems() -> dict:
                         "type": str(type(base)),
                     }
                 for planet in system.planets():
-                    if (
-                        str(type(planet))
-                        == "<class 'flint.entities.solars.PlanetaryBase'>"
-                    ):
+                    if (str(type(planet)) == "<class 'flint.entities.solars.PlanetaryBase'>"):
                         planets.append(
                             [
                                 planet.name(),
@@ -398,9 +395,7 @@ def get_systems() -> dict:
                 systems[system.nickname] = {
                     "name": system.name(),
                     "infocard": system.infocard("plain"),
-                    "region": system.region()
-                    if system.region() != "Independent"
-                    else "Independent Worlds",
+                    "region": system.region() if system.region() != "Independent" else "Independent Worlds",
                     "bases": bases,
                     "planets": planets,
                     "stars": stars,
