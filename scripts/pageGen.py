@@ -543,9 +543,7 @@ def generateSpecial(
     return pages
 
 
-def main(loadedData = None):
-    if not loadedData:
-        loadedData = loadData("../dumpedData/flData.json")
+def assemblePages(loadedData):
     configData = loadData("config.json")
     sources = {}
     redirects = {}
@@ -617,7 +615,14 @@ def main(loadedData = None):
         commodities=loadedData["Commodities"],
     )
 
+    return sources
 
+
+def main(loadedData = None):
+    if not loadedData:
+        loadedData = loadData("../dumpedData/flData.json")
+
+    sources = assemblePages(loadedData)
     print("DONE")
 
     if not loadedData:
