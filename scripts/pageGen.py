@@ -140,6 +140,7 @@ def generatePage(template, data, config, nickname):
         AoI = "<h1>Areas of Interest</h1>\n<hr>\n"
         nebulae = "<h2>Nebulae</h2>\n\n{nebulae}\n"
         asteroids = "<h2>Asteroid Fields</h2>\n\n{asteroids}\n"
+        wrecks = "<h2>Wrecks</h2>\n\n{wrecks}\n"
         gates = '<h1>Jump Gates/Holes</h1>\n<hr>\n<table class="wikitable collapsible collapsed">\n<tr>\n<th>Jump Hole/Gate Locations \n</th></tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Target System</th>\n<th>Type</th>\n<th>Sector</th></tr>\n{gates}\n</td></tr></table>\n</td></tr></table>\n'
         time = "<i>NOTE: {time}<i>"
         category = "\n[[Category: Systems]]\n{region}"
@@ -291,6 +292,15 @@ def generatePage(template, data, config, nickname):
         nebulae = nebulae.replace("{nebulae}", nebulas.replace("&nbsp;", ""))
         asteroids = asteroids.replace("{asteroids}", asteroiden.replace("&nbsp;", ""))
 
+        wreckages = ""
+        for w in entry["wrecks"]:
+            wreckages = f"""{wreckages}<h3>{w['name']}</h3>\n{w['infocard']}\nContains:\n<ul style="margin-top:-20px;">\n"""
+            for item, amount in w['loot']:
+                wreckages = wreckages + f"<li>{amount}x [[{item}]]</li>\n"
+            wreckages = wreckages + "</ul>\n"
+
+        wrecks = wrecks.replace("{wrecks}", wreckages.replace("&nbsp;", ""))
+
         jumps = ""
         for target, type, location in entry["holes"]:
             jumps = f"{jumps}<tr><td>[[{target}]]</td>\n<td>{type}</td>\n<td>{location}</td></tr>\n"
@@ -303,7 +313,7 @@ def generatePage(template, data, config, nickname):
         else:
             category = category.replace("{region}", "")
 
-        return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{gates}{time}{category}"
+        return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{wrecks}{gates}{time}{category}"
     elif "base" in template.lower():
         entry = data["Bases"][nickname]
         name = entry["name"]
@@ -495,9 +505,7 @@ def generatePage(template, data, config, nickname):
         return f"{infobox}{infocard}{availability}{time}{categories}"
 
 
-def generateSpecial(
-    ships=None, systems=None, bases=None, factions=None, commodities=None
-):
+def generateSpecial(ships=None, systems=None, bases=None, factions=None, commodities=None):
     shipTemplate0 = """A list of all ships in this wiki. Click [Expand] below to show a sortable table of all ships\n\n{| class="sortable wikitable mw-collapsible mw-collapsed" width="100%"\n|+ \n|-\n!rowspan="2" style="text-align: center;"|Name\n!rowspan="2" style="text-align: center;"|Techcell\n!rowspan="2" style="text-align: center;"|Class\n!rowspan="1" style="text-align: center;"|Guns\n!rowspan="1" style="text-align: center;"|Turrets\n!rowspan="1" style="text-align: center;"|Mines\n!rowspan="1" style="text-align: center;"|CDs/Ts\n!rowspan="1" style="text-align: center;"|CMs\n!rowspan="2" style="text-align: center;"|Turn<br>Rate\n!rowspan="2" style="text-align: center;"|Hit<br>Points\n!rowspan="2" style="text-align: center;"|Power<br>Core\n!rowspan="2" style="text-align: center;"|Nanobots\n!rowspan="2" style="text-align: center;"|Shield Batteries\n!rowspan="2" style="text-align: center;"|Hold<br>Size\n!rowspan="2" style="text-align: center;"|Package<br>Price\n|-\n!colspan="6" style="text-align: center;"|Hardpoint Types\n"""
     shipTemplate1 = """|-\n|{name}\n|{faction}\n|{class}\n|style="text-align: center;"|{guns}\n|style="text-align: center;"|{turrets}\n|style="text-align: center;"|{mines} \n|style="text-align: center;"|{cds}\n|style="text-align: center;"|{cms}\n|style="text-align: center;"|{turnrate}\n|style="text-align: center;"|{hitpoints}\n|style="text-align: center;"|{powercore}\n|style="text-align: center;"|{bots}\n|style="text-align: center;"|{bats}\n|style="text-align: center;"|{cargo} \n|style="text-align: center;"|{price}"""
 
@@ -624,13 +632,10 @@ def main(loadedData = None):
 
     sources = assemblePages(loadedData)
     print("DONE")
-
-    if not loadedData:
-        with open("../dumpedData/wikitext.json", "w") as f:
-            json.dump(sources, f, indent=1)
-    else:
-        return sources
+    return sources
 
 
 if __name__ == "__main__":
-    main()
+    sources = main()
+    with open("../dumpedData/wikitext.json", "w") as f:
+        json.dump(sources, f, indent=1)

@@ -399,8 +399,12 @@ def get_systems() -> dict:
                 for star in system.stars():
                     stars[star.name()] = star.infocard("plain")
                 for w in system.wrecks():
-                    if "surprise" in w.nickname.lower():
-                        wrecks.append({"name": w.name(), "infocard": w.infocard(), "sector": w.sector(), "loot": [e.name() for e in w.loot()]})
+                    if "surprise" in w.nickname.lower() or "suprise" in w.nickname.lower() or "secret" in w.nickname.lower():
+                        wrecks.append({ "name": w.name(),
+                                        "nickname": w.nickname,
+                                        "infocard": w.infocard(),
+                                        "sector": w.sector(),
+                                        "loot": [[equip.name(), amount] for equip, amount in w.loot()]})
                 neighbors = [x for x in neighbors if x != system.name()]
                 neighbors = list(dict.fromkeys(neighbors))
 
@@ -426,6 +430,7 @@ def get_systems() -> dict:
 
 
         except Exception as e:
+            raise
             logs.append({system: e})
     return systems
 
