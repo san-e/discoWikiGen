@@ -1,4 +1,3 @@
-from distutils.fancy_getopt import wrap_text
 import json
 from os import getcwd
 from os.path import exists
@@ -294,7 +293,7 @@ def generatePage(template, data, config, nickname):
 
         wreckages = ""
         for w in entry["wrecks"]:
-            wreckages = f"""{wreckages}<h3>{w['name']}</h3>\n{w['infocard']}\nContains:\n<ul style="margin-top:-20px;">\n"""
+            wreckages = f"""{wreckages}<h3>{w['name']} - {w['sector']}</h3>\n{w['infocard']}\nContains:\n<ul style="margin-top:-20px;">\n"""
             for item, amount in w['loot']:
                 wreckages = wreckages + f"<li>{amount}x [[{item}]]</li>\n"
             wreckages = wreckages + "</ul>\n"
@@ -323,6 +322,7 @@ def generatePage(template, data, config, nickname):
         bribesNmissions = '<h2>Bribes & Missions Offered</h2>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Bribes</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{bribes}\n</td>\n</tr>\n</table>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Missions</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{missions}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
         commodities = '<h2>Commodities</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Imports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{imports}\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>Exports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{exports}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
         ships = '<h2>Ships sold</h2>\n\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n<th>Price</th>\n</tr>\n{ships_sold}\n</td></tr></table>\n<p><br style="clear: both; height: 0px;" />\n</p>\n'
+        news = "<h2>News</h2>\n{news}\n"
         rumors = "<h2>Rumors</h2>\n{rumors}\n"
         time = "<i>NOTE: {time}<i>"
         categories = "\n[[Category: Bases]]\n{other}"
@@ -378,6 +378,13 @@ def generatePage(template, data, config, nickname):
 
         ships = ships.replace("{ships_sold}", shippos)
 
+        newsTemplate = '<table style="margin-bottom: 10px; margin-left: 1em; width:90%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>{headline}</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px; padding-left: 20px; padding-right: 20px">\n{news}\n</td>\n</tr>\n</table>\n'
+        new = ""
+        for headline, newsItem in entry["news"]:
+            new = f'{new}{newsTemplate.replace("{headline}", headline).replace("{news}", newsItem)}\n'
+
+        news = news.replace("{news}", new)
+
         rumorTemplate = '<table style="margin-bottom: 10px; margin-left: 1em; width:90%; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;"><b>[[{rumorFaction}]]</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{rumors}\n</td>\n</tr>\n</table>\n'
         rum = ""
         for faction, rumorList in entry["rumors"].items():
@@ -394,7 +401,7 @@ def generatePage(template, data, config, nickname):
         other = f'[[Category: {entry["owner"]}]]\n[[Category: {entry["region"]}]]\n[[Category: {entry["system"]}]]\n'
         categories = categories.replace("{other}", other)
 
-        return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{rumors}{time}{categories}"
+        return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{news}{rumors}{time}{categories}"
     elif "faction" in template.lower():
         entry = data["Factions"][nickname]
 

@@ -310,6 +310,11 @@ def get_bases() -> dict:
                 except (IndexError, KeyError):
                     synopsis = fl.formats.dll.lookup_as_html(base.solar().ids_info + 1)
 
+                if base.news():
+                    news = [[newsitem._headline(), newsitem._text()] for newsitem in base.news()]
+                else:
+                    news = []
+
                 bases[base.nickname] = {
                     "name": base.name(),
                     "specs": specifications,
@@ -320,10 +325,8 @@ def get_bases() -> dict:
                     "sector": base.sector(),
                     "bribes": [faction.name() for faction in base.bribes()],
                     "missions": [faction.name() for faction in base.missions()],
-                    "rumors": {
-                        faction.name(): list(rumor)
-                        for faction, rumor in base.rumors().items()
-                    },
+                    "rumors": {faction.name(): list(rumor) for faction, rumor in base.rumors().items()},
+					"news": news,
                     "commodities_buying": [x.name() for x in base.buys_commodities()],
                     "commodities_selling": [x.name() for x in base.sells_commodities()],
                     "ships_sold": ships_sold,
@@ -549,10 +552,49 @@ def get_commodities() -> dict:
     return commodities
 
 
+def get_guns() -> dict:
+    print("Reading weapon data...")
+    guns = {
+        "Guns": {},
+        "Turrets": {},
+        "Missiles": {}
+    }
+    for gun in fl.routines.get_guns():
+        sold_oorp_only = all(base.nickname in oorpBases for base in gun.sold_at().keys())
+        if gun.sold_at() and gun.is_valid() and not sold_oorp_only:
+            gunData = {
+                "name": gun.name(),
+                "infocard": gun.infocard(),
+                "hull_damage": round(gun.hull_damage(), 2),
+                "hull_dps": round(gun.hull_dps(), 2),
+                "shield_damage": round(gun.shield_damage(), 2),
+                "shield_dps": round(gun.shield_dps(), 2),
+                "energy_per_second": round(gun.energy_per_second(), 2),
+                "efficiency": round(gun.efficiency(), 2),
+                "rating": round(gun.rating(), 2),
+                "range": round(gun.range(), 2),
+                "sold_at": list({(  base.name(),
+                                    base.owner().name(),
+                                    base.system_().name(),
+                                    base.system_().region(),
+                                    price)
+                                    for base, price in gun.sold_at().items()})
+            }
+            if gun.is_missile():
+                guns["Missiles"][gun.nickname] = gunData
+            elif gun.is_turret():
+                guns["Turrets"][gun.nickname] = gunData
+            else:
+                guns["Guns"][gun.nickname] = gunData         
+
+    return guns
+
+
 def main():
     with open("cconfig.json", "r") as f:
         cconfig = load(f)
     fl.set_install_path(cconfig["freelancerPath"])
+    global oorpBases; oorpBases = [b.nickname for b in fl.bases if b.system_().nickname in oorp]
     global infocardMap; infocardMap = fl.interface.get_infocardmap()
     global commodity_table; commodity_table = {commodity.nickname: commodity.name() for commodity in fl.commodities}
     data = {
@@ -563,6 +605,7 @@ def main():
         "Bases": get_bases(),
         "Factions": get_factions(),
         "Commodities": get_commodities(),
+        "Guns": get_guns()
     }
     print(logs)
     return data
@@ -581,6 +624,7 @@ if __name__ == "__main__":
         )
         quit()
 
+    oorpBases = [b.nickname for b in fl.bases if b.system_().nickname in oorp]
     infocardMap = fl.interface.get_infocardmap()
     commodity_table = {commodity.nickname: commodity.name() for commodity in fl.commodities}
 
@@ -595,6 +639,7 @@ if __name__ == "__main__":
         "Bases": get_bases(),
         "Factions": get_factions(),
         "Commodities": get_commodities(),
+        "Guns": get_guns()
     }
     print(f"Game files read, writing {filename}...")
     with open(f"../dumpedData/{filename}", "w") as f:
