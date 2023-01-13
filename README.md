@@ -13,9 +13,9 @@ WIP dynamic wiki page source generator for Discovery Freelancer
 
 To install, do:
 
-`pip install beautifulsoup4 pillow html-table-parser-python3 pandas alive_progress requests`
+`pip install beautifulsoup4 pillow html-table-parser-python3 pandas alive_progress requests pytz`
 
-`pip install https://github.com/baseflow1/flint/archive/wiki.zip -U`
+`pip install https://github.com/san-e/flint/archive/wiki.zip -U`
 
 or navigate to the `requirements.txt` file and do `pip install -r requirements.txt`
 

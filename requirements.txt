@@ -5,3 +5,4 @@ pandas
 alive_progress
 pillow
 requests
+pytz
