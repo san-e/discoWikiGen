@@ -9,6 +9,7 @@ from os.path import exists, basename
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
+import pytz
 
 version = ""  # input("Enter game version: ")
 
@@ -280,8 +281,8 @@ def get_ships(definitions: dict) -> dict:
                         if base.has_solar() and base.system_().nickname not in oorp
                     ],
                     "hardpoints": hardpoints,
-                    "time": datetime.now().strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S"
+                    "time": datetime.now(tz = pytz.UTC).strftime(
+                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
                     ),
                 }
             except TypeError as e:
@@ -330,9 +331,7 @@ def get_bases() -> dict:
                     "commodities_buying": [x.name() for x in base.buys_commodities()],
                     "commodities_selling": [x.name() for x in base.sells_commodities()],
                     "ships_sold": ships_sold,
-                    "time": datetime.now().strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S"
-                    ),
+                    "time": datetime.now(tz = pytz.UTC).strftime("Page generated on the %d/%m/%Y at %H:%M:%S UTC UTC"),
                 }
             except (TypeError, AttributeError) as e:
                 logs.append({base: e})
@@ -424,8 +423,8 @@ def get_systems() -> dict:
                     "nebulae": nebulae,
                     "asteroids": asteroids,
                     "wrecks": wrecks,
-                    "time": datetime.now().strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S"
+                    "time": datetime.now(tz = pytz.UTC).strftime(
+                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
                     ),
                 }
 
@@ -494,8 +493,8 @@ def get_factions() -> dict:
                     fl.bases[base].name(): text
                     for base, text in faction.rumors().items()
                 },
-                "time": datetime.now().strftime(
-                    "Page generated on the %d/%m/%Y at %H:%M:%S"
+                "time": datetime.now(tz = pytz.UTC).strftime(
+                    "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
                 ),
             }
     return factions
@@ -545,7 +544,7 @@ def get_commodities() -> dict:
                 for base, price in commodity.sold_at().items()
                 if base.system_().nickname not in oorp
             ],
-            "time": datetime.now().strftime(
+            "time": datetime.now(tz = pytz.UTC).strftime(
                 "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
             ),
         }
