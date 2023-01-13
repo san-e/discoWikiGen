@@ -11,6 +11,7 @@ def clearConsole():
     else:
         os.system('clear')
 
+
 def firstTimeSetup():
     while True:
         print("""Input the Path to your Freelancer installation:""")
@@ -28,7 +29,8 @@ def firstTimeSetup():
 
     clearConsole()
     print(f"""Input your Bot Username and Password
-    If you don't have one, navigate to {wikiLink.replace('api.php', 'wiki/Special:BotPasswords')} to create one""")
+    If you don't have one, navigate to /wiki/Special:BotPasswords to create one.
+    More info: https://www.mediawiki.org/wiki/Manual:Bot_passwords""")
     botP1 = input("Wiki-Account-Username: ")
     botP2 = input("Bot-name: ")
     botP3 = input("Bot-password: ")
@@ -39,6 +41,7 @@ def firstTimeSetup():
             "freelancerPath": freelancerPath,
             "botCredentials": botCredentials
         }, f, indent=1)
+
 
 def nukeWiki():
     print("Nuke the wiki before updating? y/N")
@@ -64,14 +67,14 @@ def pagesToUpdate():
     print("")
     selection = input()
     options = {
-        "systems": True if "1" in selection or "x" in selection else False,
-        "ships": True if "2" in selection or "x" in selection else False,
-        "bases": True if "3" in selection or "x" in selection else False,
-        "factions": True if "4" in selection or "x" in selection else False,
+        "systems":     True if "1" in selection or "x" in selection else False,
+        "ships":       True if "2" in selection or "x" in selection else False,
+        "bases":       True if "3" in selection or "x" in selection else False,
+        "factions":    True if "4" in selection or "x" in selection else False,
         "commodities": True if "5" in selection or "x" in selection else False,
-        "redirects": True if "6" in selection or "x" in selection else False,
-        "special": True if "7" in selection or "x" in selection else False,
-        "images": True if "8" in selection or "x" in selection else False,
+        "redirects":   True if "6" in selection or "x" in selection else False,
+        "special":     True if "7" in selection or "x" in selection else False,
+        "images":      True if "8" in selection or "x" in selection else False,
         "nuke": nuke
         }
     clearConsole()
