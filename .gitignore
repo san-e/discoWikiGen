@@ -1,10 +1,6 @@
-flData.json
 .vscode/
 __pycache__/
-dumpedData/images/ships/*
-dumpedData/images/commodities/*
-flData.json
-wikitext.json
+dumpedData/*
 gen.bat
 scripts/botPassword.json
 everything.bat

@@ -5,7 +5,7 @@ from time import perf_counter
 from math import pi
 from sys import argv
 from os import getcwd, makedirs
-from os.path import exists, basename
+from os.path import exists, basename, splitext
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
@@ -560,9 +560,30 @@ def get_guns() -> dict:
     }
     for gun in fl.routines.get_guns():
         sold_oorp_only = all(base.nickname in oorpBases for base in gun.sold_at().keys())
-        if gun.sold_at() and gun.is_valid() and not sold_oorp_only:
+
+        wrecks = []
+        for wreck in fl.routines.get_wrecks():
+            loot = [x[0] for x in wreck.loot()]
+            if gun in loot:
+                wrecks.append([wreck.name(), wreck.system().name(), wreck.sector()])
+
+        if ((gun.sold_at() and not sold_oorp_only) or wrecks) and gun.is_valid():
+
+            icon_name = splitext(basename(gun.good().item_icon))[0]
+
+            icon = gun.icon()
+            image = Image.open(BytesIO(icon))
+            if image.size != (64, 64):
+                image.save(f"../dumpedData/images/guns/{icon_name}.png")
+            else:
+                image.resize((128, 128)).save(f"../dumpedData/images/guns/{icon_name}.png")
+
+            sold_at = {base: price for base, price in gun.sold_at().items() if base.nickname not in oorpBases}
+
             gunData = {
                 "name": gun.name(),
+                "nickname": gun.nickname,
+                "icon_name": icon_name,
                 "infocard": gun.infocard(),
                 "hull_damage": round(gun.hull_damage(), 2),
                 "hull_dps": round(gun.hull_dps(), 2),
@@ -570,6 +591,7 @@ def get_guns() -> dict:
                 "shield_dps": round(gun.shield_dps(), 2),
                 "energy_per_second": round(gun.energy_per_second(), 2),
                 "efficiency": round(gun.efficiency(), 2),
+                "refire_rate": round(gun.refire(), 2),
                 "rating": round(gun.rating(), 2),
                 "range": round(gun.range(), 2),
                 "sold_at": list({(  base.name(),
@@ -577,8 +599,11 @@ def get_guns() -> dict:
                                     base.system_().name(),
                                     base.system_().region(),
                                     price)
-                                    for base, price in gun.sold_at().items()})
+                                    for base, price in sold_at.items()}),
+                "wrecks": wrecks
             }
+
+
             if gun.is_missile():
                 guns["Missiles"][gun.nickname] = gunData
             elif gun.is_turret():
@@ -604,7 +629,7 @@ def main():
         "Bases": get_bases(),
         "Factions": get_factions(),
         "Commodities": get_commodities(),
-        "Guns": get_guns()
+        "Weapons": get_guns()
     }
     print(logs)
     return data
