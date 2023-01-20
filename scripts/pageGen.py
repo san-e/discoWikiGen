@@ -552,7 +552,10 @@ def generatePage(template, data, config, nickname):
                 
         time = time.replace("{time}", entry["time"])
 
-        categories = categories.replace("{type}", f"[[Category: {entry['type'].title()}]]")
+        if entry["name"].isupper():
+            categories = categories.replace("{type}", f"[[Category: {entry['type'].title()}]] [[Category: Codenames]]")
+        else:
+            categories = categories.replace("{type}", f"[[Category: {entry['type'].title()}]]")
 
         return f"{infobox}{infocard}{availability}{time}{categories}"
 
