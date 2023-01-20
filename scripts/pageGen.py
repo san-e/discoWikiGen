@@ -510,6 +510,52 @@ def generatePage(template, data, config, nickname):
         time = time.replace("{time}", entry["time"])
 
         return f"{infobox}{infocard}{availability}{time}{categories}"
+    elif "weapon" in template.lower():
+        entry = data["Weapons"][nickname]
+
+        infobox = """__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; float: right; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{icon_name}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="Hull Damage per hit"><b>Hull Damage</b>\n</td>\n<td style="padding-right: 1em">{hull_damage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Shield Damage per hit"><b>Shield Damage</b>\n</td>\n<td style="padding-right: 1em">{shield_damage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Hull Damage per second of continuous fire"><b>Hull DPS</b>\n</td>\n<td style="padding-right: 1em">{hull_dps}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Shield Damage per second of continuous fire"><b>Shield DPS</b>\n</td>\n<td style="padding-right: 1em">{shield_dps}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Amound of projectiles shot per second"><b>Refire Rate</b>\n</td>\n<td style="padding-right: 1em">{refire}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Amount of energy used per second"><b>Energy usage/s</b>\n</td>\n<td style="padding-right: 1em">{energy_usage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Speed of the projectile in meters per second"><b>Speed</b>\n</td>\n<td style="padding-right: 1em">{speed}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Range of the projectile in meters"><b>Range</b>\n</td>\n<td style="padding-right: 1em">{range}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="(Hull Damage + Shield Damage) / Power Usage"><b>Efficiency</b>\n</td>\n<td style="padding-right: 1em">{efficiency}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="FLStat Rating"><b>FLStat Rating</b>\n</td>\n<td style="padding-right: 1em">{rating}\n</td>\n</tr>\n</table>\n\n"""
+        infocard = "{infocard}\n"
+        availability = "<h2>Availability</h2>\n{availability}"
+        time = "<i>NOTE: {time}</i>\n"
+        categories = "\n[[Category: Weapons]]{type}\n"
+
+        infobox = infobox.replace("{nickname}", nickname)
+        infobox = infobox.replace("{name}", entry["name"])
+        infobox = infobox.replace("{icon_name}", f'{entry["icon_name"]}.png')
+        infobox = infobox.replace("{hull_damage}", str(entry["hull_damage"]))
+        infobox = infobox.replace("{shield_damage}", str(entry["shield_damage"]))
+        infobox = infobox.replace("{hull_dps}", str(entry["hull_dps"]))
+        infobox = infobox.replace("{shield_dps}", str(entry["shield_dps"]))
+        infobox = infobox.replace("{refire}", str(entry["refire"]))
+        infobox = infobox.replace("{energy_usage}", str(entry["energy_per_second"]))
+        infobox = infobox.replace("{speed}", str(entry["speed"]))
+        infobox = infobox.replace("{range}", str(entry["range"]))
+        infobox = infobox.replace("{efficiency}", str(entry["efficiency"]))
+        infobox = infobox.replace("{rating}", str(entry["rating"]))
+
+        infocard = infocard.replace("{infocard}", entry["infocard"].replace("<p>", '<p style="padding: 0px; margin: 0px;">').replace('<p align="left">', '<p style="padding: 0px; margin: 0px;">'))
+
+        temp = ""
+        if entry["sold_at"]:
+            temp = temp + """<h3>Sold at</h3>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n"""
+            for name, owner, system, region, price in entry["sold_at"]:
+                temp = temp + f"""<tr>\n<td>[[{name}]]</td>\n<td>[[{owner}]]</td>\n<td>[[{system}]]</td>\n<td>{region}</td>\n<td>{"{:,}".format(price)}</td>\n</tr>\n"""
+            temp = temp + "</td></tr></table>\n"
+        
+        if entry["wrecks"]:
+            temp = temp + """<h3>Wrecks</h3>\n<table class="wikitable sortable">\n<tr>\n<th>Wreck</th>\n<th>System</th>\n<th>Sector</th>\n</tr>\n"""
+            for name, system, sector in entry["wrecks"]:
+                temp = temp + f"""<tr>\n<td>{name}</td>\n<td>[[{system}]]</td>\n<td>{sector}</td>\n</tr>\n"""
+            temp = temp + "</td></tr></table>\n"
+
+        availability = availability.replace("{availability}", temp)
+                
+        time = time.replace("{time}", entry["time"])
+
+        categories = categories.replace("{type}", f"[[Category: {entry['type'].title()}]]")
+
+        return f"{infobox}{infocard}{availability}{time}{categories}"
+
 
 
 def generateSpecial(ships=None, systems=None, bases=None, factions=None, commodities=None):
@@ -617,6 +663,15 @@ def assemblePages(loadedData):
         ) + "[[Category: NukeOnPatch]]"
         commoditySource[attributes["name"]] = source
     sources["Commodities"] = commoditySource
+
+    weaponSource = {}
+    print("Assembling Weapon pages")
+    for name, attributes in loadedData["Weapons"].items():
+        source = generatePage(
+            template="Weapon", data=loadedData, config=configData, nickname=name
+        ) + "[[Category: NukeOnPatch]]"
+        weaponSource[attributes["name"]] = source
+    sources["Weapons"] = weaponSource
 
     print("Assembling Redirect pages")
     sources["Redirects"] = redirects

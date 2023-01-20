@@ -90,7 +90,8 @@
   "dumpedData": "../dumpedData/",
   "createDir": [
    "../dumpedData/images/ships",
-   "../dumpedData/images/commodities"
+   "../dumpedData/images/commodities",
+   "../dumpedData/images/guns"
   ]
  },
  "pageGen": {

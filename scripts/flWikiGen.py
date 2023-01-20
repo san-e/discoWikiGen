@@ -553,11 +553,9 @@ def get_commodities() -> dict:
 
 def get_guns() -> dict:
     print("Reading weapon data...")
-    guns = {
-        "Guns": {},
-        "Turrets": {},
-        "Missiles": {}
-    }
+
+    guns = {}
+
     for gun in fl.routines.get_guns():
         sold_oorp_only = all(base.nickname in oorpBases for base in gun.sold_at().keys())
 
@@ -580,38 +578,40 @@ def get_guns() -> dict:
 
             sold_at = {base: price for base, price in gun.sold_at().items() if base.nickname not in oorpBases}
 
-            gunData = {
+            if gun.is_missile():
+                type = "missile"
+            elif gun.is_turret():
+                type = "turret"
+            else:
+                type = "gun"
+
+            guns[gun.nickname] = {
                 "name": gun.name(),
-                "nickname": gun.nickname,
                 "icon_name": icon_name,
                 "infocard": gun.infocard(),
                 "hull_damage": round(gun.hull_damage(), 2),
                 "hull_dps": round(gun.hull_dps(), 2),
                 "shield_damage": round(gun.shield_damage(), 2),
                 "shield_dps": round(gun.shield_dps(), 2),
+                "refire": round(gun.refire(), 2),
+                "speed": gun.muzzle_velocity,
                 "energy_per_second": round(gun.energy_per_second(), 2),
                 "efficiency": round(gun.efficiency(), 2),
                 "refire_rate": round(gun.refire(), 2),
                 "rating": round(gun.rating(), 2),
                 "range": round(gun.range(), 2),
+                "type": type,
                 "sold_at": list({(  base.name(),
                                     base.owner().name(),
                                     base.system_().name(),
                                     base.system_().region(),
                                     price)
                                     for base, price in sold_at.items()}),
-                "wrecks": wrecks
+                "wrecks": wrecks,
+                "time": datetime.now(tz = pytz.UTC).strftime("Page generated on the %d/%m/%Y at %H:%M:%S UTC")
             }
 
-
-            if gun.is_missile():
-                guns["Missiles"][gun.nickname] = gunData
-            elif gun.is_turret():
-                guns["Turrets"][gun.nickname] = gunData
-            else:
-                guns["Guns"][gun.nickname] = gunData         
-
-    return guns
+    return dict(sorted(guns.items(), key = lambda x: bool(x[1]["sold_at"])))
 
 
 def main():
@@ -663,7 +663,7 @@ if __name__ == "__main__":
         "Bases": get_bases(),
         "Factions": get_factions(),
         "Commodities": get_commodities(),
-        "Guns": get_guns()
+        "Weapons": get_guns()
     }
     print(f"Game files read, writing {filename}...")
     with open(f"../dumpedData/{filename}", "w") as f:

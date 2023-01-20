@@ -16,6 +16,7 @@ argparser.add_argument("-b", "--bases", help="Update base pages", action="store_
 argparser.add_argument("-f", "--factions", help="Update faction pages", action="store_true")
 argparser.add_argument("-i", "--images", help="Upload images", action="store_true")
 argparser.add_argument("-c", "--commodities", help="Update commodities", action="store_true")
+argparser.add_argument("-w", "--weapons", help="Update weapons", action="store_true")
 argparser.add_argument("--special", help="Update Special Pages", action="store_true")
 argparser.add_argument("-a", "--all", help="Update all Pages + Upload Images", action="store_true")
 argparser.add_argument("-r", "--redirects", help="Update Redirects", action="store_true")
@@ -293,6 +294,8 @@ def main(wikidata = None, choices = None):
         wikitext = wikitext | wikidata["Factions"]
     if args.commodities or args.all or "commodities" in choices:
         wikitext = wikitext | wikidata["Commodities"]
+    if args.weapons or args.all or "weapons" in choices:
+        wikitext = wikitext | wikidata["Weapons"]
     if args.redirects or args.all or "redirects" in choices:
         wikitext = wikitext | wikidata["Redirects"]
     if args.special or args.all or "special" in choices:
