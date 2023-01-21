@@ -563,7 +563,7 @@ def get_guns() -> dict:
         for wreck in fl.routines.get_wrecks():
             loot = [x[0] for x in wreck.loot()]
             if gun in loot:
-                wrecks.append([wreck.name(), wreck.system().name(), wreck.sector()])
+                wrecks.append([wreck.name() if wreck.name() else "Unmarked Wreck", wreck.system().name(), wreck.sector()])
 
         if ((gun.sold_at() and not sold_oorp_only) or wrecks) and gun.is_valid():
 
