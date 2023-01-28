@@ -10,6 +10,9 @@ from PIL import Image
 from io import BytesIO
 from datetime import datetime
 import pytz
+import logging
+
+logging.basicConfig(level = logging.DEBUG, filename = datetime.now(tz = pytz.UTC).strftime("./logs/%d-%m-%Y_%Hh%Mm%Ss.log"))
 
 version = ""  # input("Enter game version: ")
 
@@ -286,7 +289,7 @@ def get_ships(definitions: dict) -> dict:
                     ),
                 }
             except TypeError as e:
-                logs.append({ship: e})
+                logging.exception(f"Error occured for ship {ship.nickname}: ")
     return ships
 
 
@@ -312,7 +315,7 @@ def get_bases() -> dict:
                     synopsis = fl.formats.dll.lookup_as_html(base.solar().ids_info + 1)
 
                 if base.news():
-                    news = [[newsitem._headline(), newsitem._text()] for newsitem in base.news()]
+                    news = [[newsitem.headline_(), newsitem.text_()] for newsitem in base.news()]
                 else:
                     news = []
 
@@ -331,10 +334,10 @@ def get_bases() -> dict:
                     "commodities_buying": [x.name() for x in base.buys_commodities()],
                     "commodities_selling": [x.name() for x in base.sells_commodities()],
                     "ships_sold": ships_sold,
-                    "time": datetime.now(tz = pytz.UTC).strftime("Page generated on the %d/%m/%Y at %H:%M:%S UTC UTC"),
+                    "time": datetime.now(tz = pytz.UTC).strftime("Page generated on the %d/%m/%Y at %H:%M:%S UTC"),
                 }
             except (TypeError, AttributeError) as e:
-                logs.append({base: e})
+                logging.exception(f"Error occured for base {base.nickname}: ")
     return bases
 
 
@@ -432,8 +435,7 @@ def get_systems() -> dict:
 
 
         except Exception as e:
-            raise
-            logs.append({system: e})
+            logging.exception(f"Error occured for system {system.nickname}: ")
     return systems
 
 
@@ -441,62 +443,65 @@ def get_factions() -> dict:
     print("Reading faction data...")
     factions = {}
     for faction in fl.factions:
-        if faction.nickname not in faction.name() and not faction.name().isspace():
-            alignment = (
-                "Corporation"
-                if faction.name() in config["pageGen"]["corporations"]
-                else faction.legality()
-            )
+        try:
+            if faction.nickname not in faction.name() and not faction.name().isspace():
+                alignment = (
+                    "Corporation"
+                    if faction.name() in config["pageGen"]["corporations"]
+                    else faction.legality()
+                )
 
-            reps = {
-                faction.name(): rep
-                for faction, rep in faction.rep_sheet().items()
-                if rep
-            }
-            reps = sorted(reps.items(), key=lambda x: x[1])
-            reps = dict(reps)
+                reps = {
+                    faction.name(): rep
+                    for faction, rep in faction.rep_sheet().items()
+                    if rep
+                }
+                reps = sorted(reps.items(), key=lambda x: x[1])
+                reps = dict(reps)
 
-            factions[faction.nickname] = {
-                "name": faction.name(),
-                "shortName": faction.short_name(),
-                "alignment": alignment,
-                "infocard": '<p style="padding: 0px; margin: 0px;">'
-                + faction.infocard().replace(
-                    "<p>", '<p style="padding: 0px; margin: 0px;">'
-                ),
-                "ships": [
-                    [ship.name(), ship.type()]
-                    for nickname, ship in faction.ships().items()
-                ],
-                "bases": [
-                    [
-                        base.name(),
-                        base.owner().name(),
-                        base.system_().name(),
-                        base.system_().region(),
-                    ]
-                    for nickname, base in faction.bases().items()
-                    if base.system_().nickname not in oorp
-                ],
-                "bribes": [
-                    [
-                        base.name(),
-                        base.owner().name(),
-                        base.system_().name(),
-                        base.system_().region(),
-                    ]
-                    for nickname, base in faction.bribes().items()
-                    if base.system_().nickname not in oorp
-                ],
-                "repsheet": reps,
-                "rumors": {
-                    fl.bases[base].name(): text
-                    for base, text in faction.rumors().items()
-                },
-                "time": datetime.now(tz = pytz.UTC).strftime(
-                    "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
-                ),
-            }
+                factions[faction.nickname] = {
+                    "name": faction.name(),
+                    "shortName": faction.short_name(),
+                    "alignment": alignment,
+                    "infocard": '<p style="padding: 0px; margin: 0px;">'
+                    + faction.infocard().replace(
+                        "<p>", '<p style="padding: 0px; margin: 0px;">'
+                    ),
+                    "ships": [
+                        [ship.name(), ship.type()]
+                        for nickname, ship in faction.ships().items()
+                    ],
+                    "bases": [
+                        [
+                            base.name(),
+                            base.owner().name(),
+                            base.system_().name(),
+                            base.system_().region(),
+                        ]
+                        for nickname, base in faction.bases().items()
+                        if base.system_().nickname not in oorp
+                    ],
+                    "bribes": [
+                        [
+                            base.name(),
+                            base.owner().name(),
+                            base.system_().name(),
+                            base.system_().region(),
+                        ]
+                        for nickname, base in faction.bribes().items()
+                        if base.system_().nickname not in oorp
+                    ],
+                    "repsheet": reps,
+                    "rumors": {
+                        fl.bases[base].name(): text
+                        for base, text in faction.rumors().items()
+                    },
+                    "time": datetime.now(tz = pytz.UTC).strftime(
+                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
+                    ),
+                }
+        except TypeError:
+            logging.exception(f"Error occured for faction {faction.nickname}: ")
     return factions
 
 
@@ -505,49 +510,52 @@ def get_commodities() -> dict:
     commodities = {}
     for commodity in fl.commodities:
         try:
-            icon = commodity.icon()
-            image = Image.open(BytesIO(icon))
-            if image.size != (64, 64):
-                image.save(f"../dumpedData/images/commodities/{commodity.nickname}.png")
-            else:
-                image.resize((128, 128)).save(
-                    f"../dumpedData/images/commodities/{commodity.nickname}.png"
-                )
-        except FileNotFoundError:
-            pass
+            try:
+                icon = commodity.icon()
+                image = Image.open(BytesIO(icon))
+                if image.size != (64, 64):
+                    image.save(f"../dumpedData/images/commodities/{commodity.nickname}.png")
+                else:
+                    image.resize((128, 128)).save(
+                        f"../dumpedData/images/commodities/{commodity.nickname}.png"
+                    )
+            except FileNotFoundError:
+                pass
 
-        commodities[commodity.nickname] = {
-            "name": commodity.name(),
-            "infocard": commodity.infocard(),
-            "volume": commodity.volume,
-            "decay": commodity.decay_per_second,
-            "defaultPrice": commodity.price(),
-            "boughtAt": [
-                [
-                    base.name(),
-                    base.owner().name(),
-                    base.system_().name(),
-                    base.system_().region(),
-                    price,
-                ]
-                for base, price in commodity.bought_at().items()
-                if base.system_().nickname not in oorp
-            ],
-            "soldAt": [
-                [
-                    base.name(),
-                    base.owner().name(),
-                    base.system_().name(),
-                    base.system_().region(),
-                    price,
-                ]
-                for base, price in commodity.sold_at().items()
-                if base.system_().nickname not in oorp
-            ],
-            "time": datetime.now(tz = pytz.UTC).strftime(
-                "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
-            ),
-        }
+            commodities[commodity.nickname] = {
+                "name": commodity.name(),
+                "infocard": commodity.infocard(),
+                "volume": commodity.volume,
+                "decay": commodity.decay_per_second,
+                "defaultPrice": commodity.price(),
+                "boughtAt": [
+                    [
+                        base.name(),
+                        base.owner().name(),
+                        base.system_().name(),
+                        base.system_().region(),
+                        price,
+                    ]
+                    for base, price in commodity.bought_at().items()
+                    if base.system_().nickname not in oorp
+                ],
+                "soldAt": [
+                    [
+                        base.name(),
+                        base.owner().name(),
+                        base.system_().name(),
+                        base.system_().region(),
+                        price,
+                    ]
+                    for base, price in commodity.sold_at().items()
+                    if base.system_().nickname not in oorp
+                ],
+                "time": datetime.now(tz = pytz.UTC).strftime(
+                    "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
+                ),
+            }
+        except TypeError:
+            logging.exception(f"Error occured for commodity {commodity.nickname}")
     return commodities
 
 
@@ -557,59 +565,63 @@ def get_guns() -> dict:
     guns = {}
 
     for gun in fl.routines.get_guns():
-        sold_oorp_only = all(base.nickname in oorpBases for base in gun.sold_at().keys())
+        try:
+            sold_oorp_only = all(base.nickname in oorpBases for base in gun.sold_at().keys())
 
-        wrecks = []
-        for wreck in fl.routines.get_wrecks():
-            loot = [x[0] for x in wreck.loot()]
-            if gun in loot:
-                wrecks.append([wreck.name() if wreck.name() else "Unmarked Wreck", wreck.system().name(), wreck.sector()])
+            wrecks = []
+            for wreck in fl.routines.get_wrecks():
+                loot = [x[0] for x in wreck.loot()]
+                if gun in loot:
+                    wrecks.append([wreck.name() if wreck.name() else "Unmarked Wreck", wreck.system().name(), wreck.sector()])
 
-        if ((gun.sold_at() and not sold_oorp_only) or wrecks) and gun.is_valid():
+            if ((gun.sold_at() and not sold_oorp_only) or wrecks) and gun.is_valid():
 
-            icon_name = splitext(basename(gun.good().item_icon))[0]
+                icon_name = splitext(basename(gun.good().item_icon))[0]
 
-            icon = gun.icon()
-            image = Image.open(BytesIO(icon))
-            if image.size != (64, 64):
-                image.save(f"../dumpedData/images/guns/{icon_name}.png")
-            else:
-                image.resize((128, 128)).save(f"../dumpedData/images/guns/{icon_name}.png")
+                icon = gun.icon()
+                image = Image.open(BytesIO(icon))
+                if image.size != (64, 64):
+                    image.save(f"../dumpedData/images/guns/{icon_name}.png")
+                else:
+                    image.resize((128, 128)).save(f"../dumpedData/images/guns/{icon_name}.png")
 
-            sold_at = {base: price for base, price in gun.sold_at().items() if base.nickname not in oorpBases}
+                sold_at = {base: price for base, price in gun.sold_at().items() if base.nickname not in oorpBases}
 
-            if gun.is_missile():
-                type = "missile"
-            elif gun.is_turret():
-                type = "turret"
-            else:
-                type = "gun"
+                if gun.is_missile():
+                    type = "missile"
+                elif gun.is_turret():
+                    type = "turret"
+                else:
+                    type = "gun"
 
-            guns[gun.nickname] = {
-                "name": gun.name(),
-                "icon_name": icon_name,
-                "infocard": gun.infocard(),
-                "hull_damage": round(gun.hull_damage(), 2),
-                "hull_dps": round(gun.hull_dps(), 2),
-                "shield_damage": round(gun.shield_damage(), 2),
-                "shield_dps": round(gun.shield_dps(), 2),
-                "refire": round(gun.refire(), 2),
-                "speed": gun.muzzle_velocity,
-                "energy_per_second": round(gun.energy_per_second(), 2),
-                "efficiency": round(gun.efficiency(), 2),
-                "refire_rate": round(gun.refire(), 2),
-                "rating": round(gun.rating(), 2),
-                "range": round(gun.range(), 2),
-                "type": type,
-                "sold_at": list({(  base.name(),
-                                    base.owner().name(),
-                                    base.system_().name(),
-                                    base.system_().region(),
-                                    price)
-                                    for base, price in sold_at.items()}),
-                "wrecks": wrecks,
-                "time": datetime.now(tz = pytz.UTC).strftime("Page generated on the %d/%m/%Y at %H:%M:%S UTC")
-            }
+                guns[gun.nickname] = {
+                    "name": gun.name(),
+                    "icon_name": icon_name,
+                    "infocard": gun.infocard(),
+                    "hull_damage": round(gun.hull_damage(), 2),
+                    "hull_dps": round(gun.hull_dps(), 2),
+                    "shield_damage": round(gun.shield_damage(), 2),
+                    "shield_dps": round(gun.shield_dps(), 2),
+                    "refire": round(gun.refire(), 2),
+                    "speed": gun.muzzle_velocity,
+                    "energy_per_second": round(gun.energy_per_second(), 2),
+                    "efficiency": round(gun.efficiency(), 2),
+                    "refire_rate": round(gun.refire(), 2),
+                    "rating": round(gun.rating(), 2),
+                    "range": round(gun.range(), 2),
+                    "type": type,
+                    "sold_at": list({(  base.name(),
+                                        base.owner().name(),
+                                        base.system_().name(),
+                                        base.system_().region(),
+                                        price)
+                                        for base, price in sold_at.items()}),
+                    "wrecks": wrecks,
+                    "time": datetime.now(tz = pytz.UTC).strftime("Page generated on the %d/%m/%Y at %H:%M:%S UTC")
+                }
+        except:
+            logging.exception(f"Error occured for gun {gun.nickname}: ")
+
 
     return dict(sorted(guns.items(), key = lambda x: bool(x[1]["sold_at"])))
 
