@@ -92,6 +92,7 @@ Confirm? y/N
     """)
     if 'y' in input():
         clearConsole()
+        print("Dumping game data\n===================")
         flData = flWikiGen.main()
         wikitext = pageGen.main(flData)
         clearConsole()
