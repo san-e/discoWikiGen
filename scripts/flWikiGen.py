@@ -36,6 +36,16 @@ flintClasses = {
     "TradeLaneRing": fl.entities.solars.TradeLaneRing,
     "Object": fl.entities.solars.Object,
     "Jump": fl.entities.solars.Jump,
+    "Gun": fl.entities.equipment.Gun,
+    "MineDropper": fl.entities.equipment.MineDropper,
+    "Thruster": fl.entities.equipment.Thruster,
+    "CloakingDevice": fl.entities.equipment.CloakingDevice,
+    "Power": fl.entities.equipment.Power,
+    "Scanner": fl.entities.equipment.Scanner,
+    "CounterMeasureDropper": fl.entities.equipment.CounterMeasureDropper,
+    "Engine": fl.entities.equipment.Engine,
+    "Armor": fl.entities.equipment.Armor,
+    "CargoPod": fl.entities.equipment.CargoPod,
 }
 
 def degree(x):
@@ -43,7 +53,7 @@ def degree(x):
     return degree
 
 
-def getMineableCommodites(path):
+def get_mineable_commodites(path):
     content = fl.formats.ini.parse(fl.paths.construct_path(f"DATA/{path}"))
     for header, attributes in content:
         if header.lower() == "lootablezone":
@@ -56,7 +66,7 @@ def get_ships(definitions: dict) -> dict:
     print("Reading ship data...")
     ships = {}
     for ship in fl.ships:
-        if not "_npc" in ship.nickname and ship.sold_at():
+        if not "_npc" in ship.nickname and list(filter(lambda x: x.nickname not in oorpBases, ship.sold_at())):
             try:
                 built_by = ""
                 for shorthand, fullName in shipBuilders.items():
@@ -297,7 +307,7 @@ def get_bases() -> dict:
     print("Reading base data...")
     bases = {}
     for base in fl.bases:
-        if base.has_solar() and base.system_().nickname not in config["wikiGen"]["oorpSystems"]:
+        if base.has_solar() and base.nickname not in oorpBases:
             try:
                 ships_sold = [
                     [ship.name(), ship.type(), price]
@@ -366,7 +376,7 @@ def get_systems() -> dict:
                         except KeyError:
                             pass
                 for x in asteroids:
-                    x.append(getMineableCommodites(x[1]))
+                    x.append(get_mineable_commodites(x[1]))
                 for base in system.bases():
                     bases[base.name()] = {
                         "owner": base.owner().name(),
@@ -506,53 +516,54 @@ def get_commodities() -> dict:
     print("Reading commodity data...")
     commodities = {}
     for commodity in fl.commodities:
-        try:
+        if list(filter(lambda x: x.nickname not in oorpBases, list(commodity.sold_at().keys()))):
             try:
-                icon = commodity.icon()
-                image = Image.open(BytesIO(icon))
-                if image.size != (64, 64):
-                    image.save(f"../dumpedData/images/commodities/{commodity.nickname}.png")
-                else:
-                    image.resize((128, 128)).save(
-                        f"../dumpedData/images/commodities/{commodity.nickname}.png"
-                    )
-            except FileNotFoundError:
-                pass
+                try:
+                    icon = commodity.icon()
+                    image = Image.open(BytesIO(icon))
+                    if image.size != (64, 64):
+                        image.save(f"../dumpedData/images/commodities/{commodity.nickname}.png")
+                    else:
+                        image.resize((128, 128)).save(
+                            f"../dumpedData/images/commodities/{commodity.nickname}.png"
+                        )
+                except FileNotFoundError:
+                    pass
 
-            commodities[commodity.nickname] = {
-                "name": commodity.name(),
-                "infocard": commodity.infocard(),
-                "volume": commodity.volume,
-                "decay": commodity.decay_per_second,
-                "defaultPrice": commodity.price(),
-                "boughtAt": [
-                    [
-                        base.name(),
-                        base.owner().name(),
-                        base.system_().name(),
-                        base.system_().region(),
-                        price,
-                    ]
-                    for base, price in commodity.bought_at().items()
-                    if base.system_().nickname not in oorp
-                ],
-                "soldAt": [
-                    [
-                        base.name(),
-                        base.owner().name(),
-                        base.system_().name(),
-                        base.system_().region(),
-                        price,
-                    ]
-                    for base, price in commodity.sold_at().items()
-                    if base.system_().nickname not in oorp
-                ],
-                "time": datetime.now(tz = pytz.UTC).strftime(
-                    "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
-                ),
-            }
-        except TypeError:
-            logging.exception(f"Error occured for commodity {commodity.nickname}")
+                commodities[commodity.nickname] = {
+                    "name": commodity.name(),
+                    "infocard": commodity.infocard(),
+                    "volume": commodity.volume,
+                    "decay": commodity.decay_per_second,
+                    "defaultPrice": commodity.price(),
+                    "boughtAt": [
+                        [
+                            base.name(),
+                            base.owner().name(),
+                            base.system_().name(),
+                            base.system_().region(),
+                            price,
+                        ]
+                        for base, price in commodity.bought_at().items()
+                        if base.system_().nickname not in oorp
+                    ],
+                    "soldAt": [
+                        [
+                            base.name(),
+                            base.owner().name(),
+                            base.system_().name(),
+                            base.system_().region(),
+                            price,
+                        ]
+                        for base, price in commodity.sold_at().items()
+                        if base.system_().nickname not in oorp
+                    ],
+                    "time": datetime.now(tz = pytz.UTC).strftime(
+                        "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
+                    ),
+                }
+            except TypeError:
+                logging.exception(f"Error occured for commodity {commodity.nickname}")
     return commodities
 
 
