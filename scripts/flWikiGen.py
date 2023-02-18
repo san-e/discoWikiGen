@@ -642,7 +642,7 @@ def get_guns() -> dict:
 def get_equipment() -> dict:
     print("Reading other equipment...")
     
-    equipment = {"CounterMeasures": {}, "Armor": {}, "Cloaks": {}, "Engines": {}, "Shields": {}}
+    equipment = {"CounterMeasures": {}, "Armor": {}, "Cloaks": {}, "Engines": {}, "Shields": {}, "Thrusters": {}}
 
     # CMs
     countermeasures = fl.equipment.of_type(flintClasses["CounterMeasureDropper"])
@@ -741,6 +741,26 @@ def get_equipment() -> dict:
                                         base.system_().region(),
                                         price)
                                         for base, price in shield.sold_at().items()}),
+            }
+
+    thrusters = fl.equipment.of_type(flintClasses["Thruster"])
+    for thruster in thrusters:
+        if filter_oorp_bases(thruster.sold_at()):
+
+            equipment["Thrusters"][thruster.nickname] = {
+                "name": thruster.name(),
+                "infocard": thruster.infocard(),
+                "price": thruster.price(),
+                "power_usage": thruster.power_usage,
+                "max_force": thruster.max_force,
+                "efficiency": thruster.efficiency(),
+                "explosion_resistance": thruster.explosion_resistance,
+                "availability": list({( base.name(),
+                                        base.owner().name(),
+                                        base.system_().name(),
+                                        base.system_().region(),
+                                        price)
+                                        for base, price in thruster.sold_at().items()}),
             }
 
     equipment["CounterMeasures"] = dict(sorted(equipment["CounterMeasures"].items(), key = lambda x: bool(x[1]["availability"])))
