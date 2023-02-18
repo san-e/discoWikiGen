@@ -46,6 +46,7 @@ flintClasses = {
     "Engine": fl.entities.equipment.Engine,
     "Armor": fl.entities.equipment.Armor,
     "CargoPod": fl.entities.equipment.CargoPod,
+    "ShieldGenerator": fl.entities.equipment.ShieldGenerator,
 }
 
 def degree(x):
@@ -641,7 +642,7 @@ def get_guns() -> dict:
 def get_equipment() -> dict:
     print("Reading other equipment...")
     
-    equipment = {"CounterMeasures": {}, "Armor": {}, "Cloaks": {}, "Engines": {}}
+    equipment = {"CounterMeasures": {}, "Armor": {}, "Cloaks": {}, "Engines": {}, "Shields": {}}
 
     # CMs
     countermeasures = fl.equipment.of_type(flintClasses["CounterMeasureDropper"])
@@ -718,6 +719,30 @@ def get_equipment() -> dict:
                                         for base, price in engine.sold_at().items()}),
             }
 
+    shields = fl.equipment.of_type(flintClasses["ShieldGenerator"])
+    for shield in shields:
+        if filter_oorp_bases(shield.sold_at()):
+
+            equipment["Shields"][shield.nickname] = {
+                "name": shield.name(),
+                "infocard": shield.infocard(),
+                "price": shield.price(),
+                "technology": shield.shield_type,
+                "capacity": shield.max_capacity,
+                "explosion_resistance": shield.explosion_resistance,
+                "regen_rate": shield.regeneration_rate,
+                "offline_rebuild_time": shield.offline_rebuild_time,
+                "offline_threshold": shield.offline_threshold,
+                "constant_power_draw": shield.constant_power_draw,
+                "rebuild_power_draw": shield.rebuild_power_draw,
+                "availability": list({( base.name(),
+                                        base.owner().name(),
+                                        base.system_().name(),
+                                        base.system_().region(),
+                                        price)
+                                        for base, price in shield.sold_at().items()}),
+            }
+
     equipment["CounterMeasures"] = dict(sorted(equipment["CounterMeasures"].items(), key = lambda x: bool(x[1]["availability"])))
     equipment["Cloaks"] = dict(sorted(equipment["Cloaks"].items(), key = lambda x: bool(x[1]["availability"])))
     return equipment
@@ -737,7 +762,8 @@ def main():
         "Bases": get_bases(),
         "Factions": get_factions(),
         "Commodities": get_commodities(),
-        "Weapons": get_guns()
+        "Weapons": get_guns(),
+        "Equipment": get_equipment()
     }
     print(logs)
     return data
