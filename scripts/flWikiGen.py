@@ -539,7 +539,7 @@ def get_commodities() -> dict:
     print("Reading commodity data...")
     commodities = {}
     for commodity in fl.commodities:
-        if filter_oorp_bases(commodity.sold_at().keys()):
+        if filter_oorp_bases(commodity.sold_at()).keys():
             try:
                 try:
                     save_icon(icon = commodity.icon(), name = commodity.nickname, folder = "commodities")
