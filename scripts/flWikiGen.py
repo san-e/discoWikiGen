@@ -49,6 +49,8 @@ flintClasses = {
     "ShieldGenerator": fl.entities.equipment.ShieldGenerator,
 }
 
+EntitySet = fl.entities.EntitySet
+
 def degree(x):
     degree = (x * 180) / pi
     return degree
@@ -64,10 +66,14 @@ def get_mineable_commodites(path):
 
 
 def filter_oorp_bases(bases):
+    if not bases:
+        return {}
     if type(bases) == list:
         return list(filter(lambda x: x.nickname not in oorpBases, bases))
     elif type(bases) == dict:
         return dict(filter(lambda x: x[0].nickname not in oorpBases, bases.items()))
+    elif type(bases) == EntitySet:
+        return EntitySet(filter(lambda x: x.nickname not in oorpBases, bases.values()))
 
 
 def save_icon(icon, name, folder):
@@ -308,8 +314,8 @@ def get_ships(definitions: dict) -> dict:
                             base.system_().name(),
                             base.system_().region(),
                         ]
-                        for base in ship.sold_at()
-                        if base.has_solar() and base.system_().nickname not in oorp
+                        for base in filter_oorp_bases(ship.sold_at())
+                        if base.has_solar()
                     ],
                     "hardpoints": hardpoints,
                     "time": datetime.now(tz = pytz.UTC).strftime(
@@ -503,8 +509,7 @@ def get_factions() -> dict:
                             base.system_().name(),
                             base.system_().region(),
                         ]
-                        for nickname, base in faction.bases().items()
-                        if base.system_().nickname not in oorp
+                        for nickname, base in filter_oorp_bases(faction.bases()).items()
                     ],
                     "bribes": [
                         [
@@ -555,8 +560,7 @@ def get_commodities() -> dict:
                             base.system_().region(),
                             price,
                         ]
-                        for base, price in commodity.bought_at().items()
-                        if base.system_().nickname not in oorp
+                        for base, price in filter_oorp_bases(commodity.bought_at()).items()
                     ],
                     "soldAt": [
                         [
@@ -566,8 +570,7 @@ def get_commodities() -> dict:
                             base.system_().region(),
                             price,
                         ]
-                        for base, price in commodity.sold_at().items()
-                        if base.system_().nickname not in oorp
+                        for base, price in filter_oorp_bases(commodity.sold_at()).items()
                     ],
                     "time": datetime.now(tz = pytz.UTC).strftime(
                         "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
@@ -599,7 +602,7 @@ def get_guns() -> dict:
 
                 save_icon(icon = gun.icon(), name = icon_name, folder = "guns")
 
-                sold_at = {base: price for base, price in gun.sold_at().items() if base.nickname not in oorpBases}
+                sold_at = {base: price for base, price in filter_oorp_bases(gun.sold_at()).items()}
 
                 if gun.is_missile():
                     type = "missile"
@@ -666,7 +669,7 @@ def get_equipment() -> dict:
                                         base.system_().name(),
                                         base.system_().region(),
                                         price)
-                                        for base, price in cm.sold_at().items()}),
+                                        for base, price in filter_oorp_bases(cm.sold_at()).items()}),
             }
 
     armors = fl.equipment.of_type(flintClasses["Armor"])
@@ -685,7 +688,7 @@ def get_equipment() -> dict:
                                         base.system_().name(),
                                         base.system_().region(),
                                         price)
-                                        for base, price in armor.sold_at().items()}),
+                                        for base, price in filter_oorp_bases(armor.sold_at()).items()}),
             }
 
     cloaks = fl.equipment.of_type(flintClasses["CloakingDevice"])
@@ -702,7 +705,7 @@ def get_equipment() -> dict:
                                         base.system_().name(),
                                         base.system_().region(),
                                         price)
-                                        for base, price in cloak.sold_at().items()}),
+                                        for base, price in filter_oorp_bases(cloak.sold_at()).items()}),
             }
 
     engines = fl.equipment.of_type(flintClasses["Engine"])
@@ -721,7 +724,7 @@ def get_equipment() -> dict:
                                         base.system_().name(),
                                         base.system_().region(),
                                         price)
-                                        for base, price in engine.sold_at().items()}),
+                                        for base, price in filter_oorp_bases(engine.sold_at()).items()}),
             }
 
     shields = fl.equipment.of_type(flintClasses["ShieldGenerator"])
@@ -746,7 +749,7 @@ def get_equipment() -> dict:
                                         base.system_().name(),
                                         base.system_().region(),
                                         price)
-                                        for base, price in shield.sold_at().items()}),
+                                        for base, price in filter_oorp_bases(shield.sold_at()).items()}),
             }
 
     thrusters = fl.equipment.of_type(flintClasses["Thruster"])
@@ -767,7 +770,7 @@ def get_equipment() -> dict:
                                         base.system_().name(),
                                         base.system_().region(),
                                         price)
-                                        for base, price in thruster.sold_at().items()}),
+                                        for base, price in filter_oorp_bases(thruster.sold_at()).items()}),
             }
 
     equipment["CounterMeasures"] = dict(sorted(equipment["CounterMeasures"].items(), key = lambda x: bool(x[1]["availability"])))
