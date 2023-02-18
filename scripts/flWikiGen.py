@@ -641,7 +641,7 @@ def get_guns() -> dict:
 def get_equipment() -> dict:
     print("Reading other equipment...")
     
-    equipment = {"CounterMeasures": {}, "Armor": {}, "Cloaks": {}}
+    equipment = {"CounterMeasures": {}, "Armor": {}, "Cloaks": {}, "Engines": {}}
 
     # CMs
     countermeasures = fl.equipment.of_type(flintClasses["CounterMeasureDropper"])
@@ -695,6 +695,23 @@ def get_equipment() -> dict:
                                         base.system_().region(),
                                         price)
                                         for base, price in cloak.sold_at().items()}),
+            }
+
+    engines = fl.equipment.of_type(flintClasses["Engine"])
+    for engine in engines:
+        if filter_oorp_bases(engine.sold_at()):
+
+            equipment["Engines"][engine.nickname] = {
+                "name": engine.name(),
+                "price": engine.price(),
+                "cruise_speed": engine.cruise_speed_(),
+                "cruise_charge_time": engine.cruise_charge_time,
+                "availability": list({( base.name(),
+                                        base.owner().name(),
+                                        base.system_().name(),
+                                        base.system_().region(),
+                                        price)
+                                        for base, price in engine.sold_at().items()}),
             }
 
     equipment["CounterMeasures"] = dict(sorted(equipment["CounterMeasures"].items(), key = lambda x: bool(x[1]["availability"])))
