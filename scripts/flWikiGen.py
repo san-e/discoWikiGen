@@ -651,6 +651,7 @@ def get_equipment() -> dict:
             
             equipment["CounterMeasures"][cm.nickname] = {
                 "name": cm.name(),
+                "infocard": cm.infocard(),
                 "price": cm.price(),
                 "flare_price": flare.price(),
                 "max_flares": flare.ammo_limit,
@@ -671,6 +672,7 @@ def get_equipment() -> dict:
             
             equipment["Armor"][armor.nickname] = {
                 "name": armor.name(),
+                "infocard": armor.infocard(),
                 "price": armor.price(),
                 "volume": armor.volume,
                 "multiplier": armor.hit_pts_scale,
@@ -688,6 +690,7 @@ def get_equipment() -> dict:
 
             equipment["Cloaks"][cloak.nickname] = {
                 "name": cloak.name(),
+                "infocard": cloak.infocard(),
                 "price": cloak.price(),
                 "availability": list({( base.name(),
                                         base.owner().name(),
@@ -703,6 +706,7 @@ def get_equipment() -> dict:
 
             equipment["Engines"][engine.nickname] = {
                 "name": engine.name(),
+                "infocard": engine.infocard(),
                 "price": engine.price(),
                 "cruise_speed": engine.cruise_speed_(),
                 "cruise_charge_time": engine.cruise_charge_time,
