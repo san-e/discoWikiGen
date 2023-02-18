@@ -658,12 +658,22 @@ def get_equipment() -> dict:
                 "range": flare.range,
                 "lifetime": flare.lifetime,
                 "range": cm.range,
+                "availability": cm.sold_at()
             }
 
     armors = fl.equipment.of_type(flintClasses["Armor"])
     for armor in armors:
         if filter_oorp_bases(armor.sold_at()):
-            pass
+            
+            equipment["Armor"][armor.nickname] = {
+                "name": armor.name(),
+                "price": armor.price(),
+                "volume": armor.volume,
+                "multiplier": armor.hit_pts_scale,
+                "availability": armor.sold_at()
+            }
+
+    return equipment
 
 def main():
     with open("cconfig.json", "r") as f:
