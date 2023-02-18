@@ -641,7 +641,7 @@ def get_guns() -> dict:
 def get_equipment() -> dict:
     print("Reading other equipment...")
     
-    equipment = {}
+    equipment = {"CounterMeasures": {}, "Armor": {}, "Cloaks": {}}
 
     # CMs
     countermeasures = fl.equipment.of_type(flintClasses["CounterMeasureDropper"])
@@ -657,8 +657,12 @@ def get_equipment() -> dict:
                 "effectiveness": flare.effectiveness(),
                 "range": flare.range,
                 "lifetime": flare.lifetime,
-                "range": cm.range,
-                "availability": cm.sold_at()
+                "availability": list({( base.name(),
+                                        base.owner().name(),
+                                        base.system_().name(),
+                                        base.system_().region(),
+                                        price)
+                                        for base, price in cm.sold_at().items()}),
             }
 
     armors = fl.equipment.of_type(flintClasses["Armor"])
@@ -670,9 +674,31 @@ def get_equipment() -> dict:
                 "price": armor.price(),
                 "volume": armor.volume,
                 "multiplier": armor.hit_pts_scale,
-                "availability": armor.sold_at()
+                "availability": list({( base.name(),
+                                        base.owner().name(),
+                                        base.system_().name(),
+                                        base.system_().region(),
+                                        price)
+                                        for base, price in armor.sold_at().items()}),
             }
 
+    cloaks = fl.equipment.of_type(flintClasses["CloakingDevice"])
+    for cloak in cloaks:
+        if not cloak.name().isspace():
+
+            equipment["Cloaks"][cloak.nickname] = {
+                "name": cloak.name(),
+                "price": cloak.price(),
+                "availability": list({( base.name(),
+                                        base.owner().name(),
+                                        base.system_().name(),
+                                        base.system_().region(),
+                                        price)
+                                        for base, price in cloak.sold_at().items()}),
+            }
+
+    equipment["CounterMeasures"] = dict(sorted(equipment["CounterMeasures"].items(), key = lambda x: bool(x[1]["availability"])))
+    equipment["Cloaks"] = dict(sorted(equipment["Cloaks"].items(), key = lambda x: bool(x[1]["availability"])))
     return equipment
 
 def main():
@@ -724,7 +750,8 @@ if __name__ == "__main__":
         "Bases": get_bases(),
         "Factions": get_factions(),
         "Commodities": get_commodities(),
-        "Weapons": get_guns()
+        "Weapons": get_guns(),
+        "Equipment": get_equipment()
     }
     print(f"Game files read, writing {filename}...")
     with open(f"../dumpedData/{filename}", "w") as f:
