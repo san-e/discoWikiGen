@@ -62,11 +62,15 @@ def get_mineable_commodites(path):
     return None
 
 
+def filter_oorp_bases(bases):
+    return list(filter(lambda x: x.nickname not in oorpBases, bases))
+
+
 def get_ships(definitions: dict) -> dict:
     print("Reading ship data...")
     ships = {}
     for ship in fl.ships:
-        if not "_npc" in ship.nickname and list(filter(lambda x: x.nickname not in oorpBases, ship.sold_at())):
+        if not "_npc" in ship.nickname and filter_oorp_bases(ship.sold_at()):
             try:
                 built_by = ""
                 for shorthand, fullName in shipBuilders.items():
@@ -516,7 +520,7 @@ def get_commodities() -> dict:
     print("Reading commodity data...")
     commodities = {}
     for commodity in fl.commodities:
-        if list(filter(lambda x: x.nickname not in oorpBases, list(commodity.sold_at().keys()))):
+        if filter_oorp_bases(commodity.sold_at().keys()):
             try:
                 try:
                     icon = commodity.icon()
@@ -655,6 +659,11 @@ def get_equipment() -> dict:
                 "lifetime": flare.lifetime,
                 "range": cm.range,
             }
+
+    armors = fl.equipment.of_type(flintClasses["Armor"])
+    for armor in armors:
+        if filter_oorp_bases(armor.sold_at()):
+            pass
 
 def main():
     with open("cconfig.json", "r") as f:
