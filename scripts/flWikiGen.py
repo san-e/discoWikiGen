@@ -2,7 +2,7 @@ import flint as fl
 import discoTechCompat as tech
 from json import dump, load
 from time import perf_counter
-from math import pi
+from math import pi, inf
 from sys import argv
 from os import getcwd, makedirs
 from os.path import exists, basename, splitext
@@ -633,6 +633,28 @@ def get_guns() -> dict:
 
     return dict(sorted(guns.items(), key = lambda x: bool(x[1]["sold_at"])))
 
+
+def get_equipment() -> dict:
+    print("Reading other equipment...")
+    
+    equipment = {}
+
+    # CMs
+    countermeasures = fl.equipment.of_type(flintClasses["CounterMeasureDropper"])
+    for cm in countermeasures:
+        flare = cm.countermeasure()
+        if not "_npc" in cm.nickname and flare.ammo_limit != inf:
+            
+            equipment["CounterMeasures"][cm.nickname] = {
+                "name": cm.name(),
+                "price": cm.price(),
+                "flare_price": flare.price(),
+                "max_flares": flare.ammo_limit,
+                "effectiveness": flare.effectiveness(),
+                "range": flare.range,
+                "lifetime": flare.lifetime,
+                "range": cm.range,
+            }
 
 def main():
     with open("cconfig.json", "r") as f:
