@@ -64,8 +64,28 @@ def get_mineable_commodites(path):
 
 
 def filter_oorp_bases(bases):
-    return list(filter(lambda x: x.nickname not in oorpBases, bases))
+    if type(bases) == list:
+        return list(filter(lambda x: x.nickname not in oorpBases, bases))
+    elif type(bases) == dict:
+        return dict(filter(lambda x: x[0].nickname not in oorpBases, bases.items()))
 
+
+def save_icon(icon, name, folder):
+    image = Image.open(BytesIO(icon))
+    if image.size != (64, 64):
+        image.save(f"../dumpedData/images/{folder}/{name}.png")
+    else:
+        image.resize((128, 128)).save(
+            f"../dumpedData/images/{folder}/{name}.png"
+        )
+
+
+def iconname(path):
+    return splitext(basename(path))[0]
+
+
+
+# ------------------------------------------------ #
 
 def get_ships(definitions: dict) -> dict:
     print("Reading ship data...")
@@ -247,14 +267,7 @@ def get_ships(definitions: dict) -> dict:
 
                 infocard = ship.infocard("plain").split("<p>")[0]
 
-                icon = ship.icon()
-                image = Image.open(BytesIO(icon))
-                if image.size != (64, 64):
-                    image.save(f"../dumpedData/images/ships/{ship.nickname}.png")
-                else:
-                    image.resize((128, 128)).save(
-                        f"../dumpedData/images/ships/{ship.nickname}.png"
-                    )
+                save_icon(icon = ship.icon(), name = ship.nickname, folder = "ships")
 
                 ships[ship.nickname] = {
                     "name": ship.name(),
@@ -524,14 +537,7 @@ def get_commodities() -> dict:
         if filter_oorp_bases(commodity.sold_at().keys()):
             try:
                 try:
-                    icon = commodity.icon()
-                    image = Image.open(BytesIO(icon))
-                    if image.size != (64, 64):
-                        image.save(f"../dumpedData/images/commodities/{commodity.nickname}.png")
-                    else:
-                        image.resize((128, 128)).save(
-                            f"../dumpedData/images/commodities/{commodity.nickname}.png"
-                        )
+                    save_icon(icon = commodity.icon(), name = commodity.nickname, folder = "commodities")
                 except FileNotFoundError:
                     pass
 
@@ -589,14 +595,9 @@ def get_guns() -> dict:
 
             if ((gun.sold_at() and not sold_oorp_only) or wrecks) and gun.is_valid():
 
-                icon_name = splitext(basename(gun.good().item_icon))[0]
+                icon_name = iconname(gun.good().item_icon)
 
-                icon = gun.icon()
-                image = Image.open(BytesIO(icon))
-                if image.size != (64, 64):
-                    image.save(f"../dumpedData/images/guns/{icon_name}.png")
-                else:
-                    image.resize((128, 128)).save(f"../dumpedData/images/guns/{icon_name}.png")
+                save_icon(icon = gun.icon(), name = icon_name, folder = "guns")
 
                 sold_at = {base: price for base, price in gun.sold_at().items() if base.nickname not in oorpBases}
 
@@ -649,7 +650,8 @@ def get_equipment() -> dict:
     for cm in countermeasures:
         flare = cm.countermeasure()
         if not "_npc" in cm.nickname and flare.ammo_limit != inf:
-            
+            save_icon(icon = cm.icon(), name = iconname(cm.good().item_icon), folder = "equipment")
+
             equipment["CounterMeasures"][cm.nickname] = {
                 "name": cm.name(),
                 "infocard": cm.infocard(),
@@ -670,7 +672,8 @@ def get_equipment() -> dict:
     armors = fl.equipment.of_type(flintClasses["Armor"])
     for armor in armors:
         if filter_oorp_bases(armor.sold_at()):
-            
+            save_icon(icon = armor.icon(), name = iconname(armor.good().item_icon), folder = "equipment")
+
             equipment["Armor"][armor.nickname] = {
                 "name": armor.name(),
                 "infocard": armor.infocard(),
@@ -688,6 +691,7 @@ def get_equipment() -> dict:
     cloaks = fl.equipment.of_type(flintClasses["CloakingDevice"])
     for cloak in cloaks:
         if not cloak.name().isspace():
+            save_icon(icon = cloak.icon(), name = iconname(cloak.good().item_icon), folder = "equipment")
 
             equipment["Cloaks"][cloak.nickname] = {
                 "name": cloak.name(),
@@ -704,6 +708,7 @@ def get_equipment() -> dict:
     engines = fl.equipment.of_type(flintClasses["Engine"])
     for engine in engines:
         if filter_oorp_bases(engine.sold_at()):
+            save_icon(icon = engine.icon(), name = iconname(engine.good().item_icon), folder = "equipment")
 
             equipment["Engines"][engine.nickname] = {
                 "name": engine.name(),
@@ -722,6 +727,7 @@ def get_equipment() -> dict:
     shields = fl.equipment.of_type(flintClasses["ShieldGenerator"])
     for shield in shields:
         if filter_oorp_bases(shield.sold_at()):
+            save_icon(icon = shield.icon(), name = iconname(shield.good().item_icon), folder = "equipment")
 
             equipment["Shields"][shield.nickname] = {
                 "name": shield.name(),
@@ -746,6 +752,7 @@ def get_equipment() -> dict:
     thrusters = fl.equipment.of_type(flintClasses["Thruster"])
     for thruster in thrusters:
         if filter_oorp_bases(thruster.sold_at()):
+            save_icon(icon = thruster.icon(), name = iconname(thruster.good().item_icon), folder = "equipment")
 
             equipment["Thrusters"][thruster.nickname] = {
                 "name": thruster.name(),

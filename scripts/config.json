@@ -91,7 +91,8 @@
   "createDir": [
    "../dumpedData/images/ships",
    "../dumpedData/images/commodities",
-   "../dumpedData/images/guns"
+   "../dumpedData/images/guns",
+   "../dumpedData/images/equipment"
   ]
  },
  "pageGen": {
