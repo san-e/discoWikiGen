@@ -25,8 +25,6 @@ if not exists(config["wikiGen"]["dumpedData"]):
     for folder in config["wikiGen"]["createDir"]:
         makedirs(folder)
 
-logs = []
-
 flintClasses = {
     "PlanetaryBase": fl.entities.solars.PlanetaryBase,
     "Planet": fl.entities.solars.Planet,
@@ -409,15 +407,15 @@ def get_systems() -> dict:
                     }
                 for planet in system.planets():
                     if type(planet) == flintClasses["PlanetaryBase"]:
+                        owner = planet.owner().name() if len(planet.owner().name()) <= 20 else planet.owner().short_name()
                         planets.append(
                             [
                                 planet.name(),
-                                planet.nickname,
-                                planet.owner().name() if len(planet.owner().name()) <= 20 else planet.owner().short_name(),
+                                owner if owner else "Uninhabited",
                             ]
                         )
                     else:
-                        planets.append([planet.name(), planet.nickname, ""])
+                        planets.append([planet.name(), "Uninhabited"])
                 for x in system.connections():
                     name = fl.systems[x.goto[0]].name()
                     neighbors.append(name)
@@ -657,6 +655,7 @@ def get_equipment() -> dict:
 
             equipment["CounterMeasures"][cm.nickname] = {
                 "name": cm.name(),
+                "icon_name": iconname(cm.good().item_icon),
                 "infocard": cm.infocard(),
                 "price": cm.price(),
                 "flare_price": flare.price(),
@@ -679,6 +678,7 @@ def get_equipment() -> dict:
 
             equipment["Armor"][armor.nickname] = {
                 "name": armor.name(),
+                "icon_name": iconname(armor.good().item_icon),
                 "infocard": armor.infocard(),
                 "price": armor.price(),
                 "volume": armor.volume,
@@ -698,6 +698,7 @@ def get_equipment() -> dict:
 
             equipment["Cloaks"][cloak.nickname] = {
                 "name": cloak.name(),
+                "icon_name": iconname(cloak.good().item_icon),
                 "infocard": cloak.infocard(),
                 "price": cloak.price(),
                 "availability": list({( base.name(),
@@ -715,6 +716,7 @@ def get_equipment() -> dict:
 
             equipment["Engines"][engine.nickname] = {
                 "name": engine.name(),
+                "icon_name": iconname(engine.good().item_icon),
                 "infocard": engine.infocard(),
                 "price": engine.price(),
                 "cruise_speed": engine.cruise_speed_(),
@@ -734,6 +736,7 @@ def get_equipment() -> dict:
 
             equipment["Shields"][shield.nickname] = {
                 "name": shield.name(),
+                "icon_name": iconname(shield.good().item_icon),
                 "infocard": shield.infocard(),
                 "price": shield.price(),
                 "technology": shield.shield_type,
@@ -759,6 +762,7 @@ def get_equipment() -> dict:
 
             equipment["Thrusters"][thruster.nickname] = {
                 "name": thruster.name(),
+                "icon_name": iconname(thruster.good().item_icon),
                 "infocard": thruster.infocard(),
                 "price": thruster.price(),
                 "power_usage": thruster.power_usage,
@@ -776,6 +780,7 @@ def get_equipment() -> dict:
     equipment["CounterMeasures"] = dict(sorted(equipment["CounterMeasures"].items(), key = lambda x: bool(x[1]["availability"])))
     equipment["Cloaks"] = dict(sorted(equipment["Cloaks"].items(), key = lambda x: bool(x[1]["availability"])))
     return equipment
+
 
 def main():
     with open("cconfig.json", "r") as f:
@@ -795,14 +800,12 @@ def main():
         "Weapons": get_guns(),
         "Equipment": get_equipment()
     }
-    print(logs)
     return data
 
 if __name__ == "__main__":
     try:
-        if exists(argv[1]):
-            if exists(argv[1] + "\\EXE\\freelancer.exe"):
-                fl.set_install_path(argv[1])
+        if fl.paths.is_probably_freelancer(argv[1]):
+            fl.set_install_path(argv[1])
         else:
             print("Invalid directory")
             quit()
@@ -835,4 +838,3 @@ if __name__ == "__main__":
         dump(data, f, indent=1)
     endTime = perf_counter()
     print(f"Done.\nReading and writing took {round(endTime-startTime, 2)}s")
-    print(logs)

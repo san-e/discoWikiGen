@@ -54,29 +54,33 @@ def pagesToUpdate():
     nuke = nukeWiki()
     print(
     """Which of the following (if any) pages do you wish to update?
-    (1) Systems
-    (2) Ships
-    (3) Bases
-    (4) Factions
-    (5) Commodities
-    (6) Weapons
-    (7) Redirects
-    (8) Special
-    (9) Images
+    (a) Systems
+    (b) Ships
+    (c) Bases
+    (d) Factions
+    (e) Commodities
+    (f) Weapons
+    (g) Countermeasures
+    (h) Armor
+    () Redirects
+    () Special
+    () Images
     (x) All of the above
     """)
     print("")
     selection = input()
     options = {
-        "systems":      True if "1" in selection or "x" in selection else False,
-        "ships":        True if "2" in selection or "x" in selection else False,
-        "bases":        True if "3" in selection or "x" in selection else False,
-        "factions":     True if "4" in selection or "x" in selection else False,
-        "commodities":  True if "5" in selection or "x" in selection else False,
-        "weapons":      True if "6" in selection or "x" in selection else False,
-        "redirects":    True if "7" in selection or "x" in selection else False,
-        "special":      True if "8" in selection or "x" in selection else False,
-        "images":       True if "9" in selection or "x" in selection else False,
+        "systems":      True if "a" in selection or "x" in selection else False,
+        "ships":        True if "b" in selection or "x" in selection else False,
+        "bases":        True if "c" in selection or "x" in selection else False,
+        "factions":     True if "d" in selection or "x" in selection else False,
+        "commodities":  True if "e" in selection or "x" in selection else False,
+        "weapons":      True if "f" in selection or "x" in selection else False,
+        "cms":          True if "g" in selection or "x" in selection else False,
+        "armor":        True if "h" in selection or "x" in selection else False,
+        "redirects":    True if "!" in selection or "x" in selection else False,
+        "special":      True if "!" in selection or "x" in selection else False,
+        "images":       True if "!" in selection or "x" in selection else False,
         "nuke": nuke
         }
     clearConsole()

@@ -295,7 +295,11 @@ def main(wikidata = None, choices = None):
     if args.commodities or args.all or "commodities" in choices:
         wikitext = wikitext | wikidata["Commodities"]
     if args.weapons or args.all or "weapons" in choices:
-        wikitext = wikitext | wikidata["Weapons"]
+        wikitext = wikitext | wikidata["Weapons"]#
+    if args.weapons or args.all or "cms" in choices:
+        wikitext = wikitext | wikidata["CMs"]
+    if args.weapons or args.all or "armor" in choices:
+        wikitext = wikitext | wikidata["Armor"]
     if args.redirects or args.all or "redirects" in choices:
         wikitext = wikitext | wikidata["Redirects"]
     if args.special or args.all or "special" in choices:
