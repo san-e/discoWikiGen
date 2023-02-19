@@ -300,6 +300,8 @@ def main(wikidata = None, choices = None):
         wikitext = wikitext | wikidata["CMs"]
     if args.weapons or args.all or "armor" in choices:
         wikitext = wikitext | wikidata["Armor"]
+    if args.weapons or args.all or "cloaks" in choices:
+        wikitext = wikitext | wikidata["Cloaks"]
     if args.redirects or args.all or "redirects" in choices:
         wikitext = wikitext | wikidata["Redirects"]
     if args.special or args.all or "special" in choices:

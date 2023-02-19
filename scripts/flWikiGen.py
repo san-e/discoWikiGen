@@ -701,6 +701,7 @@ def get_equipment() -> dict:
                 "icon_name": iconname(cloak.good().item_icon),
                 "infocard": cloak.infocard(),
                 "price": cloak.price(),
+                "volume": cloak.volume,
                 "availability": list({( base.name(),
                                         base.owner().name(),
                                         base.system_().name(),

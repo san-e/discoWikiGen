@@ -62,6 +62,7 @@ def pagesToUpdate():
     (f) Weapons
     (g) Countermeasures
     (h) Armor
+    (i) Cloaks
     () Redirects
     () Special
     () Images
@@ -78,6 +79,7 @@ def pagesToUpdate():
         "weapons":      True if "f" in selection or "x" in selection else False,
         "cms":          True if "g" in selection or "x" in selection else False,
         "armor":        True if "h" in selection or "x" in selection else False,
+        "cloaks":       True if "i" in selection or "x" in selection else False,
         "redirects":    True if "!" in selection or "x" in selection else False,
         "special":      True if "!" in selection or "x" in selection else False,
         "images":       True if "!" in selection or "x" in selection else False,
