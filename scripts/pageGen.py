@@ -644,6 +644,30 @@ def generatePage(template, data, config, nickname):
             availability = availability.replace("{sold_at}", "")
 
         return f"{infobox}{infocard}{availability}{categories}"
+    elif "engine" in template.lower():
+        entry = data["Equipment"]["Engines"][nickname]
+        infobox = """__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Engine"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<td class="infobox-data-title" title="The maximum cruise speed this engine can reach"><b>Max. Cruise Speed</b>\n</td>\n<td style="padding-right: 1em">{cruise_speed}\n</td></tr>\n<td class="infobox-data-title" title="The time it takes to reach Cruise"><b>Cruise Charge Time</b>\n</td>\n<td style="padding-right: 1em">{cruise_charge_time}\n</td></tr>\n</table>\n"""
+        infocard = "{infocard}\n"
+        availability = '<h3>Availability</h3>\n{sold_at}\n'
+        categories = '[[Category: Equipment]]\n[[Category: Engines]]\n'
+
+        infobox = infobox.replace("{nickname}", nickname)
+        infobox = infobox.replace("{name}", entry["name"])
+        infobox = infobox.replace("{icon_name}", entry["icon_name"])
+        infobox = infobox.replace("{price}", "{:,}".format(entry["price"]) + "$")
+        infobox = infobox.replace("{cruise_speed}", str(entry["cruise_speed"]))
+        infobox = infobox.replace("{cruise_charge_time}", str(entry["cruise_charge_time"]))
+
+        infocard = infocard.replace("{infocard}", entry["infocard"])
+
+        if entry["availability"]:
+            availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region", "Price"], entries = entry["availability"]))
+        else:
+            availability = availability.replace("{sold_at}", "")
+
+        return f"{infobox}{infocard}{availability}{categories}"
+
+
 
 def generateSpecial(ships={}, systems={}, bases={}, factions={}, commodities={}):
     shipTemplate0 = """A list of all ships in this wiki. Click [Expand] below to show a sortable table of all ships\n\n{| class="sortable wikitable mw-collapsible mw-collapsed" width="100%"\n|+ \n|-\n!rowspan="2" style="text-align: center;"|Name\n!rowspan="2" style="text-align: center;"|Techcell\n!rowspan="2" style="text-align: center;"|Class\n!rowspan="1" style="text-align: center;"|Guns\n!rowspan="1" style="text-align: center;"|Turrets\n!rowspan="1" style="text-align: center;"|Mines\n!rowspan="1" style="text-align: center;"|CDs/Ts\n!rowspan="1" style="text-align: center;"|CMs\n!rowspan="2" style="text-align: center;"|Turn<br>Rate\n!rowspan="2" style="text-align: center;"|Hit<br>Points\n!rowspan="2" style="text-align: center;"|Power<br>Core\n!rowspan="2" style="text-align: center;"|Nanobots\n!rowspan="2" style="text-align: center;"|Shield Batteries\n!rowspan="2" style="text-align: center;"|Hold<br>Size\n!rowspan="2" style="text-align: center;"|Package<br>Price\n|-\n!colspan="6" style="text-align: center;"|Hardpoint Types\n"""
@@ -788,6 +812,15 @@ def assemblePages(loadedData):
         ) + "[[Category: NukeOnPatch]]"
         cloakSource[attributes["name"]] = source
     sources["Cloaks"] = cloakSource
+
+    engineSource = {}
+    print("Assembling Engine pages")
+    for name, attributes in loadedData["Equipment"]["Engines"].items():
+        source = generatePage(
+            template="Engine", data=loadedData, config=configData, nickname=name
+        ) + "[[Category: NukeOnPatch]]"
+        engineSource[attributes["name"]] = source
+    sources["Engines"] = engineSource
 
     print("Assembling Redirect pages")
     sources["Redirects"] = redirects
