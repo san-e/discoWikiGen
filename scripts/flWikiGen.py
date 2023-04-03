@@ -146,67 +146,34 @@ def get_ships(definitions: dict) -> dict:
                 thrusterCount = len(
                     [x for x in ship.hardpoints() if "thruster" in x.lower()]
                 )
-                maxClass = {
-                    "1": 0,
-                    "2": 0,
-                    "3": 0,
-                    "4": 0,
-                    "5": 0,
-                    "6": 0,
-                    "7": 0,
-                    "8": 0,
-                    "9": 0,
-                    "10": 0,
+                hp_types = {
+                "hp_turret_special_10": 10,
+                "hp_turret_special_9": 9,
+                "hp_turret_special_8": 8,
+                "hp_turret_special_7": 7,
+                "hp_turret_special_6": 6,
+                "hp_turret_special_5": 5,
+                "hp_turret_special_4": 4,
+                "hp_turret_special_3": 3,
+                "hp_turret_special_2": 2,
+                "hp_turret_special_1": 1,
+                "hp_gun_special_10": 10,
+                "hp_gun_special_9": 9,
+                "hp_gun_special_8": 8,
+                "hp_gun_special_7": 7,
+                "hp_gun_special_6": 6,
+                "hp_gun_special_5": 5,
+                "hp_gun_special_4": 4,
+                "hp_gun_special_3": 3,
+                "hp_gun_special_2": 2,
+                "hp_gun_special_1": 1,
                 }
-                for x in ship.hardpoints().values():
-                    try:
-                        if "gun_special_1" in x[0].nickname:
-                            maxClass["1"] += 1
-                        elif "gun_special_2" in x[0].nickname:
-                            maxClass["2"] += 1
-                        elif "gun_special_3" in x[0].nickname:
-                            maxClass["3"] += 1
-                        elif "gun_special_4" in x[0].nickname:
-                            maxClass["4"] += 1
-                        elif "gun_special_5" in x[0].nickname:
-                            maxClass["5"] += 1
-                        elif "gun_special_6" in x[0].nickname:
-                            maxClass["6"] += 1
-                        elif "gun_special_7" in x[0].nickname:
-                            maxClass["7"] += 1
-                        elif "gun_special_8" in x[0].nickname:
-                            maxClass["8"] += 1
-                        elif "gun_special_9" in x[0].nickname:
-                            maxClass["9"] += 1
-                        elif "hp_turret_special_1" == x[0].nickname:
-                            maxClass["1"] += 1
-                        elif "turret_special_2" in x[0].nickname:
-                            maxClass["2"] += 1
-                        elif "turret_special_3" in x[0].nickname:
-                            maxClass["3"] += 1
-                        elif "turret_special_4" in x[0].nickname:
-                            maxClass["4"] += 1
-                        elif "turret_special_5" in x[0].nickname:
-                            maxClass["5"] += 1
-                        elif "turret_special_6" in x[0].nickname:
-                            maxClass["6"] += 1
-                        elif "turret_special_7" in x[0].nickname:
-                            maxClass["7"] += 1
-                        elif "turret_special_9" in x[0].nickname:
-                            maxClass["9"] += 1
-                        elif "hp_turret_special_10" == x[0].nickname:
-                            maxClass["10"] += 1
-                        elif "turret_special_8" in x[0].nickname:
-                            maxClass["8"] += 1
-                    except AttributeError:
-                        pass
 
-                delete = []
-                for x in maxClass.items():
-                    if x[1] == 0:
-                        delete.append(x[0])
-                for x in delete:
-                    del maxClass[x]
+                maxClass = 0
+                for hardpoint in {x[0].nickname for x in ship.hardpoints().values()}:
+                    if hp_types.get(hardpoint, 0) > maxClass:
+                        maxClass = hp_types.get(hardpoint, 0)
+
 
                 try:
                     power_output = ship.power_core().capacity
@@ -225,15 +192,9 @@ def get_ships(definitions: dict) -> dict:
 
                 hardpoints = list(dict.fromkeys(tempHardpoints))  # remove duplicates
 
-                try:
-                    maxClass = list(maxClass.keys())[-1]
-                except:
-                    maxClass = 0
 
                 try:
-                    infocardMan = ship.infocard("plain").split("Maneuverability")[1][
-                        2:
-                    ][:-1]
+                    infocardMan = ship.infocard("plain").split("Maneuverability")[1][2:][:-1]
                 except:
                     infocardMan = ""
 
