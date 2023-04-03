@@ -64,9 +64,10 @@ def pagesToUpdate():
     (h) Armor
     (i) Cloaks
     (j) Engines
-    () Redirects
-    () Special
-    () Images
+    (k) Shields
+    (1) Redirects
+    (2) Special
+    (3) Images
     (x) All of the above
     """)
     print("")
@@ -81,10 +82,11 @@ def pagesToUpdate():
         "cms":          True if "g" in selection or "x" in selection else False,
         "armor":        True if "h" in selection or "x" in selection else False,
         "cloaks":       True if "i" in selection or "x" in selection else False,
-        "engines":       True if "j" in selection or "x" in selection else False,
-        "redirects":    True if "!" in selection or "x" in selection else False,
-        "special":      True if "!" in selection or "x" in selection else False,
-        "images":       True if "!" in selection or "x" in selection else False,
+        "engines":      True if "j" in selection or "x" in selection else False,
+        "shields":      True if "k" in selection or "x" in selection else False,
+        "redirects":    True if "1" in selection or "x" in selection else False,
+        "special":      True if "2" in selection or "x" in selection else False,
+        "images":       True if "3" in selection or "x" in selection else False,
         "nuke": nuke
         }
     clearConsole()

@@ -304,6 +304,8 @@ def main(wikidata = None, choices = None):
         wikitext = wikitext | wikidata["Cloaks"]
     if args.weapons or args.all or "engines" in choices:
         wikitext = wikitext | wikidata["Engines"]
+    if args.weapons or args.all or "shields" in choices:
+        wikitext = wikitext | wikidata["Shields"]
     if args.redirects or args.all or "redirects" in choices:
         wikitext = wikitext | wikidata["Redirects"]
     if args.special or args.all or "special" in choices:
