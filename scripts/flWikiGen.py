@@ -745,7 +745,7 @@ def get_equipment() -> dict:
 
 
 def main():
-    with open("cconfig.json", "r") as f:
+    with open("secret.json", "r") as f:
         cconfig = load(f)
     fl.set_install_path(cconfig["freelancerPath"])
     global oorpBases; oorpBases = [b.nickname for b in fl.bases if b.system_().nickname in oorp]

@@ -4,5 +4,5 @@ dumpedData/*
 gen.bat
 scripts/botPassword.json
 everything.bat
-scripts/cconfig.json
+scripts/secret.json
 scripts/logs/*

@@ -2,7 +2,7 @@ import json
 import flint as fl
 from pprint import pprint
 
-with open("cconfig.json", "r") as f:
+with open("secret.json", "r") as f:
     path = json.load(f)["freelancerPath"]
 with open("config.json", "r") as f:
     config = json.load(f)

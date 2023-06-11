@@ -22,7 +22,7 @@ def firstTimeSetup():
         else:
             print("Path is not a valid Freelancer installation, trying again...")
     
-    print("""Input the API-Link to your  Wiki (default: "https://disco-freelancer.fandom.com/api.php"):""")
+    print("""Input the API-Link to your Wiki (default: "https://disco-freelancer.fandom.com/api.php"):""")
     wikiLink = input("")
     wikiLink = "https://disco-freelancer.fandom.com/api.php" if not wikiLink else wikiLink
     config["bot"]["URL"] = wikiLink
@@ -32,15 +32,18 @@ def firstTimeSetup():
     If you don't have one, navigate to /wiki/Special:BotPasswords to create one.
     More info: https://www.mediawiki.org/wiki/Manual:Bot_passwords""")
     botP1 = input("Wiki-Account-Username: ")
-    botP2 = input("Bot-name: ")
-    botP3 = input("Bot-password: ")
+    botP2 = input("Bot-Name: ")
+    botP3 = input("Bot-Password: ")
     botCredentials = [f"{botP1}@{botP2}", botP3]
 
-    with open("./cConfig.json", "w") as f:
+    with open("./secret.json", "w") as f:
         json.dump({
             "freelancerPath": freelancerPath,
             "botCredentials": botCredentials
         }, f, indent=1)
+
+    with open("./config.json", "w") as f:
+        json.dump(config, f, indent=1)
 
 
 def nukeWiki():
@@ -116,7 +119,7 @@ if __name__ == "__main__":
         config =  json.load(f)
 
 
-    if not os.path.exists("./cConfig.json"):
+    if not os.path.exists("./secret.json"):
         print("Running first time setup...")
         firstTimeSetup()
         clearConsole()
