@@ -55,13 +55,9 @@ def login(botPasswordPath):
     return session, csrfToken
 
 
-def regenerateTokens():
-    global session
-    global csrfToken
-    session, csrfToken = login(config["bot"]["botPassword"])
-
-def uploadText(session, csrfToken, wikitext, titleText):
+def uploadText(wikitext, titleText):
     def upload(toUpload):
+        session, csrfToken = login(config["bot"]["botPassword"])
         failedUploads = {}
         with alive_bar(len(toUpload.keys()), dual_line=True, title=titleText) as bar:
             for name, text in toUpload.items():
@@ -81,7 +77,8 @@ def uploadText(session, csrfToken, wikitext, titleText):
                     failedUploads[name] = text
                     print(f"Error updating {name}: {error}, trying again later...")
                     if error == "badtoken":
-                        regenerateTokens()
+                        session, csrfToken = login(config["bot"]["botPassword"])
+                    bar()
                 except:
                     pass
                     bar()
@@ -95,7 +92,7 @@ def uploadText(session, csrfToken, wikitext, titleText):
         failures = upload(failures)
 
 
-def uploadImages(session, csrfToken, titleImage, path="../dumpedData/images"):
+def uploadImages(titleImage, path="../dumpedData/images"):
     subdirectories = set()
     if exists(path):
         with scandir(path) as dirs:
@@ -105,6 +102,7 @@ def uploadImages(session, csrfToken, titleImage, path="../dumpedData/images"):
 
 
     def getWikiImages():
+        session, csrfToken = login(config["bot"]["botPassword"])
         allimages_params = {
             "action": "query",
             "format": "json",
@@ -118,6 +116,7 @@ def uploadImages(session, csrfToken, titleImage, path="../dumpedData/images"):
         return allimages
 
     def upload(entries):
+        session, csrfToken = login(config["bot"]["botPassword"])
         failedUploads = []
         with alive_bar(len(entries), dual_line=True, title=titleImage) as bar:
             for entry in entries:
@@ -180,7 +179,8 @@ def uploadImages(session, csrfToken, titleImage, path="../dumpedData/images"):
         failures = upload(failures)
 
 
-def nukeTheWiki(session, csrfToken, titleNuke):
+def nukeTheWiki(titleNuke):
+    session, csrfToken = login(config["bot"]["botPassword"])
     def nuke():
         with alive_bar(len(idsToNuke), dual_line=True, title=titleNuke) as bar:
             for id in idsToNuke:
@@ -218,8 +218,6 @@ def nukeTheWiki(session, csrfToken, titleNuke):
 
 
 def main(wikidata = None, choices = None):      
-    loginData = login(config["bot"]["botPassword"])
-
     if not wikidata:
         with open(config["bot"]["wikitext"], "r") as f:
             wikidata = load(f)
@@ -254,21 +252,15 @@ def main(wikidata = None, choices = None):
 
     if "nuke" in choices:
         nukeTheWiki(
-            session=loginData[0],
-            csrfToken=loginData[1],
             titleNuke=config["bot"]["titleNuke"],
         )
 
     uploadText(
-        session=loginData[0],
-        csrfToken=loginData[1],
         wikitext=wikitext,
         titleText=config["bot"]["titleText"],
     )
     if "images" in choices:
         uploadImages(
-            session=loginData[0],
-            csrfToken=loginData[1],
             titleImage=config["bot"]["titleImage"],
             path=config["bot"]["images"],
         )
