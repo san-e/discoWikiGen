@@ -8,7 +8,9 @@ from alive_progress import alive_bar
 with open("config.json", "r") as f:
     config = load(f)
 
-URL = config["bot"]["URL"]
+with open(config["bot"]["botPassword"], "r") as f:
+    URL = load(f)["URL"]
+
 delay = config["bot"]["delay"]
 
 
