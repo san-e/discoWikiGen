@@ -550,12 +550,12 @@ def get_guns() -> dict:
             sold_oorp_only = all(base.nickname in oorpBases for base in gun.sold_at().keys())
 
             wrecks = []
-            for wreck in fl.routines.get_wrecks():
+            for wreck in {wreck for wreck in fl.routines.get_wrecks() if wreck.system().nickname not in oorp}:
                 loot = [x[0] for x in wreck.loot()]
                 if gun in loot:
                     wrecks.append([wreck.name() if wreck.name() else "Unmarked Wreck", wreck.system().name(), wreck.sector()])
 
-            if ((gun.sold_at() and not sold_oorp_only) or wrecks) and gun.is_valid():
+            if ((gun.sold_at() and not sold_oorp_only) or wrecks or gun.name().isupper()) and gun.is_valid():
 
                 icon_name = iconname(gun.good().item_icon)
 
