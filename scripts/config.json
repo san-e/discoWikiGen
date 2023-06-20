@@ -139,8 +139,8 @@
   ]
  },
  "bot": {
-  "URL": "https://disco-freelancer.fandom.com/api.php",
-  "delay": 1.5,
+  "URL": "https://discoverygc.com/w/api.php",
+  "delay": 0.26,
   "botPassword": "secret.json",
   "wikitext": "../dumpedData/wikitext.json",
   "titleText": "mediawikiBot.py | Updating Text",

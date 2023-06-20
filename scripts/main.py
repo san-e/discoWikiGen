@@ -25,7 +25,6 @@ def firstTimeSetup():
     print("""Input the API-Link to your Wiki (default: "https://disco-freelancer.fandom.com/api.php"):""")
     wikiLink = input("")
     wikiLink = "https://disco-freelancer.fandom.com/api.php" if not wikiLink else wikiLink
-    config["bot"]["URL"] = wikiLink
 
     clearConsole()
     print(f"""Input your Bot Username and Password
@@ -39,11 +38,9 @@ def firstTimeSetup():
     with open("./secret.json", "w") as f:
         json.dump({
             "freelancerPath": freelancerPath,
+            "URL": wikiLink,
             "botCredentials": botCredentials
         }, f, indent=1)
-
-    with open("./config.json", "w") as f:
-        json.dump(config, f, indent=1)
 
 
 def nukeWiki():
