@@ -139,7 +139,6 @@
   ]
  },
  "bot": {
-  "URL": "https://discoverygc.com/w/api.php",
   "delay": 0.26,
   "botPassword": "secret.json",
   "wikitext": "../dumpedData/wikitext.json",
