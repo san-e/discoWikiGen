@@ -87,6 +87,7 @@
    "molly_": "Mollys",
    "z_": "Zoners"
   },
+  "dumpSysmaps": true,
   "dumpedData": "../dumpedData/",
   "createDir": [
    "../dumpedData/images/ships",
