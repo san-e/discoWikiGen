@@ -92,7 +92,8 @@
    "../dumpedData/images/ships",
    "../dumpedData/images/commodities",
    "../dumpedData/images/guns",
-   "../dumpedData/images/equipment"
+   "../dumpedData/images/equipment",
+   "../dumpedData/images/systems"
   ]
  },
  "pageGen": {

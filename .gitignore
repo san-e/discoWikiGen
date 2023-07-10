@@ -6,3 +6,4 @@ scripts/botPassword.json
 everything.bat
 scripts/secret.json
 scripts/logs/*
+scripts/geckodriver.log
