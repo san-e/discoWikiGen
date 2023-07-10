@@ -87,7 +87,7 @@
    "molly_": "Mollys",
    "z_": "Zoners"
   },
-  "dumpSysmaps": true,
+  "dumpSysmaps": false,
   "dumpedData": "../dumpedData/",
   "createDir": [
    "../dumpedData/images/ships",
@@ -138,7 +138,8 @@
    "Independent Miners Guild",
    "IMG (Gallic Occupation)",
    "Kruger Minerals"
-  ]
+  ],
+  "includeSysmaps": true
  },
  "bot": {
   "delay": 0.26,
