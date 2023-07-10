@@ -6,3 +6,4 @@ alive_progress
 pillow
 requests
 pytz
+selenium
