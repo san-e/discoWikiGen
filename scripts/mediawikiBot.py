@@ -4,6 +4,7 @@ from os.path import exists, isdir, split
 from os import scandir
 import time
 from alive_progress import alive_bar
+from pprint import pprint
 
 with open("config.json", "r") as f:
     config = load(f)
@@ -126,7 +127,7 @@ def uploadImages(titleImage, path="../dumpedData/images"):
                     continue
 
                 try:
-                    if allimages[entry['name']] != config["bot"]["comment"]:
+                    if allimages[entry['name']] != config["bot"]["comment"] and False:
                         print(
                             f"Skipping {entry['name']}, probably shouldn't be replaced."
                         )
@@ -223,6 +224,8 @@ def main(wikidata = None, choices = None):
     if not wikidata:
         with open(config["bot"]["wikitext"], "r") as f:
             wikidata = load(f)
+
+    print(URL)
 
     wikitext = {}
     if "systems" in choices:

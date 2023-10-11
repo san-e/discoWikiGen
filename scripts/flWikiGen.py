@@ -14,6 +14,7 @@ import logging
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
+import cv2
 
 logging.basicConfig(level = logging.ERROR, filename = datetime.now(tz = pytz.UTC).strftime("./logs/%d-%m-%Y_%Hh%Mm%Ss.log"))
 
@@ -195,10 +196,22 @@ def get_ships(definitions: dict) -> dict:
 
                 hardpoints = list(dict.fromkeys(tempHardpoints))  # remove duplicates
 
+                comps = []
+                components = {}
+                if ship.type() == "Battlecruiser":
+                    try:
+                        comps = ship.infocard("plain").split("Components")[1].strip().split("\n \n")
+                        for component in comps:
+                            temp = component.split("\n")
+                            name = temp[0]
+                            components[name] = temp[1:]
+                    except IndexError:
+                        components = {}
+
 
                 try:
-                    infocardMan = ship.infocard("plain").split("Maneuverability")[1][2:][:-1]
-                except:
+                    infocardMan = ship.infocard("plain").split("Maneuverability")[1][2:][:-1].split("\n \n")[0]
+                except IndexError:
                     infocardMan = ""
 
                 techcompat = ""
@@ -240,6 +253,7 @@ def get_ships(definitions: dict) -> dict:
                 ships[ship.nickname] = {
                     "name": ship.name(),
                     "longName": ship.infocard("plain").split("\n")[0],
+                    "components": components,
                     "maneuverability": infocardMan,
                     "built_by": built_by,
                     "techcompat": techcompat,
@@ -312,6 +326,12 @@ def get_bases() -> dict:
                 else:
                     news = []
 
+                if base.bribes():
+                    bribes = [faction.name() for faction in base.bribes()]
+                else:
+                    bribes = []
+
+
                 bases[base.nickname] = {
                     "name": base.name(),
                     "specs": specifications,
@@ -320,7 +340,7 @@ def get_bases() -> dict:
                     "system": base.system_().name(),
                     "region": base.system_().region(),
                     "sector": base.sector(),
-                    "bribes": [faction.name() for faction in base.bribes()],
+                    "bribes": bribes,
                     "missions": [faction.name() for faction in base.missions()],
                     "rumors": {faction.name(): list(rumor) for faction, rumor in base.rumors().items()},
 					"news": news,
@@ -522,6 +542,16 @@ def get_factions() -> dict:
 
 
 def get_commodities() -> dict:
+    template = cv2.imread(r'hrc_template.png')
+    def match_hrc_template(icon_path):
+        method = cv2.TM_SQDIFF_NORMED
+        icon = cv2.imread(icon_path)
+        result = cv2.matchTemplate(template, icon, method)
+        mn = cv2.minMaxLoc(result)[0]
+        if mn < 0.1:
+            return True
+        return False
+
     print("Reading commodity data...")
     commodities = {}
     for commodity in fl.commodities:
@@ -529,8 +559,9 @@ def get_commodities() -> dict:
             try:
                 try:
                     save_icon(icon = commodity.icon(), name = commodity.nickname, folder = "commodities")
+                    hrc = match_hrc_template(f"../dumpedData/images/commodities/{commodity.nickname}.png")     
                 except FileNotFoundError:
-                    pass
+                    hrc = False
 
                 commodities[commodity.nickname] = {
                     "name": commodity.name(),
@@ -538,6 +569,7 @@ def get_commodities() -> dict:
                     "volume": commodity.volume,
                     "decay": commodity.decay_per_second,
                     "defaultPrice": commodity.price(),
+                    "hrc": hrc,
                     "boughtAt": [
                         [
                             base.name(),
@@ -547,7 +579,7 @@ def get_commodities() -> dict:
                             price,
                         ]
                         for base, price in filter_oorp_bases(commodity.bought_at()).items()
-                    ],
+                    if (hrc == True and commodity not in base.sells_commodities()) or (hrc == False)],
                     "soldAt": [
                         [
                             base.name(),
@@ -597,6 +629,11 @@ def get_guns() -> dict:
                 else:
                     type = "gun"
 
+                try:
+                    range = round(gun.range(), 2)
+                except ValueError:
+                    range = 0
+
                 guns[gun.nickname] = {
                     "name": gun.name(),
                     "icon_name": icon_name,
@@ -611,7 +648,7 @@ def get_guns() -> dict:
                     "efficiency": round(gun.efficiency(), 2),
                     "refire_rate": round(gun.refire(), 2),
                     "rating": round(gun.rating(), 2),
-                    "range": round(gun.range(), 2),
+                    "range": range,
                     "type": type,
                     "sold_at": list({(  base.name(),
                                         base.owner().name(),
@@ -638,7 +675,7 @@ def get_equipment() -> dict:
     countermeasures = fl.equipment.of_type(flintClasses["CounterMeasureDropper"])
     for cm in countermeasures:
         flare = cm.countermeasure()
-        if not "_npc" in cm.nickname and flare.ammo_limit != inf:
+        if not "_npc" in cm.nickname and not "npc_" in cm.nickname and flare.ammo_limit != inf:
             save_icon(icon = cm.icon(), name = iconname(cm.good().item_icon), folder = "equipment")
 
             equipment["CounterMeasures"][cm.nickname] = {

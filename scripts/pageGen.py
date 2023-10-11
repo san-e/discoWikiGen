@@ -51,6 +51,7 @@ def generatePage(template, data, config, nickname):
         name = data["Ships"][nickname]["name"]
         infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<tr title={nickname}>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Ship Class</b>\n</td>\n<td style="padding-right: 1em;">{class}\n</td>\n<tr>\n<td class="infobox-data-title"><b>Built by</b>\n</td>\n<td style="padding-right: 1em;">{built_by}\n</td>\n<tr>\n<td class="infobox-data-title"><b>[http://discoverygc.com/techcompat/techcompat_table.php Tech Column]</b>\n</td>\n<td style="padding-right: 1em;">{techcompat}\n</td>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Technical Information\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Guns/Turrets</b>\n</td>\n<td style="padding-right: 1em; font-weight: bold; letter-spacing: 1px;">{gunCount} / {turretCount}\n</td></tr>\n<tr title="Maximum class of weapons that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. weapon class</b>\n</td>\n<td style="padding-right: 1em;">{maxwep}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Other equipment</b>\n</td>\n<td style="padding-right: 1em;">\n<ul>\n{other}\n</ul></td></tr>\n<tr title="Amount of hull hitpoints">\n<td class="infobox-data-title"><b>Hull strength</b>\n</td>\n<td style="padding-right: 1em; color: #009900; font-weight: bold;">{hull}\n</td></tr>\n<tr title="Maximum class of shield that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. shield class</b>\n</td>\n<td style="padding-right: 1em; color: #006699; font-weight: bold;">{maxShield}\n</td></tr>\n<tr title="Amount of cargo this ship is able to carry">\n<td class="infobox-data-title"><b>Cargo space</b>\n</td>\n<td style="padding-right: 1em;">{cargo} units\n</td></tr>\n<tr title="Maximum number of shield batteries carried by this ship">\n<td class="infobox-data-title"><b>Batteries</b>\n</td>\n<td style="padding-right: 1em;">{batteries}\n</td></tr>\n<tr title="Maximum number of shield nanobots carried by this ship">\n<td class="infobox-data-title"><b>Nanobots</b>\n</td>\n<td style="padding-right: 1em;">{bots}\n</td></tr>\n<tr title="Maximum speed of this ship on impulse drive">\n<td class="infobox-data-title"><b>Max. impulse speed</b>\n</td>\n<td style="padding-right: 1em;">{impulse} m/s\n</td></tr>\n<tr title="Maximum turning speed in degrees per second">\n<td class="infobox-data-title"><b>Max. turn speed</b>\n</td>\n<td style="padding-right: 1em;">{turnRate} deg/s\n</td></tr>\n<tr title="Maximum speed of this ship on thrusters">\n<td class="infobox-data-title"><b>Max. thrust speed</b>\n</td>\n<td style="padding-right: 1em;">{maxthrust} m/s\n</td></tr>\n<tr title="Maximum speed of this ship on cruise engines">\n<td class="infobox-data-title"><b>Max. cruise speed</b>\n</td>\n<td style="padding-right: 1em;">{maxCruise} m/s\n</td></tr>\n<tr title="Maximum reactor energy storage (capacitance)">\n<td class="infobox-data-title"><b>Power output</b>\n</td>\n<td style="padding-right: 1em;">{power_output} u\n</td></tr>\n<tr title="Amount of energy units generated per second">\n<td class="infobox-data-title"><b>Power recharge</b>\n</td>\n<td style="padding-right: 1em;">{power_recharge} u/s\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">Additional Information\n</td></tr>\n<tr title="Price of the ship without any mounted equipment">\n<td class="infobox-data-title"><b>Ship price</b>\n</td>\n<td style="padding-right: 1em;">${hull_price}\n</td></tr>\n<tr title="Price of the ship with the default equipment">\n<td class="infobox-data-title"><b>Package price</b>\n</td>\n<td style="padding-right: 1em;">${package_price}\n</td></tr></table>\n'
         infocard = "<p>{infocard}\n</p><p><br/>\n</p>\n"
+        components = '<h2>Components</h2>\n<ul style="line-height: 1.5em; margin-bottom: 15px">\n{components}\n</ul>\n'
         handling = "<h2>Handling</h2>\n<ul>\n{handling}\n</ul>\n"
         hardpoints = "<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n"
         includes = "<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>"
@@ -117,17 +118,20 @@ def generatePage(template, data, config, nickname):
             "{package_price}", "{:,}".format(ship_entry["package_price"])
         )
 
-        info = ship_entry["infocard"].split("\n", 1)[1]
-        while True:
-            if info[0].isspace():
-                info = info[1 : len(info)]
-            else:
-                break
+        info = ship_entry["infocard"].split("\n", 1)[1].strip()
         infocard = infocard.replace("{infocard}", info)
+
+        comps = ""
+        for component, attributes in ship_entry["components"].items():
+            comps += f"<li>{component}\n<ul>\n"
+            for attribute in attributes:
+                comps += f"<li>{attribute}</li>\n"
+            comps += "</ul></li>\n"
+        components = components.replace("{components}", comps)   
 
         handleList = ship_entry["maneuverability"].split("\n")
         handle = ""
-        if ship_entry["mustUseMoors"] == True:
+        if ship_entry["mustUseMoors"]:
             handle = "<li>This ship is too large to use docking bays, it must use mooring points.</li>\n"
         for entry in handleList:
             if entry != "":
@@ -146,6 +150,7 @@ def generatePage(template, data, config, nickname):
             included = f'{included}<li>{title} (${"{:,}".format(price)})</li>\n'
         includes = includes.replace("{includes}", included)
 
+        print(ship_entry["name"], ship_entry["sold_at"])
         availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region"], entries = ship_entry["sold_at"]))
 
         time = time.replace("{time}", ship_entry["time"])
@@ -158,11 +163,14 @@ def generatePage(template, data, config, nickname):
 
         category = category.replace("{rest}", rest)
 
-        return f"{infobox}{infocard}{handling}{hardpoints}{includes}{availability}{time}{category}"
+        if not ship_entry["components"]:
+            components = ""
+
+        return f"{infobox}{infocard}{components}{handling}{hardpoints}{includes}{availability}{time}{category}"
     elif "sys" in template.lower():
         entry = data["Systems"][nickname]
         name = data["Systems"][nickname]["name"]
-        infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title={nickname}><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: #555555; color: #ffffff">System\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
+        infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-family: Segoe UI; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: rgba(0,0,0,0); color: #ffffff" title={nickname}><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-family: Segoe UI; font-size: 14px; line-height: 18px; background: rgba(0,0,0,0); color: #ffffff">System\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
         infocard = '<p>{infocard}</p>\n<br style="clear: both; height: 0px;" />\n</p>\n'
         overview = '<h1><span class="mw-headline" id="System_Overview">System Overview</span></h1>\n<hr>\n<table style="width: 100%;">\n<tr>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Astronomical Bodies</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Stellar Objects</div>\n{suns}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Planetary Objects</div>\n{planets}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Nebulae &amp; Asteroids</div>\n{fields}\n</td>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Industrial Development</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Space Stations</div>\n{stations}\n<li class="mw-empty-elt"></li></ul>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Commodity Mining</div>\n{mining}\n</td>\n<td style="width: 33%; vertical-align: top; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Faction Presence</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Lawful Factions</div>\n{lawfuls}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Corporations &amp; Guilds</div>\n{corps}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Unlawful Factions</div>\n{unlawfuls}\n</td></tr></table>\n'
         navmap = '<p><br style="clear: both; height: 0px;" />\n</p>\n<h1><span class="mw-headline" id="System_Map">System Map</span></h1>\n<hr>\n<p>{navmap}\n</p>\n'
@@ -312,9 +320,11 @@ def generatePage(template, data, config, nickname):
 
         wreckages = ""
         for w in entry["wrecks"]:
-            wreckages = f"""{wreckages}<h3>{w['name']} - {w['sector']}</h3>\n{w['infocard']}\nContains:\n<ul style="margin-top:-20px;">\n"""
-            for item, amount in w['loot']:
-                wreckages = wreckages + f"<li>{amount}x [[{item}]]</li>\n"
+            wreckages = f"""{wreckages}<h3>{w['name']} - {w['sector']}</h3>\n{w['infocard']}\n"""
+            if w['loot']:
+                wreckages += """Contains:\n<ul style="margin-top:-20px;">\n"""
+                for item, amount in w['loot']:
+                    wreckages = wreckages + f"<li>{amount}x [[{item}]]</li>\n"
             wreckages = wreckages + "</ul>\n"
 
         wrecks = wrecks.replace("{wrecks}", wreckages.replace("&nbsp;", ""))
@@ -484,7 +494,7 @@ def generatePage(template, data, config, nickname):
     elif "commodity" in template.lower():
         entry = data["Commodities"][nickname]
 
-        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The number of units of cargo this commodity uses"><b>Cargo Space</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The rate at which this commodity decays per second"><b>Decay Rate</b>\n</td>\n<td style="padding-right: 1em">{decay}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Default Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n</table>\n'
+        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid #555555;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid #555555;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The number of units of cargo this commodity uses"><b>Cargo Space</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The rate at which this commodity decays per second"><b>Decay Rate</b>\n</td>\n<td style="padding-right: 1em">{decay}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Default Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>High Risk Commodity</b>\n</td>\n<td style="padding-right: 1em">{hrc}\n</td></tr>\n</table>\n'
         infocard = "{infocard}\n"
         availability = '<h2>Availability</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which buy this commodity"><b>Bases buying</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{buyBases}\n</td></tr></table>\n\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #555555;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which sell this commodity"><b>Bases selling</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{sellBases}\n</td></tr></table>\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n<br style="clear: both; height: 0px;" />\n'
         time = "<i>NOTE: {time}<i>"
@@ -497,6 +507,7 @@ def generatePage(template, data, config, nickname):
             "{decay}", str(entry["decay"]) if entry["decay"] else "<i>no decay</i>"
         )
         infobox = infobox.replace("{price}", "{:,}".format(entry["defaultPrice"]) + "$")
+        infobox = infobox.replace("{hrc}", str(entry["hrc"]))
 
         infocard = infocard.replace(
             "{infocard}", entry["infocard"].replace("&nbsp;", "")
