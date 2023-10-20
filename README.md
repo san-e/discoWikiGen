@@ -11,10 +11,11 @@ WIP dynamic wiki page source generator for Discovery Freelancer
 - alive_progress
 - requests
 - selenium
+- opencv-python
 
 To install, do:
 
-`pip install beautifulsoup4 pillow html-table-parser-python3 pandas alive_progress requests pytz selenium`
+`pip install beautifulsoup4 pillow html-table-parser-python3 pandas alive_progress requests pytz selenium opencv-python`
 
 `pip install https://github.com/san-e/flint/archive/wiki.zip -U`
 
