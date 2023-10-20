@@ -344,8 +344,8 @@ def get_bases() -> dict:
                     "missions": [faction.name() for faction in base.missions()],
                     "rumors": {faction.name(): list(rumor) for faction, rumor in base.rumors().items()},
 					"news": news,
-                    "commodities_buying": [x.name() for x in base.buys_commodities()],
-                    "commodities_selling": [x.name() for x in base.sells_commodities()],
+                    "commodities_buying": [[commodity.name(), cost] for commodity, cost in base.buys_commodities().items()],
+                    "commodities_selling": [[commodity.name(), cost] for commodity, cost in base.sells_commodities().items()],
                     "ships_sold": ships_sold,
                     "time": datetime.now(tz = pytz.UTC).strftime("Page generated on the %d/%m/%Y at %H:%M:%S UTC"),
                 }
