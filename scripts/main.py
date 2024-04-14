@@ -134,7 +134,11 @@ def downloadServerConfig(url="https://discoverygc.com/gameconfigpublic/"):
         "https://discoverygc.com/gameconfigpublic/" + link.get("href") for link in links
     }
 
-    for url in urls:
+    for i, url in enumerate(urls):
+        print(
+            f"{i+1}/{len(urls)} Downloading {url.split('/')[-1]}.                    ",
+            end="\r",
+        )
         r = requests.get(url)
         if r.ok:
             with open(f"./server_config/{url.split('/')[-1]}", "wb") as f:
@@ -144,10 +148,10 @@ def downloadServerConfig(url="https://discoverygc.com/gameconfigpublic/"):
 if __name__ == "__main__":
     with open("./config.json", "r") as f:
         config = json.load(f)
-
     if not os.path.exists("./secret.json"):
         print("Running first time setup...")
         firstTimeSetup()
         clearConsole()
     downloadServerConfig()
+    print("")
     callBot()
