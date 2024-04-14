@@ -83,7 +83,6 @@ def uploadText(wikitext, titleText):
                         session, csrfToken = login(config["bot"]["botPassword"])
                     bar()
                 except:
-                    pass
                     bar()
                 time.sleep(delay)
         
@@ -127,7 +126,7 @@ def uploadImages(titleImage, path="../dumpedData/images"):
                     continue
 
                 try:
-                    if allimages[entry['name']] != config["bot"]["comment"] and False:
+                    if allimages[entry['name']] != config["bot"]["comment"]:
                         print(
                             f"Skipping {entry['name']}, probably shouldn't be replaced."
                         )
@@ -185,6 +184,7 @@ def uploadImages(titleImage, path="../dumpedData/images"):
 def nukeTheWiki(titleNuke):
     session, csrfToken = login(config["bot"]["botPassword"])
     def nuke():
+        session, csrfToken = login(config["bot"]["botPassword"])
         with alive_bar(len(idsToNuke), dual_line=True, title=titleNuke) as bar:
             for id in idsToNuke:
                 bar.text = f"Nuking pageID {id}"
@@ -197,10 +197,17 @@ def nukeTheWiki(titleNuke):
                 }
 
                 request = session.post(URL, nuke_params)
+                try:
+                    error = request.json()["error"]["code"]
+                    print(f"Error updating {id}: {error}, trying again later...")
+                    if error == "badtoken":
+                        session, csrfToken = login(config["bot"]["botPassword"])
+                    bar()
+                except:
+                    bar()
                 # print(request.json())
 
                 # time.sleep(delay) # seemingly not neccessary
-                bar()
                 
     queryNuke_params = {
         "action": "query",
@@ -219,6 +226,39 @@ def nukeTheWiki(titleNuke):
     nuke()
 
 
+def addWarning():
+    session, csrfToken = login(config["bot"]["botPassword"])
+    edit_params = {
+        "action": "edit",
+        "title": "Main_Page",
+        "prependtext": "{{Warning|text=The Wiki is currently being updated. Information may be out-of-date or missing.}}\n",
+        "summary": "Adding update warning for the duration of the update.",
+        "bot": True,
+        "format": "json",
+        "token": csrfToken,
+    }
+    request = session.post(URL, data=edit_params)
+    data = request.json()
+
+    return data.get("edit", {}).get("newrevid", 0)
+    
+
+def undoEdit(title, revId):
+    session, csrfToken = login(config["bot"]["botPassword"])
+    edit_params = {
+        "action": "edit",
+        "title": title,
+        "undo": revId,
+        "summary": f"Update complete, undoing revision {revId}",
+        "bot": True,
+        "format": "json",
+        "token": csrfToken,
+    }
+
+    request = session.post(URL, data=edit_params)
+    data = request.json()
+
+    return bool(data.get("edit", {}).get("result") == "Success")
 
 def main(wikidata = None, choices = None):      
     if not wikidata:
@@ -255,6 +295,10 @@ def main(wikidata = None, choices = None):
     if "special" in choices:
         wikitext = wikitext | wikidata["Special"]
 
+    print("Adding update warning to Main_Page")
+    global warningRevId 
+    warningRevId = addWarning()
+
     if "nuke" in choices:
         nukeTheWiki(
             titleNuke=config["bot"]["titleNuke"],
@@ -270,6 +314,11 @@ def main(wikidata = None, choices = None):
             path=config["bot"]["images"],
         )
 
+    if warningRevId:
+        print("Removing update warning")
+        undoEdit("Main_Page", warningRevId)
+
 
 if __name__ == "__main__":
+    global warningRevId
     main()
