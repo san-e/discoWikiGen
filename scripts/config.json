@@ -88,6 +88,7 @@
    "z_": "Zoners"
   },
   "dumpSysmaps": false,
+  "sysmapURL": "https://fifthbarrier.github.io/Navmap/",
   "dumpedData": "../dumpedData/",
   "createDir": [
    "../dumpedData/images/ships",

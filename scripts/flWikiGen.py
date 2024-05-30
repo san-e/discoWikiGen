@@ -15,6 +15,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 import cv2
+import subprocess
 
 logging.basicConfig(
     level=logging.ERROR,
@@ -23,8 +24,12 @@ logging.basicConfig(
 
 version = ""  # input("Enter game version: ")
 
-with open(f"{getcwd()}\\config.json", "r") as file:
+with open("./config.json", "r") as file:
     config = load(file)
+with open("./secret.json", "r") as file:
+    secrets = load(file)
+LLEDITSCRIPT = secrets["librelancer"] + "/lleditscript.exe"
+EXPORTER = "./exporter.cs-script"
 oorp = config["wikiGen"]["oorpSystems"]
 shipBuilders = config["wikiGen"]["shipBuilders"]
 
@@ -82,6 +87,25 @@ def filter_oorp_bases(bases):
         return EntitySet(filter(lambda x: x.nickname not in oorpBases, bases.values()))
 
 
+processes = set()
+MAX_PROCESSES = 50
+
+
+def dump_model(model, materials, destination):
+    if len(processes) > MAX_PROCESSES:
+        for aaaa in processes:
+            aaaa.wait()
+        processes.clear()
+    arguments = [LLEDITSCRIPT, EXPORTER, model]
+    for material in materials:
+        arguments.append(material)
+    arguments.append(destination)
+    p = subprocess.Popen(
+        arguments, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+    processes.add(p)
+
+
 def save_icon(icon, name, folder):
     image = Image.open(BytesIO(icon))
     if image.size != (64, 64):
@@ -101,215 +125,211 @@ def get_ships(definitions: dict) -> dict:
     print("Reading ship data...")
     ships = {}
     for ship in fl.ships:
-        if not "_npc" in ship.nickname and filter_oorp_bases(ship.sold_at()):
+        if (
+            "_npc" in ship.nickname
+            or not filter_oorp_bases(ship.sold_at())
+            or not ship.materials()
+        ):
+            continue
+        try:
+            built_by = ""
+            for shorthand, fullName in shipBuilders.items():
+                if shorthand in ship.nickname:
+                    built_by = fullName
+                    break
+
+            equipment = []
+            for x in ship.equipment():
+                equipment.append([x.name(), x.price()])
+
             try:
-                built_by = ""
-                for shorthand, fullName in shipBuilders.items():
-                    if shorthand in ship.nickname:
-                        built_by = fullName
-                        break
+                hull_price = ship.hull().price
+            except:
+                hull_price = 0
 
-                equipment = []
-                for x in ship.equipment():
-                    equipment.append([x.name(), x.price()])
-
+            try:
                 try:
-                    hull_price = ship.hull().price
+                    if len(ship.hardpoints()["hpshield01"]) > 1:
+                        for x in ship.hardpoints()["hpshield01"]:
+                            if int(x.nickname[-1]) > maxShield:
+                                maxShield = int(x.nickname[-1])
+                    else:
+                        maxShield = int(ship.hardpoints()["hpshield01"][0].nickname[-1])
                 except:
-                    hull_price = 0
+                    if len(ship.hardpoints()["hpshield02"]) > 1:
+                        for x in ship.hardpoints()["hpshield02"]:
+                            if int(x.nickname[-1]) > maxShield:
+                                maxShield = int(x.nickname[-1])
+                    else:
+                        maxShield = int(ship.hardpoints()["hpshield02"][0].nickname[-1])
+            except:
+                maxShield = 0
 
+            gunCount = len([x for x in ship.hardpoints() if "weapon" in x.lower()])
+            turretCount = len([x for x in ship.hardpoints() if "turret" in x.lower()])
+            torpedoCount = len([x for x in ship.hardpoints() if "torpedo" in x.lower()])
+            mineCount = len([x for x in ship.hardpoints() if "mine" in x.lower()])
+            cmCount = len([x for x in ship.hardpoints() if "cm" in x.lower()])
+            thrusterCount = len(
+                [x for x in ship.hardpoints() if "thruster" in x.lower()]
+            )
+            hp_types = {
+                "hp_turret_special_10": 10,
+                "hp_turret_special_9": 9,
+                "hp_turret_special_8": 8,
+                "hp_turret_special_7": 7,
+                "hp_turret_special_6": 6,
+                "hp_turret_special_5": 5,
+                "hp_turret_special_4": 4,
+                "hp_turret_special_3": 3,
+                "hp_turret_special_2": 2,
+                "hp_turret_special_1": 1,
+                "hp_gun_special_10": 10,
+                "hp_gun_special_9": 9,
+                "hp_gun_special_8": 8,
+                "hp_gun_special_7": 7,
+                "hp_gun_special_6": 6,
+                "hp_gun_special_5": 5,
+                "hp_gun_special_4": 4,
+                "hp_gun_special_3": 3,
+                "hp_gun_special_2": 2,
+                "hp_gun_special_1": 1,
+            }
+
+            maxClass = 0
+            for hardpoint in {x[0].nickname for x in ship.hardpoints().values()}:
+                if hp_types.get(hardpoint, 0) > maxClass:
+                    maxClass = hp_types.get(hardpoint, 0)
+
+            try:
+                power_output = ship.power_core().capacity
+                power_recharge = ship.power_core().charge_rate
+            except:
+                power_output = 0
+                power_recharge = 0
+
+            hardpoints = []
+            for x in ship.hardpoints().values():
+                if x[0].name() != x[0].nickname:
+                    hardpoints.append(x[0].name())
+            tempHardpoints = []
+            for x in hardpoints:
+                tempHardpoints.append(f"{x}:{hardpoints.count(x)}")
+
+            hardpoints = list(dict.fromkeys(tempHardpoints))  # remove duplicates
+
+            comps = []
+            components = {}
+            if ship.type() == "Battlecruiser":
                 try:
-                    try:
-                        if len(ship.hardpoints()["hpshield01"]) > 1:
-                            for x in ship.hardpoints()["hpshield01"]:
-                                if int(x.nickname[-1]) > maxShield:
-                                    maxShield = int(x.nickname[-1])
-                        else:
-                            maxShield = int(
-                                ship.hardpoints()["hpshield01"][0].nickname[-1]
-                            )
-                    except:
-                        if len(ship.hardpoints()["hpshield02"]) > 1:
-                            for x in ship.hardpoints()["hpshield02"]:
-                                if int(x.nickname[-1]) > maxShield:
-                                    maxShield = int(x.nickname[-1])
-                        else:
-                            maxShield = int(
-                                ship.hardpoints()["hpshield02"][0].nickname[-1]
-                            )
-                except:
-                    maxShield = 0
-
-                gunCount = len([x for x in ship.hardpoints() if "weapon" in x.lower()])
-                turretCount = len(
-                    [x for x in ship.hardpoints() if "turret" in x.lower()]
-                )
-                torpedoCount = len(
-                    [x for x in ship.hardpoints() if "torpedo" in x.lower()]
-                )
-                mineCount = len([x for x in ship.hardpoints() if "mine" in x.lower()])
-                cmCount = len([x for x in ship.hardpoints() if "cm" in x.lower()])
-                thrusterCount = len(
-                    [x for x in ship.hardpoints() if "thruster" in x.lower()]
-                )
-                hp_types = {
-                    "hp_turret_special_10": 10,
-                    "hp_turret_special_9": 9,
-                    "hp_turret_special_8": 8,
-                    "hp_turret_special_7": 7,
-                    "hp_turret_special_6": 6,
-                    "hp_turret_special_5": 5,
-                    "hp_turret_special_4": 4,
-                    "hp_turret_special_3": 3,
-                    "hp_turret_special_2": 2,
-                    "hp_turret_special_1": 1,
-                    "hp_gun_special_10": 10,
-                    "hp_gun_special_9": 9,
-                    "hp_gun_special_8": 8,
-                    "hp_gun_special_7": 7,
-                    "hp_gun_special_6": 6,
-                    "hp_gun_special_5": 5,
-                    "hp_gun_special_4": 4,
-                    "hp_gun_special_3": 3,
-                    "hp_gun_special_2": 2,
-                    "hp_gun_special_1": 1,
-                }
-
-                maxClass = 0
-                for hardpoint in {x[0].nickname for x in ship.hardpoints().values()}:
-                    if hp_types.get(hardpoint, 0) > maxClass:
-                        maxClass = hp_types.get(hardpoint, 0)
-
-                try:
-                    power_output = ship.power_core().capacity
-                    power_recharge = ship.power_core().charge_rate
-                except:
-                    power_output = 0
-                    power_recharge = 0
-
-                hardpoints = []
-                for x in ship.hardpoints().values():
-                    if x[0].name() != x[0].nickname:
-                        hardpoints.append(x[0].name())
-                tempHardpoints = []
-                for x in hardpoints:
-                    tempHardpoints.append(f"{x}:{hardpoints.count(x)}")
-
-                hardpoints = list(dict.fromkeys(tempHardpoints))  # remove duplicates
-
-                comps = []
-                components = {}
-                if ship.type() == "Battlecruiser":
-                    try:
-                        comps = (
-                            ship.infocard("plain")
-                            .split("Components")[1]
-                            .strip()
-                            .split("\n \n")
-                        )
-                        for component in comps:
-                            temp = component.split("\n")
-                            name = temp[0]
-                            components[name] = temp[1:]
-                    except IndexError:
-                        components = {}
-
-                try:
-                    infocardMan = (
+                    comps = (
                         ship.infocard("plain")
-                        .split("Maneuverability")[1][2:][:-1]
-                        .split("\n \n")[0]
+                        .split("Components")[1]
+                        .strip()
+                        .split("\n \n")
                     )
+                    for component in comps:
+                        temp = component.split("\n")
+                        name = temp[0]
+                        components[name] = temp[1:]
                 except IndexError:
-                    infocardMan = ""
+                    components = {}
 
-                techcompat = ""
-                for x in definitions.items():
-                    if ship.nickname in x[1]:
-                        techcompat = x[0]
-
-                turnRate = degree(ship.turn_rate())
-                angularDistanceInTime = ship.angular_distance_in_time(0.5)
-                responseTime = ship.response()
-                # Time to turn 180 ~ 180 / turnRate
-
-                thruster_force = 72000
-                engine = ship.engine()
-                linear_drag = (
-                    ship.linear_drag + engine.linear_drag
-                    if engine
-                    else ship.linear_drag
+            try:
+                infocardMan = (
+                    ship.infocard("plain")
+                    .split("Maneuverability")[1][2:][:-1]
+                    .split("\n \n")[0]
                 )
-                force = thruster_force + ship.engine().max_force
-                maxThrust = int(force / linear_drag) if thrusterCount > 0 else 0
+            except IndexError:
+                infocardMan = ""
 
-                mustUseMoors = (
-                    False if ship.mission_property == "can_use_berths" else True
-                )
+            techcompat = ""
+            for x in definitions.items():
+                if ship.nickname in x[1]:
+                    techcompat = x[0]
 
-                maxCruise = (
-                    ship.engine().cruise_speed
-                    if ship.engine().cruise_speed != 0
-                    else 350
-                )
-                if isinstance(maxCruise, list):
-                    maxCruise = maxCruise[0]
+            turnRate = degree(ship.turn_rate())
+            angularDistanceInTime = ship.angular_distance_in_time(0.5)
+            responseTime = ship.response()
+            # Time to turn 180 ~ 180 / turnRate
 
-                infocard = ship.infocard("plain").split("<p>")[0]
+            thruster_force = 72000
+            engine = ship.engine()
+            linear_drag = (
+                ship.linear_drag + engine.linear_drag if engine else ship.linear_drag
+            )
+            force = thruster_force + ship.engine().max_force
+            maxThrust = int(force / linear_drag) if thrusterCount > 0 else 0
 
-                save_icon(icon=ship.icon(), name=ship.nickname, folder="ships")
+            mustUseMoors = not ship.mission_property == "can_use_berths"
 
-                ships[ship.nickname] = {
-                    "name": ship.name(),
-                    "longName": ship.infocard("plain").split("\n")[0],
-                    "components": components,
-                    "maneuverability": infocardMan,
-                    "built_by": built_by,
-                    "techcompat": techcompat,
-                    "type": ship.type(),
-                    "maxClass": maxClass,
-                    "maxShield": maxShield,
-                    "infocard": infocard.replace("&nbsp;", ""),
-                    "hull_price": hull_price,
-                    "package_price": ship.price(),
-                    "impulse_speed": int(ship.impulse_speed()),
-                    "maxThrust": maxThrust,
-                    "hit_pts": ship.hit_pts,
-                    "hold_size": ship.hold_size,
-                    "gunCount": gunCount,
-                    "thrusterCount": thrusterCount,
-                    "turretCount": turretCount,
-                    "torpedoCount": torpedoCount,
-                    "mineCount": mineCount,
-                    "cmCount": cmCount,
-                    "bot_limit": ship.nanobot_limit,
-                    "bat_limit": ship.shield_battery_limit,
-                    "power_output": power_output,
-                    "maxCruise": maxCruise,
-                    "power_recharge": power_recharge,
-                    "turnRate": round(turnRate, 2),
-                    "angularDistance0.5": angularDistanceInTime,
-                    "responseTime": responseTime,
-                    "mustUseMoors": mustUseMoors,
-                    "equipment": equipment,
-                    "sold_at": [
-                        [
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                        ]
-                        for base in filter_oorp_bases(ship.sold_at())
-                        if base.has_solar()
-                    ],
-                    "hardpoints": hardpoints,
-                    "time": datetime.now(tz=pytz.UTC).strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
-                    ),
-                }
+            maxCruise = (
+                ship.engine().cruise_speed if ship.engine().cruise_speed != 0 else 350
+            )
+            if isinstance(maxCruise, list):
+                maxCruise = maxCruise[0]
 
-            except TypeError as e:
-                logging.exception(f"Error occured for ship {ship.nickname}: {e}")
+            infocard = ship.infocard("plain").split("<p>")[0]
+
+            save_icon(icon=ship.icon(), name=ship.nickname, folder="ships")
+            dump_model(
+                ship.model(),
+                ship.materials(),
+                f"../dumpedData/models/{ship.nickname}.glb",
+            )
+
+            ships[ship.nickname] = {
+                "name": ship.name(),
+                "longName": ship.infocard("plain").split("\n")[0],
+                "components": components,
+                "maneuverability": infocardMan,
+                "built_by": built_by,
+                "techcompat": techcompat,
+                "type": ship.type(),
+                "maxClass": maxClass,
+                "maxShield": maxShield,
+                "infocard": infocard.replace("&nbsp;", ""),
+                "hull_price": hull_price,
+                "package_price": ship.price(),
+                "impulse_speed": int(ship.impulse_speed()),
+                "maxThrust": maxThrust,
+                "hit_pts": ship.hit_pts,
+                "hold_size": ship.hold_size,
+                "gunCount": gunCount,
+                "thrusterCount": thrusterCount,
+                "turretCount": turretCount,
+                "torpedoCount": torpedoCount,
+                "mineCount": mineCount,
+                "cmCount": cmCount,
+                "bot_limit": ship.nanobot_limit,
+                "bat_limit": ship.shield_battery_limit,
+                "power_output": power_output,
+                "maxCruise": maxCruise,
+                "power_recharge": power_recharge,
+                "turnRate": round(turnRate, 2),
+                "angularDistance0.5": angularDistanceInTime,
+                "responseTime": responseTime,
+                "mustUseMoors": mustUseMoors,
+                "equipment": equipment,
+                "sold_at": [
+                    [
+                        base.name(),
+                        base.owner().name(),
+                        base.system_().name(),
+                        base.system_().region(),
+                    ]
+                    for base in filter_oorp_bases(ship.sold_at())
+                    if base.has_solar()
+                ],
+                "hardpoints": hardpoints,
+                "time": datetime.now(tz=pytz.UTC).strftime(
+                    "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
+                ),
+            }
+
+        except TypeError as e:
+            logging.exception(f"Error occured for ship {ship.nickname}: {e}")
     return ships
 
 
@@ -388,7 +408,7 @@ def get_systems(get_system_images=False) -> dict:
         options.set_preference("layout.css.devPixelsPerPx", "2.0")
         driver = webdriver.Firefox(options=options)
         driver.set_window_size(1920, 1080)
-        driver.get("https://space.discoverygc.com/navmap")
+        driver.get(config["wikiGen"]["sysmapURL"])
 
     systems = {}
     solars = {}
@@ -992,6 +1012,10 @@ def main():
         "Weapons": get_guns(),
         "Equipment": get_equipment(),
     }
+
+    if len(processes) > 0:
+        for process in processes:
+            process.wait()
     return data
 
 

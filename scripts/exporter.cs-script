@@ -1,0 +1,49 @@
+using LibreLancer.Utf;
+using LibreLancer.Utf.Cmp;
+
+
+ScriptUsage(@"inputmodel[.cmp/.3db] [resourcefile.txm] [resourcefile2.mat] output.glb
+- Exports a Freelancer model (referencing associated material/texture files) to a .glb");
+
+var args = ParseArguments(2);
+AssertFileExists(args[0]);
+
+// Create our fake game context
+Game win;
+win = new Game(1,1, false, true, GameConfiguration.HeadlessTest()
+    .WithTick(() => win.Exit())
+);
+win.Run();
+new MaterialMap();
+var resourceManager = new GameResourceManager(win, null);
+// Load resources
+for(int i = 0; i < args.Length - 1; i++) {
+    AssertFileExists(args[i]);
+    // Use EditableUtf as regular api expects a loaded VFS
+    var eutf = new EditableUtf(args[i]);
+    resourceManager.AddResources(eutf.Export(), i.ToString());
+}
+
+var utf = UtfLoader.LoadDrawable(File.OpenRead(args[0]), args[0], resourceManager);
+
+EditResult<SimpleMesh.Model> exported;
+var settings = new ModelExporterSettings() { IncludeLods = false, IncludeHardpoints = false, IncludeWireframes = false };
+if (utf is ModelFile mdl)
+    exported = ModelExporter.Export(mdl, null, settings, resourceManager);
+else if(utf is CmpFile cmp)
+    exported = ModelExporter.Export(cmp, null, settings, resourceManager);
+else {
+    Console.Error.WriteLine("Input isn't utf or 3db");
+    Environment.Exit(1);
+}
+
+if(exported.IsError) {
+    Console.Error.WriteLine(exported.AllMessages());
+    Environment.Exit(1);
+}
+
+using (var outfile = File.Create(args[^1])) {
+    exported.Data.SaveTo(outfile, SimpleMesh.ModelSaveFormat.GLB);
+}
+Console.WriteLine("Exported!");
+return 0;

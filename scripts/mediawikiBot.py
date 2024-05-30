@@ -45,11 +45,7 @@ def login(botPasswordPath):
     }
     request = session.post(URL, data=login_params)
 
-    csrf_params = {
-        "action": "query",
-        "meta": "tokens",
-        "format": "json"
-    }
+    csrf_params = {"action": "query", "meta": "tokens", "format": "json"}
 
     request = session.get(url=URL, params=csrf_params)
     data = request.json()
@@ -85,7 +81,7 @@ def uploadText(wikitext, titleText):
                 except:
                     bar()
                 time.sleep(delay)
-        
+
         return failedUploads
 
     failures = upload(wikitext)
@@ -101,7 +97,6 @@ def uploadImages(titleImage, path="../dumpedData/images"):
             for entry in dirs:
                 if isdir(entry.path):
                     subdirectories.add(entry.path)
-
 
     def getWikiImages():
         session, csrfToken = login(config["bot"]["botPassword"])
@@ -126,7 +121,7 @@ def uploadImages(titleImage, path="../dumpedData/images"):
                     continue
 
                 try:
-                    if allimages[entry['name']] != config["bot"]["comment"]:
+                    if allimages[entry["name"]] != config["bot"]["comment"]:
                         print(
                             f"Skipping {entry['name']}, probably shouldn't be replaced."
                         )
@@ -140,15 +135,15 @@ def uploadImages(titleImage, path="../dumpedData/images"):
                 )
                 upload_params = {
                     "action": "upload",
-                    "filename": entry['name'],
+                    "filename": entry["name"],
                     "comment": config["bot"]["comment"],
                     "format": "json",
                     "token": csrfToken,
                     "bot": True,
                     "ignorewarnings": 1,
                 }
-                with open(entry['path'], "rb") as fileParam:
-                    file = {"file": (entry['name'], fileParam, "multipart/form-data")}
+                with open(entry["path"], "rb") as fileParam:
+                    file = {"file": (entry["name"], fileParam, "multipart/form-data")}
                     request = session.post(URL, files=file, data=upload_params)
                 data = request.json()
 
@@ -163,18 +158,22 @@ def uploadImages(titleImage, path="../dumpedData/images"):
                         print(
                             f"Error uploading {entry['name']}: {error}, trying again later..."
                         )
-                        failedUploads.append({"name": entry['name'], "path": entry['path']})
+                        failedUploads.append(
+                            {"name": entry["name"], "path": entry["path"]}
+                        )
                 except:
                     pass
                 # time.sleep(delay)
                 bar()
         return failedUploads
-    
+
     allimages = getWikiImages()
 
     failures = []
     for directory in subdirectories:
-        entries = [{"name": entry.name, "path": entry.path} for entry in scandir(directory)]
+        entries = [
+            {"name": entry.name, "path": entry.path} for entry in scandir(directory)
+        ]
         failures = failures + upload(entries)
 
     while failures:
@@ -183,6 +182,7 @@ def uploadImages(titleImage, path="../dumpedData/images"):
 
 def nukeTheWiki(titleNuke):
     session, csrfToken = login(config["bot"]["botPassword"])
+
     def nuke():
         session, csrfToken = login(config["bot"]["botPassword"])
         with alive_bar(len(idsToNuke), dual_line=True, title=titleNuke) as bar:
@@ -208,7 +208,7 @@ def nukeTheWiki(titleNuke):
                 # print(request.json())
 
                 # time.sleep(delay) # seemingly not neccessary
-                
+
     queryNuke_params = {
         "action": "query",
         "generator": "categorymembers",
@@ -241,7 +241,7 @@ def addWarning():
     data = request.json()
 
     return data.get("edit", {}).get("newrevid", 0)
-    
+
 
 def undoEdit(title, revId):
     session, csrfToken = login(config["bot"]["botPassword"])
@@ -260,10 +260,15 @@ def undoEdit(title, revId):
 
     return bool(data.get("edit", {}).get("result") == "Success")
 
-def main(wikidata = None, choices = None):      
+
+def main(wikidata=None, choices=None):
     if not wikidata:
         with open(config["bot"]["wikitext"], "r") as f:
             wikidata = load(f)
+
+    if not choices:
+        print("Exiting since nothing should be updated")
+        return
 
     print(URL)
 
@@ -296,7 +301,7 @@ def main(wikidata = None, choices = None):
         wikitext = wikitext | wikidata["Special"]
 
     print("Adding update warning to Main_Page")
-    global warningRevId 
+    global warningRevId
     warningRevId = addWarning()
 
     if "nuke" in choices:

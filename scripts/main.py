@@ -1,11 +1,15 @@
-import flWikiGen
 import pageGen
-import mediawikiBot
 import json
 import os
 from flint.paths import is_probably_freelancer
 import requests
 from bs4 import BeautifulSoup
+
+try:
+    import flWikiGen
+    import mediawikiBot
+except FileNotFoundError:
+    pass
 
 
 def clearConsole():
@@ -44,12 +48,22 @@ def firstTimeSetup():
     botP3 = input("Bot-Password: ")
     botCredentials = [f"{botP1}@{botP2}", botP3]
 
+    clearConsole()
+    while True:
+        print("""Input the path to the root a Librelancer install""")
+        librelancer = input("Path: ")
+        if os.path.exists(librelancer + "/lleditscript.exe"):
+            break
+        else:
+            print("Path does not look like a complete Librelancer install. Try again")
+
     with open("./secret.json", "w") as f:
         json.dump(
             {
                 "freelancerPath": freelancerPath,
                 "URL": wikiLink,
                 "botCredentials": botCredentials,
+                "librelancer": librelancer,
             },
             f,
             indent=1,
@@ -152,6 +166,8 @@ if __name__ == "__main__":
         print("Running first time setup...")
         firstTimeSetup()
         clearConsole()
+        import flWikiGen
+        import mediawikiBot
     downloadServerConfig()
     print("")
     callBot()

@@ -1,6 +1,7 @@
 import json
 from os import getcwd
 from os.path import exists
+from inspect import cleandoc
 
 
 def loadData(filename):
@@ -18,18 +19,18 @@ def generateTable(header, entries):
         if "price" in head.lower():
             formatting.append(i)
         table += f'<th style="background: rgba(255, 255, 255, 0.2)">{head}</th>\n'
-    table += '</tr>\n'
+    table += "</tr>\n"
 
     for entry in entries:
-        table += '<tr>\n'
+        table += "<tr>\n"
         for i, value in enumerate(entry):
             if i in formatting:
                 table += f'<td>{"{:,}".format(value) + "$"}</td>\n'
             else:
-                table += f'<td>[[{value}]]</td>\n'
-        table += '</tr>\n'
+                table += f"<td>[[{value}]]</td>\n"
+        table += "</tr>\n"
 
-    table += '</table>\n'
+    table += "</table>\n"
     return table
 
 
@@ -49,73 +50,72 @@ def generatePage(template, data, config, nickname):
     if template.lower() == "ship":
         ship_entry = data["Ships"][nickname]
         name = data["Ships"][nickname]["name"]
-        infobox = '__NOTOC__\n<table style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<tr title={nickname}>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; color: #ffffff; background: rgba(255, 255, 255, 0.2);"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="floatnone">[[File:{image}|center|250px]]</div>\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Ship Class</b>\n</td>\n<td style="padding-right: 1em;">{class}\n</td>\n<tr>\n<td class="infobox-data-title"><b>[http://discoverygc.com/techcompat/techcompat_table.php Tech Column]</b>\n</td>\n<td style="padding-right: 1em;">{techcompat}\n</td>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; color: #ffffff; background: rgba(255, 255, 255, 0.2);">Technical Information\n</td></tr>\n<tr title="Amount of gun and turret hardpoints on this ship">\n<td class="infobox-data-title"><b>Guns/Turrets</b>\n</td>\n<td style="padding-right: 1em; font-weight: bold; letter-spacing: 1px;">{gunCount} / {turretCount}\n</td></tr>\n<tr title="Maximum class of weapons that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. weapon class</b>\n</td>\n<td style="padding-right: 1em;">{maxwep}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Other equipment</b>\n</td>\n<td style="padding-right: 1em;">\n<ul>\n{other}\n</ul></td></tr>\n<tr title="Amount of hull hitpoints">\n<td class="infobox-data-title"><b>Hull strength</b>\n</td>\n<td style="padding-right: 1em; color: #009900; font-weight: bold;">{hull}\n</td></tr>\n<tr title="Maximum class of shield that can be mounted on this ship">\n<td class="infobox-data-title"><b>Max. shield class</b>\n</td>\n<td style="padding-right: 1em; color: #006699; font-weight: bold;">{maxShield}\n</td></tr>\n<tr title="Amount of cargo this ship is able to carry">\n<td class="infobox-data-title"><b>Cargo space</b>\n</td>\n<td style="padding-right: 1em;">{cargo} units\n</td></tr>\n<tr title="Maximum number of shield batteries carried by this ship">\n<td class="infobox-data-title"><b>Batteries</b>\n</td>\n<td style="padding-right: 1em;">{batteries}\n</td></tr>\n<tr title="Maximum number of shield nanobots carried by this ship">\n<td class="infobox-data-title"><b>Nanobots</b>\n</td>\n<td style="padding-right: 1em;">{bots}\n</td></tr>\n<tr title="Maximum speed of this ship on impulse drive">\n<td class="infobox-data-title"><b>Max. impulse speed</b>\n</td>\n<td style="padding-right: 1em;">{impulse} m/s\n</td></tr>\n<tr title="Maximum turning speed in degrees per second">\n<td class="infobox-data-title"><b>Max. turn speed</b>\n</td>\n<td style="padding-right: 1em;">{turnRate} deg/s\n</td></tr>\n<tr title="Maximum speed of this ship on thrusters">\n<td class="infobox-data-title"><b>Max. thrust speed</b>\n</td>\n<td style="padding-right: 1em;">{maxthrust} m/s\n</td></tr>\n<tr title="Maximum speed of this ship on cruise engines">\n<td class="infobox-data-title"><b>Max. cruise speed</b>\n</td>\n<td style="padding-right: 1em;">{maxCruise} m/s\n</td></tr>\n<tr title="Maximum reactor energy storage (capacitance)">\n<td class="infobox-data-title"><b>Power output</b>\n</td>\n<td style="padding-right: 1em;">{power_output} u\n</td></tr>\n<tr title="Amount of energy units generated per second">\n<td class="infobox-data-title"><b>Power recharge</b>\n</td>\n<td style="padding-right: 1em;">{power_recharge} u/s\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff; ">Additional Information\n</td></tr>\n<tr title="Price of the ship without any mounted equipment">\n<td class="infobox-data-title"><b>Ship price</b>\n</td>\n<td style="padding-right: 1em;">${hull_price}\n</td></tr>\n<tr title="Price of the ship with the default equipment">\n<td class="infobox-data-title"><b>Package price</b>\n</td>\n<td style="padding-right: 1em;">${package_price}\n</td></tr></table>'
         infocard = "<p>{infocard}\n</p><p><br/>\n</p>\n"
         components = '<h2>Components</h2>\n<ul style="line-height: 1.5em; margin-bottom: 15px">\n{components}\n</ul>\n'
         handling = "<h2>Handling</h2>\n<ul>\n{handling}\n</ul>\n"
         hardpoints = "<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n"
         includes = "<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>"
-        availability = '<h2>Availability</h2>\n{sold_at}\n'
+        availability = "<h2>Availability</h2>\n{sold_at}\n"
         time = "<i>NOTE: {time}<i>"
         category = "\n[[Category: Ships]]\n{rest}"
 
+        name = ship_entry["longName"]
         image = f"{nickname}.png"
-
-        infobox = infobox.replace("{nickname}", nickname)
-        infobox = infobox.replace("{name}", ship_entry["longName"])
-        infobox = infobox.replace("{image}", image)
-        infobox = infobox.replace("{class}", ship_entry["type"])
-        if ship_entry["built_by"] != "":
-            if ship_entry["built_by"] in houses:
-                infobox = infobox.replace(
-                    "{built_by}",
-                    f'[[File:Flag-{ship_entry["built_by"].lower()}.png|19px]] {ship_entry["built_by"]}',
-                )
-            else:
-                infobox = infobox.replace("{built_by}", f'{ship_entry["built_by"]}')
-        else:
-            infobox = infobox.replace("{built_by}", "Unknown")
-
-        infobox = infobox.replace("{techcompat}", ship_entry["techcompat"])
-        infobox = infobox.replace("{gunCount}", str(ship_entry["gunCount"]))
-        infobox = infobox.replace("{turretCount}", str(ship_entry["turretCount"]))
+        ship_class = ship_entry["type"]
+        techcompat = ship_entry["techcompat"]
+        gun_count = ship_entry["gunCount"]
+        turret_count = ship_entry["turretCount"]
+        hull = "{:,}".format(ship_entry["hit_pts"])
+        cargo = "{:,}".format(ship_entry["hold_size"])
+        batteries = "{:,}".format(ship_entry["bat_limit"])
+        bots = "{:,}".format(ship_entry["bot_limit"])
+        max_wep = ship_entry["maxClass"]
+        max_shield = "{:,}".format(ship_entry["maxShield"])
+        impulse = "{:,}".format(ship_entry["impulse_speed"])
+        turnrate = "{:,}".format(ship_entry["turnRate"])
+        power_output = "{:,}".format(ship_entry["power_output"])
+        max_cruise = "{:,}".format(ship_entry["maxCruise"])
+        power_recharge = "{:,}".format(ship_entry["power_recharge"])
+        hull_price = "{:,}".format(ship_entry["hull_price"])
+        package_price = "{:,}".format(ship_entry["package_price"])
         other = ""
         if ship_entry["torpedoCount"] > 0:
-            other = f'{other}<li>{ship_entry["torpedoCount"]}xCD/T</li>\n'
+            other += f'<li>{ship_entry["torpedoCount"]}xCD/T</li>\n'
         if ship_entry["cmCount"] > 0:
-            other = f'{other}<li>{ship_entry["cmCount"]}xCM</li>\n'
+            other += f'<li>{ship_entry["cmCount"]}xCM</li>\n'
         if ship_entry["mineCount"] > 0:
-            other = f'{other}<li>{ship_entry["mineCount"]}xM</li>\n'
-        infobox = infobox.replace("{other}", other)
+            other += f'<li>{ship_entry["mineCount"]}xM</li>\n'
+
         if ship_entry["maxThrust"] > 0:
-            infobox = infobox.replace("{maxthrust}", str(ship_entry["maxThrust"]))
+            max_thrust = ship_entry["maxThrust"]
         else:
-            infobox = infobox.replace(
-                "{maxthrust} m/s",
-                '<span style="color: #f7001d; font-style: italic;">Thruster not available</span>',
-            )
-        infobox = infobox.replace("{hull}", "{:,}".format(ship_entry["hit_pts"]))
-        infobox = infobox.replace("{cargo}", "{:,}".format(ship_entry["hold_size"]))
-        infobox = infobox.replace("{batteries}", "{:,}".format(ship_entry["bat_limit"]))
-        infobox = infobox.replace("{bots}", "{:,}".format(ship_entry["bot_limit"]))
-        infobox = infobox.replace("{maxwep}", str(ship_entry["maxClass"]))
-        infobox = infobox.replace("{maxShield}", "{:,}".format(ship_entry["maxShield"]))
-        infobox = infobox.replace(
-            "{impulse}", "{:,}".format(ship_entry["impulse_speed"])
-        )
-        infobox = infobox.replace("{turnRate}", "{:,}".format(ship_entry["turnRate"]))
-        infobox = infobox.replace(
-            "{power_output}", "{:,}".format(ship_entry["power_output"])
-        )
-        infobox = infobox.replace("{maxCruise}", "{:,}".format(ship_entry["maxCruise"]))
-        infobox = infobox.replace(
-            "{power_recharge}", "{:,}".format(ship_entry["power_recharge"])
-        )
-        infobox = infobox.replace(
-            "{hull_price}", "{:,}".format(ship_entry["hull_price"])
-        )
-        infobox = infobox.replace(
-            "{package_price}", "{:,}".format(ship_entry["package_price"])
+            max_thrust = '<span style="color: #f7001d; font-style: italic;">Thruster not available</span>'
+
+        infobox = cleandoc(
+            f"""  __NOTOC__
+
+                        {{{{ShipInfoBox
+                        |shipName={name}
+                        |imageName={image}
+                        |shipClass={ship_class}
+                        |techColumn={techcompat}
+                        |gunsTurrets={gun_count} / {turret_count}
+                        |maxWeaponClass={max_wep}
+                        |otherEquipment={other}
+                        |hullStrength={hull}
+                        |maxShieldClass={max_shield}
+                        |cargoSpace={cargo}
+                        |batteries={batteries}
+                        |nanobots={bots}
+                        |maxImpulseSpeed={impulse}
+                        |maxTurnSpeed={turnrate}
+                        |maxThrustSpeed={max_thrust}
+                        |maxCruiseSpeed={max_cruise}
+                        |powerOutput={power_output}
+                        |powerRecharge={power_recharge}
+                        |shipPrice={hull_price}
+                        |packagePrice={package_price}
+                        }}}}"""
         )
 
         info = ship_entry["infocard"].split("\n", 1)[1].strip()
@@ -127,7 +127,7 @@ def generatePage(template, data, config, nickname):
             for attribute in attributes:
                 comps += f"<li>{attribute}</li>\n"
             comps += "</ul></li>\n"
-        components = components.replace("{components}", comps)   
+        components = components.replace("{components}", comps)
 
         handleList = ship_entry["maneuverability"].split("\n")
         handle = ""
@@ -151,7 +151,13 @@ def generatePage(template, data, config, nickname):
         includes = includes.replace("{includes}", included)
 
         print(ship_entry["name"], ship_entry["sold_at"])
-        availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region"], entries = ship_entry["sold_at"]))
+        availability = availability.replace(
+            "{sold_at}",
+            generateTable(
+                header=["Base", "Owner", "System", "Region"],
+                entries=ship_entry["sold_at"],
+            ),
+        )
 
         time = time.replace("{time}", ship_entry["time"])
 
@@ -178,7 +184,7 @@ def generatePage(template, data, config, nickname):
         nebulae = "<h2>Nebulae</h2>\n\n{nebulae}\n"
         asteroids = "<h2>Asteroid Fields</h2>\n\n{asteroids}\n"
         wrecks = "<h2>Wrecks</h2>\n\n{wrecks}\n"
-        gates = '<h1>Jump Gates/Holes</h1>\n<hr>\n{gates}\n'
+        gates = "<h1>Jump Gates/Holes</h1>\n<hr>\n{gates}\n"
         time = "<i>NOTE: {time}<i>"
         category = "\n[[Category: Systems]]\n{region}"
 
@@ -221,7 +227,10 @@ def generatePage(template, data, config, nickname):
         overview = overview.replace("{suns}", temp)
 
         if entry["planets"]:
-            overview = overview.replace("{planets}", generateTable(header = ["Planet", "Owner"], entries = entry["planets"]))
+            overview = overview.replace(
+                "{planets}",
+                generateTable(header=["Planet", "Owner"], entries=entry["planets"]),
+            )
         else:
             overview = overview.replace("{planets}", "")
 
@@ -267,7 +276,9 @@ def generatePage(template, data, config, nickname):
                 unlawfulFactions.append(dicty["owner"])
 
         if bases:
-            overview = overview.replace("{stations}", generateTable(header = ["Station", "Owner"], entries = bases))
+            overview = overview.replace(
+                "{stations}", generateTable(header=["Station", "Owner"], entries=bases)
+            )
         else:
             overview = overview.replace("{stations}", "")
 
@@ -305,9 +316,15 @@ def generatePage(template, data, config, nickname):
         overview = overview.replace("{unlawfuls}", unlawfuls)
 
         if config["pageGen"]["includeSysmaps"]:
-            navmap = navmap.replace("{navmap}", f'[[File:{nickname}_map.png|center|750px|link=https://space.discoverygc.com/navmap/#q={name.replace(" ", "%20")}]]')
+            navmap = navmap.replace(
+                "{navmap}",
+                f'[[File:{nickname}_map.png|center|750px|link=https://space.discoverygc.com/navmap/#q={name.replace(" ", "%20")}]]',
+            )
         else:
-            navmap = navmap.replace("{navmap}", f'[https://space.discoverygc.com/navmap/#q={name.replace(" ", "%20")} Navmap]')
+            navmap = navmap.replace(
+                "{navmap}",
+                f'[{config["wikiGen"]["sysmapURL"]}/#q={name.replace(" ", "%20")} Navmap]',
+            )
 
         nebulas = ""
         asteroiden = ""
@@ -321,16 +338,21 @@ def generatePage(template, data, config, nickname):
         wreckages = ""
         for w in entry["wrecks"]:
             wreckages = f"""{wreckages}<h3>{w['name']} - {w['sector']}</h3>\n{w['infocard']}\n"""
-            if w['loot']:
+            if w["loot"]:
                 wreckages += """Contains:\n<ul style="margin-top:-15px;">\n"""
-                for item, amount in w['loot']:
+                for item, amount in w["loot"]:
                     wreckages = wreckages + f"<li>{amount}x [[{item}]]</li>\n"
             wreckages = wreckages + "</ul>\n"
 
         wrecks = wrecks.replace("{wrecks}", wreckages.replace("&nbsp;", ""))
 
         if entry["holes"]:
-            gates = gates.replace("{gates}", generateTable(header = ["Target System", "Type", "Location"], entries = entry["holes"]))
+            gates = gates.replace(
+                "{gates}",
+                generateTable(
+                    header=["Target System", "Type", "Location"], entries=entry["holes"]
+                ),
+            )
         else:
             gates = gates.replace("{gates}", "")
 
@@ -389,7 +411,9 @@ def generatePage(template, data, config, nickname):
 
         exports = ""
         if entry["commodities_selling"]:
-            exports = generateTable(["Commodity", "Price"], entry["commodities_selling"])
+            exports = generateTable(
+                ["Commodity", "Price"], entry["commodities_selling"]
+            )
 
         print(entry["commodities_buying"])
         commodities = commodities.replace("{imports}", imports)
@@ -560,23 +584,39 @@ def generatePage(template, data, config, nickname):
         infobox = infobox.replace("{efficiency}", str(entry["efficiency"]))
         infobox = infobox.replace("{rating}", str(entry["rating"]))
 
-        infocard = infocard.replace("{infocard}", entry["infocard"].replace("<p>", '<p style="padding: 0px; margin: 0px;">').replace('<p align="left">', '<p style="padding: 0px; margin: 0px;">'))
+        infocard = infocard.replace(
+            "{infocard}",
+            entry["infocard"]
+            .replace("<p>", '<p style="padding: 0px; margin: 0px;">')
+            .replace('<p align="left">', '<p style="padding: 0px; margin: 0px;">'),
+        )
 
         temp = ""
         if entry["sold_at"]:
-            temp = temp + f"""<h3>Sold at</h3>\n{generateTable(["Name", "Owner", "System", "Region", "Price"], entry["sold_at"])}\n"""
-        
+            temp = (
+                temp
+                + f"""<h3>Sold at</h3>\n{generateTable(["Name", "Owner", "System", "Region", "Price"], entry["sold_at"])}\n"""
+            )
+
         if entry["wrecks"]:
-            temp = temp + f"""<h3>Wrecks</h3>\n{generateTable(["Name", "System", "Sector"], entry["wrecks"])}"""
+            temp = (
+                temp
+                + f"""<h3>Wrecks</h3>\n{generateTable(["Name", "System", "Sector"], entry["wrecks"])}"""
+            )
 
         availability = availability.replace("{availability}", temp)
-                
+
         time = time.replace("{time}", entry["time"])
 
         if entry["shortName"].isupper():
-            categories = categories.replace("{type}", f"[[Category: {entry['type'].title()}]] [[Category: Codenames]]")
+            categories = categories.replace(
+                "{type}",
+                f"[[Category: {entry['type'].title()}]] [[Category: Codenames]]",
+            )
         else:
-            categories = categories.replace("{type}", f"[[Category: {entry['type'].title()}]]")
+            categories = categories.replace(
+                "{type}", f"[[Category: {entry['type'].title()}]]"
+            )
 
         return f"{infobox}{infocard}{availability}{time}{categories}"
     elif "cm" in template.lower():
@@ -584,23 +624,33 @@ def generatePage(template, data, config, nickname):
 
         infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this CM-Dropper"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The price of this CM-Dropper's flares"><b>Flare Price</b>\n</td>\n<td style="padding-right: 1em">{flare_price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The maximum amount of carriable Flares"><b>Max. Flares</b>\n</td>\n<td style="padding-right: 1em">{flare_count}\n</td></tr>\n<td class="infobox-data-title" title="The probability this countermeasure will defeat an incoming missile."><b>Effectiveness</b>\n</td>\n<td style="padding-right: 1em">{effectiveness}\n</td></tr>\n<td class="infobox-data-title" title="The Range the Flare will travel, in meters"><b>Range</b>\n</td>\n<td style="padding-right: 1em">{range}\n</td></tr>\n<td class="infobox-data-title" title="The time this Flare will stay alive for"><b>Lifetime</b>\n</td>\n<td style="padding-right: 1em">{lifetime}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
-        availability = '<h3>Availability</h3>\n{sold_at}\n'
-        categories = '[[Category: Equipment]]\n[[Category: Countermeasures]]\n'
+        availability = "<h3>Availability</h3>\n{sold_at}\n"
+        categories = "[[Category: Equipment]]\n[[Category: Countermeasures]]\n"
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", entry["name"])
         infobox = infobox.replace("{icon_name}", entry["icon_name"])
         infobox = infobox.replace("{price}", "{:,}".format(entry["price"]) + "$")
-        infobox = infobox.replace("{flare_price}", "{:,}".format(entry["flare_price"]) + "$")
+        infobox = infobox.replace(
+            "{flare_price}", "{:,}".format(entry["flare_price"]) + "$"
+        )
         infobox = infobox.replace("{flare_count}", str(entry["max_flares"]))
-        infobox = infobox.replace("{effectiveness}", str(entry["effectiveness"] * 100) + "%")
+        infobox = infobox.replace(
+            "{effectiveness}", str(entry["effectiveness"] * 100) + "%"
+        )
         infobox = infobox.replace("{range}", str(entry["range"]) + "m")
         infobox = infobox.replace("{lifetime}", str(entry["lifetime"]) + "s")
 
         infocard = infocard.replace("{infocard}", entry["infocard"])
 
         if entry["availability"]:
-            availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region", "Price"], entries = entry["availability"]))
+            availability = availability.replace(
+                "{sold_at}",
+                generateTable(
+                    header=["Base", "Owner", "System", "Region", "Price"],
+                    entries=entry["availability"],
+                ),
+            )
         else:
             availability = availability.replace("{sold_at}", "")
 
@@ -610,8 +660,8 @@ def generatePage(template, data, config, nickname):
 
         infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Armor Upgrade"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The amount of cargo this Armor Upgrade uses"><b>Volume</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The amount by which the ship's health is multiplied"><b>Multiplier</b>\n</td>\n<td style="padding-right: 1em">{multiplier}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
-        availability = '<h3>Availability</h3>\n{sold_at}\n'
-        categories = '[[Category: Equipment]]\n[[Category: Armor]]\n'
+        availability = "<h3>Availability</h3>\n{sold_at}\n"
+        categories = "[[Category: Equipment]]\n[[Category: Armor]]\n"
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", entry["name"])
@@ -623,7 +673,13 @@ def generatePage(template, data, config, nickname):
         infocard = infocard.replace("{infocard}", entry["infocard"])
 
         if entry["availability"]:
-            availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region", "Price"], entries = entry["availability"]))
+            availability = availability.replace(
+                "{sold_at}",
+                generateTable(
+                    header=["Base", "Owner", "System", "Region", "Price"],
+                    entries=entry["availability"],
+                ),
+            )
         else:
             availability = availability.replace("{sold_at}", "")
 
@@ -632,8 +688,8 @@ def generatePage(template, data, config, nickname):
         entry = data["Equipment"]["Cloaks"][nickname]
         infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Cloak (Likely not what you'll actually be paying to other players)"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
-        availability = '<h3>Availability</h3>\n{sold_at}\n'
-        categories = '[[Category: Equipment]]\n[[Category: Cloaks]]\n'
+        availability = "<h3>Availability</h3>\n{sold_at}\n"
+        categories = "[[Category: Equipment]]\n[[Category: Cloaks]]\n"
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", entry["name"])
@@ -644,7 +700,13 @@ def generatePage(template, data, config, nickname):
         infocard = infocard.replace("{infocard}", entry["infocard"])
 
         if entry["availability"]:
-            availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region", "Price"], entries = entry["availability"]))
+            availability = availability.replace(
+                "{sold_at}",
+                generateTable(
+                    header=["Base", "Owner", "System", "Region", "Price"],
+                    entries=entry["availability"],
+                ),
+            )
         else:
             availability = availability.replace("{sold_at}", "")
 
@@ -653,20 +715,28 @@ def generatePage(template, data, config, nickname):
         entry = data["Equipment"]["Engines"][nickname]
         infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Engine"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<td class="infobox-data-title" title="The maximum cruise speed this engine can reach"><b>Max. Cruise Speed</b>\n</td>\n<td style="padding-right: 1em">{cruise_speed}\n</td></tr>\n<td class="infobox-data-title" title="The time it takes to reach Cruise"><b>Cruise Charge Time</b>\n</td>\n<td style="padding-right: 1em">{cruise_charge_time}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
-        availability = '<h3>Availability</h3>\n{sold_at}\n'
-        categories = '[[Category: Equipment]]\n[[Category: Engines]]\n'
+        availability = "<h3>Availability</h3>\n{sold_at}\n"
+        categories = "[[Category: Equipment]]\n[[Category: Engines]]\n"
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", entry["name"])
         infobox = infobox.replace("{icon_name}", entry["icon_name"])
         infobox = infobox.replace("{price}", "{:,}".format(entry["price"]) + "$")
         infobox = infobox.replace("{cruise_speed}", str(entry["cruise_speed"]))
-        infobox = infobox.replace("{cruise_charge_time}", str(entry["cruise_charge_time"]))
+        infobox = infobox.replace(
+            "{cruise_charge_time}", str(entry["cruise_charge_time"])
+        )
 
         infocard = infocard.replace("{infocard}", entry["infocard"])
 
         if entry["availability"]:
-            availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region", "Price"], entries = entry["availability"]))
+            availability = availability.replace(
+                "{sold_at}",
+                generateTable(
+                    header=["Base", "Owner", "System", "Region", "Price"],
+                    entries=entry["availability"],
+                ),
+            )
         else:
             availability = availability.replace("{sold_at}", "")
 
@@ -675,31 +745,48 @@ def generatePage(template, data, config, nickname):
         entry = data["Equipment"]["Shields"][nickname]
         infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this shield"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<td class="infobox-data-title" title="This shields capacity"><b>Capacity</b>\n</td>\n<td style="padding-right: 1em">{capacity}\n</td></tr>\n<td class="infobox-data-title" title="Amount of capacity regenerated per second"><b>Regeneration Rate</b>\n</td>\n<td style="padding-right: 1em">{regen_rate}\n</td></tr>\n<td class="infobox-data-title" title="The time it takes to rebuild in seconds"><b>Offline Rebuild Time</b>\n</td>\n<td style="padding-right: 1em">{rebuild_time}\n</td></tr>\n<td class="infobox-data-title" title="Amount of energy consumed on rebuild"><b>Rebuild Power Draw</b>\n</td>\n<td style="padding-right: 1em">{rebuild_power_draw}\n</td></tr>\n<td class="infobox-data-title" title="Amount of energy consumed every second"><b>Constant Power Draw</b>\n</td>\n<td style="padding-right: 1em">{constant_power_draw}\n</td></tr>\n<td class="infobox-data-title"><b>Offline Threshold</b>\n</td>\n<td style="padding-right: 1em">{offline_threshold}\n</td></tr>\n<td class="infobox-data-title"><b>Technology</b>\n</td>\n<td style="padding-right: 1em">{technology}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
-        availability = '<h3>Availability</h3>\n{sold_at}\n'
-        categories = '[[Category: Equipment]]\n[[Category: Shields]]\n{technology}\n'
+        availability = "<h3>Availability</h3>\n{sold_at}\n"
+        categories = "[[Category: Equipment]]\n[[Category: Shields]]\n{technology}\n"
 
         infobox = infobox.replace("{name}", entry["name"])
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{icon_name}", entry["icon_name"])
         infobox = infobox.replace("{price}", "{:,}".format(entry["price"]) + "$")
-        infobox = infobox.replace("{capacity}", "{:,}".format(round(entry["capacity"], 2)))
+        infobox = infobox.replace(
+            "{capacity}", "{:,}".format(round(entry["capacity"], 2))
+        )
         infobox = infobox.replace("{regen_rate}", str(round(entry["regen_rate"], 2)))
         infobox = infobox.replace("{rebuild_time}", str(entry["offline_rebuild_time"]))
-        infobox = infobox.replace("{rebuild_power_draw}", str(entry["rebuild_power_draw"]))
-        infobox = infobox.replace("{constant_power_draw}", str(entry["constant_power_draw"]))
-        infobox = infobox.replace("{offline_threshold}", str(entry["offline_threshold"]))
+        infobox = infobox.replace(
+            "{rebuild_power_draw}", str(entry["rebuild_power_draw"])
+        )
+        infobox = infobox.replace(
+            "{constant_power_draw}", str(entry["constant_power_draw"])
+        )
+        infobox = infobox.replace(
+            "{offline_threshold}", str(entry["offline_threshold"])
+        )
         infobox = infobox.replace("{technology}", f'{entry["technology"]}')
 
         infocard = infocard.replace("{infocard}", entry["infocard"])
 
         if entry["availability"]:
-            availability = availability.replace("{sold_at}", generateTable(header= ["Base", "Owner", "System", "Region", "Price"], entries = entry["availability"]))
+            availability = availability.replace(
+                "{sold_at}",
+                generateTable(
+                    header=["Base", "Owner", "System", "Region", "Price"],
+                    entries=entry["availability"],
+                ),
+            )
         else:
             availability = availability.replace("{sold_at}", "")
 
-        categories = categories.replace("{technology}", f'[[Category: {entry["technology"]}]]')
+        categories = categories.replace(
+            "{technology}", f'[[Category: {entry["technology"]}]]'
+        )
 
         return f"{infobox}{infocard}{availability}{categories}"
+
 
 def generateSpecial(ships={}, systems={}, bases={}, factions={}, commodities={}):
     shipTemplate0 = """A list of all ships in this wiki. Click [Expand] below to show a sortable table of all ships\n\n{| class="sortable wikitable mw-collapsible mw-collapsed" width="100%"\n|+ \n|-\n!rowspan="2" style="text-align: center;"|Name\n!rowspan="2" style="text-align: center;"|Techcell\n!rowspan="2" style="text-align: center;"|Class\n!rowspan="1" style="text-align: center;"|Guns\n!rowspan="1" style="text-align: center;"|Turrets\n!rowspan="1" style="text-align: center;"|Mines\n!rowspan="1" style="text-align: center;"|CDs/Ts\n!rowspan="1" style="text-align: center;"|CMs\n!rowspan="2" style="text-align: center;"|Turn<br>Rate\n!rowspan="2" style="text-align: center;"|Hit<br>Points\n!rowspan="2" style="text-align: center;"|Power<br>Core\n!rowspan="2" style="text-align: center;"|Nanobots\n!rowspan="2" style="text-align: center;"|Shield Batteries\n!rowspan="2" style="text-align: center;"|Hold<br>Size\n!rowspan="2" style="text-align: center;"|Package<br>Price\n|-\n!colspan="6" style="text-align: center;"|Hardpoint Types\n"""
@@ -759,27 +846,35 @@ def assemblePages(loadedData):
     for name, attributes in loadedData["Systems"].items():
         source = generatePage(
             template="System", data=loadedData, config=configData, nickname=name
-        ) 
+        )
         sysSource[attributes["name"]] = source
     sources["Systems"] = sysSource
 
     shipSource = {}
     print("Assembling Ship pages")
     for name, attributes in loadedData["Ships"].items():
-        source = generatePage(
-            template="Ship", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Ship", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         shipSource[attributes["name"]] = source
         if attributes["name"] != attributes["longName"]:
-            redirects[attributes["longName"]] = f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
+            redirects[attributes["longName"]] = (
+                f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
+            )
     sources["Ships"] = shipSource
 
     baseSource = {}
     print("Assembling Base pages")
     for name, attributes in loadedData["Bases"].items():
-        source = generatePage(
-            template="Base", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Base", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         name = (
             attributes["name"]
             if attributes["name"] not in sources["Ships"].keys()
@@ -792,74 +887,103 @@ def assemblePages(loadedData):
     print("Assembling Faction pages")
     for name, attributes in loadedData["Factions"].items():
         if not "Guard" in attributes["name"]:
-            source = generatePage(
-                template="Faction", data=loadedData, config=configData, nickname=name
-            ) + "[[Category: NukeOnPatch]]"
+            source = (
+                generatePage(
+                    template="Faction",
+                    data=loadedData,
+                    config=configData,
+                    nickname=name,
+                )
+                + "[[Category: NukeOnPatch]]"
+            )
             factionSource[attributes["name"]] = source
             if attributes["name"] != attributes["shortName"]:
-                redirects[attributes["shortName"]] = f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
+                redirects[attributes["shortName"]] = (
+                    f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
+                )
     sources["Factions"] = factionSource
 
     commoditySource = {}
     print("Assembling Commodity pages")
     for name, attributes in loadedData["Commodities"].items():
-        source = generatePage(
-            template="Commodity", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Commodity", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         commoditySource[attributes["name"]] = source
     sources["Commodities"] = commoditySource
 
     weaponSource = {}
     print("Assembling Weapon pages")
     for name, attributes in loadedData["Weapons"].items():
-        source = generatePage(
-            template="Weapon", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Weapon", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         weaponSource[attributes["name"]] = source
     sources["Weapons"] = weaponSource
 
     cmSource = {}
     print("Assembling CM pages")
     for name, attributes in loadedData["Equipment"]["CounterMeasures"].items():
-        source = generatePage(
-            template="CM", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="CM", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         cmSource[attributes["name"]] = source
     sources["CMs"] = cmSource
 
     armorSource = {}
     print("Assembling Armor pages")
     for name, attributes in loadedData["Equipment"]["Armor"].items():
-        source = generatePage(
-            template="Armor", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Armor", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         armorSource[attributes["name"]] = source
     sources["Armor"] = armorSource
 
     cloakSource = {}
     print("Assembling Cloak pages")
     for name, attributes in loadedData["Equipment"]["Cloaks"].items():
-        source = generatePage(
-            template="Cloak", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Cloak", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         cloakSource[attributes["name"]] = source
     sources["Cloaks"] = cloakSource
 
     engineSource = {}
     print("Assembling Engine pages")
     for name, attributes in loadedData["Equipment"]["Engines"].items():
-        source = generatePage(
-            template="Engine", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Engine", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         engineSource[attributes["name"]] = source
     sources["Engines"] = engineSource
 
     shieldSource = {}
     print("Assembling Shield pages")
     for name, attributes in loadedData["Equipment"]["Shields"].items():
-        source = generatePage(
-            template="Shield", data=loadedData, config=configData, nickname=name
-        ) + "[[Category: NukeOnPatch]]"
+        source = (
+            generatePage(
+                template="Shield", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
+        )
         shieldSource[attributes["name"]] = source
     sources["Shields"] = shieldSource
 
@@ -878,7 +1002,7 @@ def assemblePages(loadedData):
     return sources
 
 
-def main(loadedData = None):
+def main(loadedData=None):
     if not loadedData:
         loadedData = loadData("../dumpedData/flData.json")
 
