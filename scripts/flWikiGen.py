@@ -4,8 +4,8 @@ from json import dump, load
 from time import perf_counter
 from math import pi, inf
 from sys import argv
-from os import getcwd, makedirs
-from os.path import exists, basename, splitext
+from os import getcwd, makedirs, listdir, remove
+from os.path import exists, basename, splitext, isfile, join, abspath
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
@@ -16,6 +16,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 import cv2
 import subprocess
+import time
 
 logging.basicConfig(
     level=logging.ERROR,
@@ -60,6 +61,28 @@ flintClasses = {
 }
 
 EntitySet = fl.entities.EntitySet
+ini = fl.formats.ini
+dll = fl.formats.dll
+
+
+def load_all_infocards():  # probably extremely inefficient, since loading just one resource from each dll should be enough, but w/e
+    for i in range(65539 * len(fl.paths.dlls)):
+        dll.lookup(i)
+
+
+def apply_server_infocard_override():
+    load_all_infocards()
+
+    infocards = dict(
+        ini.parse("./server_config/infocard_overrides.cfg", infocard_override=True)
+    ).get("IDStrings")
+
+    for id, value in infocards.items():
+        dll.override_resource(int(id), value)
+
+    # verify things worked
+    for id, value in infocards.items():
+        assert dll.lookup(int(id)) == value
 
 
 def degree(x):
@@ -68,7 +91,7 @@ def degree(x):
 
 
 def get_mineable_commodites(path):
-    content = fl.formats.ini.parse(fl.paths.construct_path(f"DATA/{path}"))
+    content = ini.parse(fl.paths.construct_path(f"DATA/{path}"))
     for header, attributes in content:
         if header.lower() == "lootablezone":
             if "asteroid_loot_commodity" in attributes.keys():
@@ -121,10 +144,12 @@ def iconname(path):
 # ------------------------------------------------ #
 
 
-def get_ships(definitions: dict) -> dict:
+def get_ships(definitions: dict, dumpModels: bool) -> dict:
     print("Reading ship data...")
     ships = {}
     for ship in fl.ships:
+        if ship.nickname == "medium_miner":
+            pass
         if (
             "_npc" in ship.nickname
             or not filter_oorp_bases(ship.sold_at())
@@ -236,11 +261,7 @@ def get_ships(definitions: dict) -> dict:
                     components = {}
 
             try:
-                infocardMan = (
-                    ship.infocard("plain")
-                    .split("Maneuverability")[1][2:][:-1]
-                    .split("\n \n")[0]
-                )
+                infocardMan = ship.infocard("plain").split("Maneuverability")[1].strip()
             except IndexError:
                 infocardMan = ""
 
@@ -267,17 +288,19 @@ def get_ships(definitions: dict) -> dict:
             maxCruise = (
                 ship.engine().cruise_speed if ship.engine().cruise_speed != 0 else 350
             )
+
             if isinstance(maxCruise, list):
                 maxCruise = maxCruise[0]
 
             infocard = ship.infocard("plain").split("<p>")[0]
 
-            save_icon(icon=ship.icon(), name=ship.nickname, folder="ships")
-            dump_model(
-                ship.model(),
-                ship.materials(),
-                f"../dumpedData/models/{ship.nickname}.glb",
-            )
+            # save_icon(icon=ship.icon(), name=ship.nickname, folder="ships")
+            if dumpModels:
+                dump_model(
+                    ship.model(),
+                    ship.materials(),
+                    f"../dumpedData/models/{ship.nickname}.glb",
+                )
 
             ships[ship.nickname] = {
                 "name": ship.name(),
@@ -497,10 +520,8 @@ def get_systems(get_system_images=False) -> dict:
                 neighbors = list(dict.fromkeys(neighbors))
 
                 if get_system_images:
-                    driver.get(
-                        f"https://space.discoverygc.com/navmap/#q={system.name()}"
-                    )
-
+                    driver.get(f"{config['wikiGen']['sysmapURL']}#q={system.name()}")
+                    driver.execute_script("location.reload(true);")
                     while (
                         driver.find_elements(By.CLASS_NAME, "loadingOverlay")
                         or driver.find_elements(By.CLASS_NAME, "loaderTitle")
@@ -508,11 +529,18 @@ def get_systems(get_system_images=False) -> dict:
                         == "Sirius"
                     ):
                         pass
+                    while (
+                        driver.find_elements(By.CLASS_NAME, "systemTitle")[
+                            0
+                        ].get_attribute("innerHTML")
+                        != system.name()
+                    ):
+                        driver.execute_script("location.reload(true);")
+                        time.sleep(2)
                     sysmap = driver.find_elements(By.CLASS_NAME, "map")[0]
                     sysmap.screenshot(
                         f"../dumpedData/images/systems/{system.nickname}_map.png"
                     )
-                    driver.refresh()
 
                 systems[system.nickname] = {
                     "name": system.name(),
@@ -626,14 +654,14 @@ def get_commodities() -> dict:
         if filter_oorp_bases(commodity.sold_at()).keys():
             try:
                 try:
-                    save_icon(
-                        icon=commodity.icon(),
-                        name=commodity.nickname,
-                        folder="commodities",
-                    )
-                    hrc = match_hrc_template(
-                        f"../dumpedData/images/commodities/{commodity.nickname}.png"
-                    )
+                    # save_icon(
+                    #     icon=commodity.icon(),
+                    #     name=commodity.nickname,
+                    #     folder="commodities",
+                    # )
+                    hrc = True  # match_hrc_template(
+                    #     f"../dumpedData/images/commodities/{commodity.nickname}.png"
+                    # )
                 except FileNotFoundError:
                     hrc = False
 
@@ -712,7 +740,7 @@ def get_guns() -> dict:
 
                 icon_name = iconname(gun.good().item_icon)
 
-                save_icon(icon=gun.icon(), name=icon_name, folder="guns")
+                # save_icon(icon=gun.icon(), name=icon_name, folder="guns")
 
                 sold_at = {
                     base: price
@@ -792,9 +820,9 @@ def get_equipment() -> dict:
             and not "npc_" in cm.nickname
             and flare.ammo_limit != inf
         ):
-            save_icon(
-                icon=cm.icon(), name=iconname(cm.good().item_icon), folder="equipment"
-            )
+            # save_icon(
+            #     icon=cm.icon(), name=iconname(cm.good().item_icon), folder="equipment"
+            # )
 
             equipment["CounterMeasures"][cm.nickname] = {
                 "name": cm.name(),
@@ -823,11 +851,11 @@ def get_equipment() -> dict:
     armors = fl.equipment.of_type(flintClasses["Armor"])
     for armor in armors:
         if filter_oorp_bases(armor.sold_at()):
-            save_icon(
-                icon=armor.icon(),
-                name=iconname(armor.good().item_icon),
-                folder="equipment",
-            )
+            # save_icon(
+            #     icon=armor.icon(),
+            #     name=iconname(armor.good().item_icon),
+            #     folder="equipment",
+            # )
 
             equipment["Armor"][armor.nickname] = {
                 "name": armor.name(),
@@ -853,11 +881,11 @@ def get_equipment() -> dict:
     cloaks = fl.equipment.of_type(flintClasses["CloakingDevice"])
     for cloak in cloaks:
         if not cloak.name().isspace():
-            save_icon(
-                icon=cloak.icon(),
-                name=iconname(cloak.good().item_icon),
-                folder="equipment",
-            )
+            # save_icon(
+            #     icon=cloak.icon(),
+            #     name=iconname(cloak.good().item_icon),
+            #     folder="equipment",
+            # )
 
             equipment["Cloaks"][cloak.nickname] = {
                 "name": cloak.name(),
@@ -882,11 +910,11 @@ def get_equipment() -> dict:
     engines = fl.equipment.of_type(flintClasses["Engine"])
     for engine in engines:
         if filter_oorp_bases(engine.sold_at()):
-            save_icon(
-                icon=engine.icon(),
-                name=iconname(engine.good().item_icon),
-                folder="equipment",
-            )
+            # save_icon(
+            #     icon=engine.icon(),
+            #     name=iconname(engine.good().item_icon),
+            #     folder="equipment",
+            # )
 
             equipment["Engines"][engine.nickname] = {
                 "name": engine.name(),
@@ -912,11 +940,11 @@ def get_equipment() -> dict:
     shields = fl.equipment.of_type(flintClasses["ShieldGenerator"])
     for shield in shields:
         if filter_oorp_bases(shield.sold_at()):
-            save_icon(
-                icon=shield.icon(),
-                name=iconname(shield.good().item_icon),
-                folder="equipment",
-            )
+            # save_icon(
+            #     icon=shield.icon(),
+            #     name=iconname(shield.good().item_icon),
+            #     folder="equipment",
+            # )
 
             equipment["Shields"][shield.nickname] = {
                 "name": shield.name(),
@@ -948,11 +976,11 @@ def get_equipment() -> dict:
     thrusters = fl.equipment.of_type(flintClasses["Thruster"])
     for thruster in thrusters:
         if filter_oorp_bases(thruster.sold_at()):
-            save_icon(
-                icon=thruster.icon(),
-                name=iconname(thruster.good().item_icon),
-                folder="equipment",
-            )
+            # save_icon(
+            #     icon=thruster.icon(),
+            #     name=iconname(thruster.good().item_icon),
+            #     folder="equipment",
+            # )
 
             equipment["Thrusters"][thruster.nickname] = {
                 "name": thruster.name(),
@@ -989,10 +1017,13 @@ def get_equipment() -> dict:
     return equipment
 
 
-def main():
+def main(dumpModels: bool):
     with open("secret.json", "r") as f:
         cconfig = load(f)
     fl.set_install_path(cconfig["freelancerPath"])
+
+    apply_server_infocard_override()
+
     global oorpBases
     oorpBases = [b.nickname for b in fl.bases if b.system_().nickname in oorp]
     global infocardMap
@@ -1004,7 +1035,7 @@ def main():
     data = {
         "README": f"This file was automatically generated by {basename(__file__)}. Do not edit unless you know what you're doing!",
         "Version": version,
-        "Ships": get_ships(definitions=tech.get_definitions()),
+        "Ships": get_ships(definitions=tech.get_definitions(), dumpModels=dumpModels),
         "Systems": get_systems(get_system_images=config["wikiGen"]["dumpSysmaps"]),
         "Bases": get_bases(),
         "Factions": get_factions(),
@@ -1030,7 +1061,7 @@ if __name__ == "__main__":
         print(
             f"Path to Freelancer directory not given.\nUsage: python {basename(__file__)} [path_to_freelancer]"
         )
-        quit()
+        fl.set_install_path(input())
 
     oorpBases = [b.nickname for b in fl.bases if b.system_().nickname in oorp]
     infocardMap = fl.interface.get_infocardmap()
@@ -1044,7 +1075,7 @@ if __name__ == "__main__":
     data = {
         "README": f"This file was automatically generated by {basename(__file__)}. Do not edit unless you know what you're doing!",
         "Version": version,
-        "Ships": get_ships(definitions=tech.get_definitions()),
+        "Ships": get_ships(definitions=tech.get_definitions(), dumpModels=False),
         "Systems": get_systems(get_system_images=config["wikiGen"]["dumpSysmaps"]),
         "Bases": get_bases(),
         "Factions": get_factions(),

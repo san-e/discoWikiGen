@@ -2,6 +2,13 @@ import json
 from os import getcwd
 from os.path import exists
 from inspect import cleandoc
+from itertools import zip_longest
+
+
+def chunkList(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
 
 
 def loadData(filename):
@@ -93,28 +100,27 @@ def generatePage(template, data, config, nickname):
 
         infobox = cleandoc(
             f"""  __NOTOC__
-
-                        {{{{ShipInfoBox
-                        |shipName={name}
-                        |imageName={image}
-                        |shipClass={ship_class}
-                        |techColumn={techcompat}
-                        |gunsTurrets={gun_count} / {turret_count}
-                        |maxWeaponClass={max_wep}
-                        |otherEquipment={other}
-                        |hullStrength={hull}
-                        |maxShieldClass={max_shield}
-                        |cargoSpace={cargo}
-                        |batteries={batteries}
-                        |nanobots={bots}
-                        |maxImpulseSpeed={impulse}
-                        |maxTurnSpeed={turnrate}
-                        |maxThrustSpeed={max_thrust}
-                        |maxCruiseSpeed={max_cruise}
-                        |powerOutput={power_output}
-                        |powerRecharge={power_recharge}
-                        |shipPrice={hull_price}
-                        |packagePrice={package_price}
+{{{{ShipInfoBox
+|shipName={name}
+|imageName={image}
+|shipClass={ship_class}
+|techColumn={techcompat}
+|gunsTurrets={gun_count} / {turret_count}
+|maxWeaponClass={max_wep}
+|otherEquipment={other}
+|hullStrength={hull}
+|maxShieldClass={max_shield}
+|cargoSpace={cargo}
+|batteries={batteries}
+|nanobots={bots}
+|maxImpulseSpeed={impulse}
+|maxTurnSpeed={turnrate}
+|maxThrustSpeed={max_thrust}
+|maxCruiseSpeed={max_cruise}
+|powerOutput={power_output}
+|powerRecharge={power_recharge}
+|shipPrice={hull_price}
+|packagePrice={package_price}
                         }}}}"""
         )
 
@@ -150,7 +156,6 @@ def generatePage(template, data, config, nickname):
             included = f'{included}<li>{title} (${"{:,}".format(price)})</li>\n'
         includes = includes.replace("{includes}", included)
 
-        print(ship_entry["name"], ship_entry["sold_at"])
         availability = availability.replace(
             "{sold_at}",
             generateTable(
@@ -176,7 +181,7 @@ def generatePage(template, data, config, nickname):
     elif "sys" in template.lower():
         entry = data["Systems"][nickname]
         name = data["Systems"][nickname]["name"]
-        infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title={nickname}><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">System\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
+        infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title={nickname}><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">System\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
         infocard = '<p>{infocard}</p>\n<br style="clear: both; height: 0px;" />\n</p>\n'
         overview = '<h1><span class="mw-headline" id="System_Overview">System Overview</span></h1>\n<hr>\n<table style="width: 100%;">\n<tr>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Astronomical Bodies</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Stellar Objects</div>\n{suns}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Planetary Objects</div>\n{planets}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Nebulae &amp; Asteroids</div>\n{fields}\n</td>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Industrial Development</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Space Stations</div>\n{stations}\n<li class="mw-empty-elt"></li></ul>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Commodity Mining</div>\n{mining}\n</td>\n<td style="width: 33%; vertical-align: top; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Faction Presence</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Lawful Factions</div>\n{lawfuls}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Corporations &amp; Guilds</div>\n{corps}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Unlawful Factions</div>\n{unlawfuls}\n</td></tr></table>\n'
         navmap = '<p><br style="clear: both; height: 0px;" />\n</p>\n<h1><span class="mw-headline" id="System_Map">System Map</span></h1>\n<hr>\n<p>{navmap}\n</p>\n'
@@ -318,7 +323,7 @@ def generatePage(template, data, config, nickname):
         if config["pageGen"]["includeSysmaps"]:
             navmap = navmap.replace(
                 "{navmap}",
-                f'[[File:{nickname}_map.png|center|750px|link=https://space.discoverygc.com/navmap/#q={name.replace(" ", "%20")}]]',
+                f'[[File:{nickname}_map.png|center|750px|link={config["wikiGen"]["sysmapURL"]}#q={name.replace(" ", "%20")}]]',
             )
         else:
             navmap = navmap.replace(
@@ -368,7 +373,7 @@ def generatePage(template, data, config, nickname):
         entry = data["Bases"][nickname]
         name = entry["name"]
 
-        infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; background: transparent; border: 1px solid white;" cellpadding="3">\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff", title="{nickname}"><b>{name}</b>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;">\n<div class="center">\n<div class="floatnone">[[File:{nickname}.png|250px]]</div>\n</div>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">Owner\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{owner}\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">Location\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{location}\n</td>\n</tr>\n</table>\n'
+        infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; background: transparent; border: 1px solid white;" cellpadding="3">\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff", title="{nickname}"><b>{name}</b>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;">\n<div class="center">\n<div class="floatnone">[[File:{nickname}.png|250px]]</div>\n</div>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">Owner\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{owner}\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">Location\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{location}\n</td>\n</tr>\n</table>\n'
         infocard = "{infocard}\n"
         bribesNmissions = '<h2>Bribes & Missions Offered</h2>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid white;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: rgba(255, 255, 255, 0.2); color: #ffffff;"><b>Bribes</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{bribes}\n</td>\n</tr>\n</table>\n\n<table style="float: left; margin-bottom: 10px; margin-left: 1em; width: 25%; border: 1px solid white;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: rgba(255, 255, 255, 0.2); color: #ffffff;"><b>Missions</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{missions}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
         commodities = '<h2>Commodities</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: rgba(255, 255, 255, 0.2); color: #ffffff;"><b>Imports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{imports}\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="float: left; margin-bottom: 10px; margin-left: 1em; border: 1px solid white;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: rgba(255, 255, 255, 0.2); color: #ffffff;"><b>Exports</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{exports}\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n'
@@ -415,7 +420,6 @@ def generatePage(template, data, config, nickname):
                 ["Commodity", "Price"], entry["commodities_selling"]
             )
 
-        print(entry["commodities_buying"])
         commodities = commodities.replace("{imports}", imports)
         commodities = commodities.replace("{exports}", exports)
 
@@ -460,7 +464,7 @@ def generatePage(template, data, config, nickname):
         ships = '<h2 title="The ships this faction\'s NPC\'s use, as defined in faction_prop.ini">Ships used</h2>\n\n<table class="wikitable sortable">\n<tr>\n<th>Ship</th>\n<th>Class</th>\n</tr>\n{ships}\n</td></tr></table>\n'
         bases = '<h2 title="All bases that are owned by this faction">Bases owned</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bases}\n</td></tr></table>\n</td></tr></table>\n'
         bribes = '<h2 title="All bases that offer bribes for this faction">Bribes</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n</tr>\n{bribes}\n</td></tr></table>\n</td></tr></table>\n'
-        rep_sheet = '<h2 title="This faction\'s rep sheet">Diplomacy</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th></tr>\n<tr>\n<td>\n{{Faction Diplomacy/begin}}\n{repsheet}\n{{Faction Diplomacy/end}}\n</td></tr></table>'
+        rep_sheet = '<h2 title="This faction\'s rep sheet">Diplomacy</h2>\n\n{{Reputation_Table/Start|caption=View Reputation|width=450px}}\n|-\n{repsheet}\n{{Reputation_Table/End}}\n'
         rumors = '<h2>Rumors</h2>\n<table class="wikitable collapsible mw-collapsible mw-collapsed">\n<tr>\n<th>\n</th>\n</tr>\n<tr>\n<td>\n{rumors}\n</td></tr></table>\n'
         time = "<i>NOTE: {time}<i>"
         categories = "\n[[Category: Factions]]\n"
@@ -490,11 +494,20 @@ def generatePage(template, data, config, nickname):
         bribes = bribes.replace("{bribes}", brobes)
 
         repsheet = ""
-        for faction, rep in entry["repsheet"].items():
-            rep = f"+{rep}" if rep > 0 else rep
-            repsheet = f"{repsheet}((FD | [[{faction}]] | {rep}))\n".replace(
-                "((", "{{"
-            ).replace("))", "}}")
+        print(nickname)
+        split_reps = chunkList(
+            list(entry["repsheet"].keys()), len(entry["repsheet"].keys()) // 2 + 1
+        )
+        for factions in zip_longest(*split_reps):
+            for faction in factions:
+                if not faction:
+                    continue
+                rep = entry["repsheet"][faction]
+                rep = f"+{rep}" if rep > 0 else rep
+                repsheet = f"{repsheet}((RT|{faction}|{rep}))\n".replace(
+                    "((", "{{"
+                ).replace("))", "}}")
+            repsheet = f"{repsheet}|-\n"
 
         rep_sheet = rep_sheet.replace("{repsheet}", repsheet[:-1])
 
@@ -515,7 +528,7 @@ def generatePage(template, data, config, nickname):
     elif "commodity" in template.lower():
         entry = data["Commodities"][nickname]
 
-        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The number of units of cargo this commodity uses"><b>Cargo Space</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The rate at which this commodity decays per second"><b>Decay Rate</b>\n</td>\n<td style="padding-right: 1em">{decay}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Default Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>High Risk Commodity</b>\n</td>\n<td style="padding-right: 1em">{hrc}\n</td></tr>\n</table>\n'
+        infobox = '__NOTOC__\n<table class="infobox bordered" style=" margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white; float: right" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: #555555; color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The number of units of cargo this commodity uses"><b>Cargo Space</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The rate at which this commodity decays per second"><b>Decay Rate</b>\n</td>\n<td style="padding-right: 1em">{decay}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Default Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>High Risk Commodity</b>\n</td>\n<td style="padding-right: 1em">{hrc}\n</td></tr>\n</table>\n'
         infocard = "{infocard}\n"
         availability = '<h2>Availability</h2>\n\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid #47505a;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which buy this commodity"><b>Bases buying</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{buyBases}\n</td></tr></table>\n\n</td>\n</tr>\n</table>\n<table class="wikitable collapsible mw-collapsible mw-collapsed" style="margin-bottom: 10px; margin-left: 1em; border: 1px solid white;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: #555555; color: #ffffff;" title="All bases which sell this commodity"><b>Bases selling</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n<table class="wikitable sortable">\n<tr>\n<th>Base</th>\n<th>Owner</th>\n<th>System</th>\n<th>Region</th>\n<th>Price</th>\n</tr>\n{sellBases}\n</td></tr></table>\n</td>\n</tr>\n</table>\n<p><br style="clear: both; height: 0px;" />\n<br style="clear: both; height: 0px;" />\n'
         time = "<i>NOTE: {time}<i>"
@@ -564,7 +577,7 @@ def generatePage(template, data, config, nickname):
     elif "weapon" in template.lower():
         entry = data["Weapons"][nickname]
 
-        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 128px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}|center|128px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="Hull Damage per hit"><b>Hull Damage</b>\n</td>\n<td style="padding-right: 1em">{hull_damage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Shield Damage per hit"><b>Shield Damage</b>\n</td>\n<td style="padding-right: 1em">{shield_damage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Hull Damage per second of continuous fire"><b>Hull Damage/s</b>\n</td>\n<td style="padding-right: 1em">{hull_dps}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Shield Damage per second of continuous fire"><b>Shield Damage/s</b>\n</td>\n<td style="padding-right: 1em">{shield_dps}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Amound of projectiles shot per second"><b>Refire Rate</b>\n</td>\n<td style="padding-right: 1em">{refire}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Amount of energy used per second"><b>Energy usage/s</b>\n</td>\n<td style="padding-right: 1em">{energy_usage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Speed of the projectile in meters per second"><b>Projectile Velocity</b>\n</td>\n<td style="padding-right: 1em">{speed}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Range of the projectile in meters"><b>Range</b>\n</td>\n<td style="padding-right: 1em">{range}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="(Hull Damage + Shield Damage) / Power Usage"><b>Efficiency</b>\n</td>\n<td style="padding-right: 1em">{efficiency}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="FLStat Rating"><b>FLStat Rating</b>\n</td>\n<td style="padding-right: 1em">{rating}\n</td>\n</tr>\n</table>\n\n"""
+        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}|center|128px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="Hull Damage per hit"><b>Hull Damage</b>\n</td>\n<td style="padding-right: 1em">{hull_damage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Shield Damage per hit"><b>Shield Damage</b>\n</td>\n<td style="padding-right: 1em">{shield_damage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Hull Damage per second of continuous fire"><b>Hull Damage/s</b>\n</td>\n<td style="padding-right: 1em">{hull_dps}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Shield Damage per second of continuous fire"><b>Shield Damage/s</b>\n</td>\n<td style="padding-right: 1em">{shield_dps}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Amound of projectiles shot per second"><b>Refire Rate</b>\n</td>\n<td style="padding-right: 1em">{refire}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Amount of energy used per second"><b>Energy usage/s</b>\n</td>\n<td style="padding-right: 1em">{energy_usage}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Speed of the projectile in meters per second"><b>Projectile Velocity</b>\n</td>\n<td style="padding-right: 1em">{speed}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="Range of the projectile in meters"><b>Range</b>\n</td>\n<td style="padding-right: 1em">{range}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="(Hull Damage + Shield Damage) / Power Usage"><b>Efficiency</b>\n</td>\n<td style="padding-right: 1em">{efficiency}\n</td>\n</tr>\n<tr>\n<td class="infobox-data-title" title="FLStat Rating"><b>FLStat Rating</b>\n</td>\n<td style="padding-right: 1em">{rating}\n</td>\n</tr>\n</table>\n\n"""
         infocard = "{infocard}\n"
         availability = "<h2>Availability</h2>\n{availability}"
         time = "<i>NOTE: {time}</i>\n"
@@ -622,7 +635,7 @@ def generatePage(template, data, config, nickname):
     elif "cm" in template.lower():
         entry = data["Equipment"]["CounterMeasures"][nickname]
 
-        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this CM-Dropper"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The price of this CM-Dropper's flares"><b>Flare Price</b>\n</td>\n<td style="padding-right: 1em">{flare_price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The maximum amount of carriable Flares"><b>Max. Flares</b>\n</td>\n<td style="padding-right: 1em">{flare_count}\n</td></tr>\n<td class="infobox-data-title" title="The probability this countermeasure will defeat an incoming missile."><b>Effectiveness</b>\n</td>\n<td style="padding-right: 1em">{effectiveness}\n</td></tr>\n<td class="infobox-data-title" title="The Range the Flare will travel, in meters"><b>Range</b>\n</td>\n<td style="padding-right: 1em">{range}\n</td></tr>\n<td class="infobox-data-title" title="The time this Flare will stay alive for"><b>Lifetime</b>\n</td>\n<td style="padding-right: 1em">{lifetime}\n</td></tr>\n</table>\n"""
+        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this CM-Dropper"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The price of this CM-Dropper's flares"><b>Flare Price</b>\n</td>\n<td style="padding-right: 1em">{flare_price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The maximum amount of carriable Flares"><b>Max. Flares</b>\n</td>\n<td style="padding-right: 1em">{flare_count}\n</td></tr>\n<td class="infobox-data-title" title="The probability this countermeasure will defeat an incoming missile."><b>Effectiveness</b>\n</td>\n<td style="padding-right: 1em">{effectiveness}\n</td></tr>\n<td class="infobox-data-title" title="The Range the Flare will travel, in meters"><b>Range</b>\n</td>\n<td style="padding-right: 1em">{range}\n</td></tr>\n<td class="infobox-data-title" title="The time this Flare will stay alive for"><b>Lifetime</b>\n</td>\n<td style="padding-right: 1em">{lifetime}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
         availability = "<h3>Availability</h3>\n{sold_at}\n"
         categories = "[[Category: Equipment]]\n[[Category: Countermeasures]]\n"
@@ -658,7 +671,7 @@ def generatePage(template, data, config, nickname):
     elif "armor" in template.lower():
         entry = data["Equipment"]["Armor"][nickname]
 
-        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Armor Upgrade"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The amount of cargo this Armor Upgrade uses"><b>Volume</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The amount by which the ship's health is multiplied"><b>Multiplier</b>\n</td>\n<td style="padding-right: 1em">{multiplier}\n</td></tr>\n</table>\n"""
+        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Armor Upgrade"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The amount of cargo this Armor Upgrade uses"><b>Volume</b>\n</td>\n<td style="padding-right: 1em">{volume}\n</td></tr>\n<tr>\n<td class="infobox-data-title" title="The amount by which the ship's health is multiplied"><b>Multiplier</b>\n</td>\n<td style="padding-right: 1em">{multiplier}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
         availability = "<h3>Availability</h3>\n{sold_at}\n"
         categories = "[[Category: Equipment]]\n[[Category: Armor]]\n"
@@ -686,7 +699,7 @@ def generatePage(template, data, config, nickname):
         return f"{infobox}{infocard}{availability}{categories}"
     elif "cloak" in template.lower():
         entry = data["Equipment"]["Cloaks"][nickname]
-        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Cloak (Likely not what you'll actually be paying to other players)"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n</table>\n"""
+        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Cloak (Likely not what you'll actually be paying to other players)"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
         availability = "<h3>Availability</h3>\n{sold_at}\n"
         categories = "[[Category: Equipment]]\n[[Category: Cloaks]]\n"
@@ -713,7 +726,7 @@ def generatePage(template, data, config, nickname):
         return f"{infobox}{infocard}{availability}{categories}"
     elif "engine" in template.lower():
         entry = data["Equipment"]["Engines"][nickname]
-        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Engine"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<td class="infobox-data-title" title="The maximum cruise speed this engine can reach"><b>Max. Cruise Speed</b>\n</td>\n<td style="padding-right: 1em">{cruise_speed}\n</td></tr>\n<td class="infobox-data-title" title="The time it takes to reach Cruise"><b>Cruise Charge Time</b>\n</td>\n<td style="padding-right: 1em">{cruise_charge_time}\n</td></tr>\n</table>\n"""
+        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this Engine"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<td class="infobox-data-title" title="The maximum cruise speed this engine can reach"><b>Max. Cruise Speed</b>\n</td>\n<td style="padding-right: 1em">{cruise_speed}\n</td></tr>\n<td class="infobox-data-title" title="The time it takes to reach Cruise"><b>Cruise Charge Time</b>\n</td>\n<td style="padding-right: 1em">{cruise_charge_time}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
         availability = "<h3>Availability</h3>\n{sold_at}\n"
         categories = "[[Category: Equipment]]\n[[Category: Engines]]\n"
@@ -743,7 +756,7 @@ def generatePage(template, data, config, nickname):
         return f"{infobox}{infocard}{availability}{categories}"
     elif "shield" in template.lower():
         entry = data["Equipment"]["Shields"][nickname]
-        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this shield"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<td class="infobox-data-title" title="This shields capacity"><b>Capacity</b>\n</td>\n<td style="padding-right: 1em">{capacity}\n</td></tr>\n<td class="infobox-data-title" title="Amount of capacity regenerated per second"><b>Regeneration Rate</b>\n</td>\n<td style="padding-right: 1em">{regen_rate}\n</td></tr>\n<td class="infobox-data-title" title="The time it takes to rebuild in seconds"><b>Offline Rebuild Time</b>\n</td>\n<td style="padding-right: 1em">{rebuild_time}\n</td></tr>\n<td class="infobox-data-title" title="Amount of energy consumed on rebuild"><b>Rebuild Power Draw</b>\n</td>\n<td style="padding-right: 1em">{rebuild_power_draw}\n</td></tr>\n<td class="infobox-data-title" title="Amount of energy consumed every second"><b>Constant Power Draw</b>\n</td>\n<td style="padding-right: 1em">{constant_power_draw}\n</td></tr>\n<td class="infobox-data-title"><b>Offline Threshold</b>\n</td>\n<td style="padding-right: 1em">{offline_threshold}\n</td></tr>\n<td class="infobox-data-title"><b>Technology</b>\n</td>\n<td style="padding-right: 1em">{technology}\n</td></tr>\n</table>\n"""
+        infobox = """__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title="{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{icon_name}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title" title="The price of this shield"><b>Price</b>\n</td>\n<td style="padding-right: 1em">{price}\n</td></tr>\n<td class="infobox-data-title" title="This shields capacity"><b>Capacity</b>\n</td>\n<td style="padding-right: 1em">{capacity}\n</td></tr>\n<td class="infobox-data-title" title="Amount of capacity regenerated per second"><b>Regeneration Rate</b>\n</td>\n<td style="padding-right: 1em">{regen_rate}\n</td></tr>\n<td class="infobox-data-title" title="The time it takes to rebuild in seconds"><b>Offline Rebuild Time</b>\n</td>\n<td style="padding-right: 1em">{rebuild_time}\n</td></tr>\n<td class="infobox-data-title" title="Amount of energy consumed on rebuild"><b>Rebuild Power Draw</b>\n</td>\n<td style="padding-right: 1em">{rebuild_power_draw}\n</td></tr>\n<td class="infobox-data-title" title="Amount of energy consumed every second"><b>Constant Power Draw</b>\n</td>\n<td style="padding-right: 1em">{constant_power_draw}\n</td></tr>\n<td class="infobox-data-title"><b>Offline Threshold</b>\n</td>\n<td style="padding-right: 1em">{offline_threshold}\n</td></tr>\n<td class="infobox-data-title"><b>Technology</b>\n</td>\n<td style="padding-right: 1em">{technology}\n</td></tr>\n</table>\n"""
         infocard = "{infocard}\n"
         availability = "<h3>Availability</h3>\n{sold_at}\n"
         categories = "[[Category: Equipment]]\n[[Category: Shields]]\n{technology}\n"
@@ -844,8 +857,11 @@ def assemblePages(loadedData):
     sysSource = {}
     print("Assembling System pages")
     for name, attributes in loadedData["Systems"].items():
-        source = generatePage(
-            template="System", data=loadedData, config=configData, nickname=name
+        source = (
+            generatePage(
+                template="System", data=loadedData, config=configData, nickname=name
+            )
+            + "[[Category: NukeOnPatch]]"
         )
         sysSource[attributes["name"]] = source
     sources["Systems"] = sysSource

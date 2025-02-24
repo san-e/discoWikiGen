@@ -73,7 +73,8 @@ def uploadText(wikitext, titleText):
                 data = request.json()
                 try:
                     error = data["error"]["code"]
-                    failedUploads[name] = text
+                    if error == "ratelimited":
+                        failedUploads[name] = text
                     print(f"Error updating {name}: {error}, trying again later...")
                     if error == "badtoken":
                         session, csrfToken = login(config["bot"]["botPassword"])

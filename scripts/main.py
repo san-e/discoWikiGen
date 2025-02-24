@@ -4,6 +4,7 @@ import os
 from flint.paths import is_probably_freelancer
 import requests
 from bs4 import BeautifulSoup
+import subprocess
 
 try:
     import flWikiGen
@@ -50,12 +51,20 @@ def firstTimeSetup():
 
     clearConsole()
     while True:
-        print("""Input the path to the root a Librelancer install""")
+        print("""Input the path to the root of a Librelancer install""")
         librelancer = input("Path: ")
         if os.path.exists(librelancer + "/lleditscript.exe"):
             break
         else:
-            print("Path does not look like a complete Librelancer install. Try again")
+            print("Path does not contain lleditscript.exe. Try again")
+
+    while True:
+        print("""Input the path to the root of a Blender install""")
+        blender = input("Path: ")
+        if os.path.exists(blender + "/blender.exe"):
+            break
+        else:
+            print("Path does not contain blender.exe. Try again")        
 
     with open("./secret.json", "w") as f:
         json.dump(
@@ -64,21 +73,22 @@ def firstTimeSetup():
                 "URL": wikiLink,
                 "botCredentials": botCredentials,
                 "librelancer": librelancer,
+                "blender": blender
             },
             f,
             indent=1,
         )
 
-
-def nukeWiki():
-    print("Nuke the wiki before updating? y/N")
-    nuke = True if "y" in input() else False
+def ask(question: str):
+    print(question)
+    answer = True if "y" in input() else False
     clearConsole()
-    return nuke
-
+    return answer
 
 def pagesToUpdate():
-    nuke = nukeWiki()
+    nuke = ask("Nuke the wiki before updating? y/N")
+    dumpModels = ask("Dump ship models for rendering? y/N")
+    renderShips = ask("Render ships in Blender? y/N\nWARNING: This might take a while!")
     print(
         """Which of the following (if any) pages do you wish to update?
     (a) Systems
@@ -116,6 +126,8 @@ def pagesToUpdate():
         "special": True if "2" in selection or "x" in selection else False,
         "images": True if "3" in selection or "x" in selection else False,
         "nuke": nuke,
+        "dumpModels": dumpModels,
+        "renderShips": renderShips,
     }
     clearConsole()
     return [option for option, chosen in options.items() if chosen == True]
@@ -129,12 +141,23 @@ def callBot():
 Confirm? y/N
     """
     )
+    if "dumpModels" in choices:
+        clear_folder("../dumpedData/models/")
+    if "renderShips" in choices:
+        clear_folder("../dumpedData/images/ships/")
+
     if "y" in input():
         clearConsole()
         print("Dumping game data\n===================")
-        flData = flWikiGen.main()
+        flData = flWikiGen.main(dumpModels = "dumpModels" in choices)
+        if "renderShips" in choices:
+            blender_render()
         wikitext = pageGen.main(flData)
         clearConsole()
+        if "dumpModels" in choices:
+            choices.remove("dumpModels")
+        if "renderShips" in choices:
+            choices.remove("renderShips")
         mediawikiBot.main(wikidata=wikitext, choices=choices)
     else:
         quit()
@@ -158,6 +181,18 @@ def downloadServerConfig(url="https://discoverygc.com/gameconfigpublic/"):
             with open(f"./server_config/{url.split('/')[-1]}", "wb") as f:
                 f.write(r.content)
 
+def clear_folder(folder: str):
+    files = [os.path.abspath(folder + f) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
+
+    for file in files:
+        os.remove(file)
+
+def blender_render():
+    blender = os.path.join(secret["blender"], "blender.exe")
+    clearConsole()
+    os.environ["PYTHONPATH"] = "../.venv/Lib/site-packages"
+    subprocess.call([blender, os.path.abspath("./renderer.blend"), "-b", "-P", os.path.abspath("./blender.py")])
+    input()
 
 if __name__ == "__main__":
     with open("./config.json", "r") as f:
@@ -168,6 +203,9 @@ if __name__ == "__main__":
         clearConsole()
         import flWikiGen
         import mediawikiBot
+
+    with open("./secret.json", "r") as f:
+        secret = json.load(f)
     downloadServerConfig()
     print("")
     callBot()
