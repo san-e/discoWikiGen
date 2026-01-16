@@ -177,7 +177,7 @@ def generatePage(template, data, config, nickname):
         if not ship_entry["components"]:
             components = ""
 
-        return f"{infobox}{infocard}{components}{handling}{hardpoints}{includes}{availability}{time}{category}"
+        return f"{infobox}{infocard}{components}{handling}{hardpoints}{includes}{availability}{category}"
     elif "sys" in template.lower():
         entry = data["Systems"][nickname]
         name = data["Systems"][nickname]["name"]
@@ -368,7 +368,7 @@ def generatePage(template, data, config, nickname):
         else:
             category = category.replace("{region}", "")
 
-        return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{wrecks}{gates}{time}{category}"
+        return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{wrecks}{gates}{category}"
     elif "base" in template.lower():
         entry = data["Bases"][nickname]
         name = entry["name"]
@@ -455,7 +455,7 @@ def generatePage(template, data, config, nickname):
         other = f'[[Category: {entry["owner"]}]]\n[[Category: {entry["region"]}]]\n[[Category: {entry["system"]}]]\n'
         categories = categories.replace("{other}", other)
 
-        return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{news}{rumors}{time}{categories}"
+        return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{news}{rumors}{categories}"
     elif "faction" in template.lower():
         entry = data["Factions"][nickname]
 
@@ -494,7 +494,6 @@ def generatePage(template, data, config, nickname):
         bribes = bribes.replace("{bribes}", brobes)
 
         repsheet = ""
-        print(nickname)
         split_reps = chunkList(
             list(entry["repsheet"].keys()), len(entry["repsheet"].keys()) // 2 + 1
         )
@@ -524,7 +523,9 @@ def generatePage(template, data, config, nickname):
 
         time = time.replace("{time}", entry["time"])
 
-        return f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{rumors}{time}{categories}"
+        return (
+            f"{infobox}{infocard}{ships}{bases}{bribes}{rep_sheet}{rumors}{categories}"
+        )
     elif "commodity" in template.lower():
         entry = data["Commodities"][nickname]
 
@@ -573,7 +574,7 @@ def generatePage(template, data, config, nickname):
 
         time = time.replace("{time}", entry["time"])
 
-        return f"{infobox}{infocard}{availability}{time}{categories}"
+        return f"{infobox}{infocard}{availability}{categories}"
     elif "weapon" in template.lower():
         entry = data["Weapons"][nickname]
 
@@ -631,7 +632,7 @@ def generatePage(template, data, config, nickname):
                 "{type}", f"[[Category: {entry['type'].title()}]]"
             )
 
-        return f"{infobox}{infocard}{availability}{time}{categories}"
+        return f"{infobox}{infocard}{availability}{categories}"
     elif "cm" in template.lower():
         entry = data["Equipment"]["CounterMeasures"][nickname]
 
