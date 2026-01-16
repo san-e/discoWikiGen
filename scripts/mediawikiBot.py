@@ -58,37 +58,36 @@ def uploadText(wikitext, titleText):
     def upload(toUpload):
         session, csrfToken = login(config["bot"]["botPassword"])
         failedUploads = {}
-        with alive_bar(len(toUpload.keys()), dual_line=True, title=titleText) as bar:
-            for name, text in toUpload.items():
-                bar.text = f"-> Updating: {name}"
-                edit_params = {
-                    "action": "edit",
-                    "title": name,
-                    "text": text,
-                    "bot": True,
-                    "format": "json",
-                    "token": csrfToken,
-                }
-                request = session.post(URL, data=edit_params)
-                data = request.json()
-                try:
-                    error = data["error"]["code"]
-                    if error == "ratelimited":
-                        failedUploads[name] = text
-                    print(f"Error updating {name}: {error}, trying again later...")
-                    if error == "badtoken":
-                        session, csrfToken = login(config["bot"]["botPassword"])
-                    bar()
-                except:
-                    bar()
-                time.sleep(delay)
+        for name, text in toUpload.items():
+            bar.text = f"-> Updating: {name}"
+            edit_params = {
+                "action": "edit",
+                "title": name,
+                "text": text,
+                "bot": True,
+                "format": "json",
+                "token": csrfToken,
+            }
+            request = session.post(URL, data=edit_params)
+            data = request.json()
+            try:
+                error = data["error"]["code"]
+                if error == "ratelimited":
+                    failedUploads[name] = text
+                print(f"Error updating {name}: {error}, trying again later...")
+                if error == "badtoken":
+                    session, csrfToken = login(config["bot"]["botPassword"])
+            except:
+                bar()
+            time.sleep(delay)
 
         return failedUploads
 
-    failures = upload(wikitext)
+    with alive_bar(len(wikitext.keys()), dual_line=True, title=titleText) as bar:
+        failures = upload(wikitext)
 
-    while failures:
-        failures = upload(failures)
+        while failures:
+            failures = upload(failures)
 
 
 def uploadImages(titleImage, path="../dumpedData/images"):
