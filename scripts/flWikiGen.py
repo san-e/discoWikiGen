@@ -10,18 +10,12 @@ from PIL import Image
 from io import BytesIO
 from datetime import datetime
 import pytz
-import logging
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 import cv2
 import subprocess
 import time
-
-logging.basicConfig(
-    level=logging.ERROR,
-    filename=datetime.now(tz=pytz.UTC).strftime("./logs/%d-%m-%Y_%Hh%Mm%Ss.log"),
-)
 
 version = ""  # input("Enter game version: ")
 
@@ -352,7 +346,8 @@ def get_ships(definitions: dict, dumpModels: bool) -> dict:
             }
 
         except TypeError as e:
-            logging.exception(f"Error occured for ship {ship.nickname}: {e}")
+            print(f"Error occured for ship {ship.nickname}")
+            raise (e)
     return ships
 
 
@@ -416,7 +411,8 @@ def get_bases() -> dict:
                     ),
                 }
             except (TypeError, AttributeError) as e:
-                logging.exception(f"Error occured for base {base.nickname}: ")
+                print(f"Error occured for base {base.nickname}")
+                raise (e)
     return bases
 
 
@@ -522,13 +518,19 @@ def get_systems(get_system_images=False) -> dict:
                 if get_system_images:
                     driver.get(f"{config['wikiGen']['sysmapURL']}#q={system.name()}")
                     driver.execute_script("location.reload(true);")
+                    time.sleep(1)
+                    x = 0
                     while (
                         driver.find_elements(By.CLASS_NAME, "loadingOverlay")
                         or driver.find_elements(By.CLASS_NAME, "loaderTitle")
                         or driver.find_elements(By.CLASS_NAME, "systemTitle")[0]
                         == "Sirius"
                     ):
-                        pass
+                        time.sleep(0.1)
+                        x += 1
+                        if x >= 100:
+                            driver.execute_script("location.reload(true);")
+                            x = 0
                     while (
                         driver.find_elements(By.CLASS_NAME, "systemTitle")[
                             0
@@ -567,7 +569,8 @@ def get_systems(get_system_images=False) -> dict:
                 # get_solars()
 
         except Exception as e:
-            logging.exception(f"Error occured for system {system.nickname}: ")
+            print(f"Error occured for system {system.nickname}")
+            raise (e)
     if get_system_images:
         driver.quit()
     return systems
@@ -633,8 +636,9 @@ def get_factions() -> dict:
                         "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
                     ),
                 }
-        except TypeError:
-            logging.exception(f"Error occured for faction {faction.nickname}: ")
+        except TypeError as e:
+            print(f"Error occured for faction {faction.nickname}")
+            raise (e)
     return factions
 
 
@@ -653,17 +657,7 @@ def get_commodities() -> dict:
     for commodity in fl.commodities:
         if filter_oorp_bases(commodity.sold_at()).keys():
             try:
-                try:
-                    # save_icon(
-                    #     icon=commodity.icon(),
-                    #     name=commodity.nickname,
-                    #     folder="commodities",
-                    # )
-                    hrc = True  # match_hrc_template(
-                    #     f"../dumpedData/images/commodities/{commodity.nickname}.png"
-                    # )
-                except FileNotFoundError:
-                    hrc = False
+                hrc = False
 
                 commodities[commodity.nickname] = {
                     "name": commodity.name(),
@@ -702,8 +696,9 @@ def get_commodities() -> dict:
                         "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
                     ),
                 }
-            except TypeError:
-                logging.exception(f"Error occured for commodity {commodity.nickname}")
+            except TypeError as e:
+                print(f"Error occured for commodity {commodity.nickname}")
+                raise (e)
     return commodities
 
 
@@ -793,8 +788,9 @@ def get_guns() -> dict:
                         "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
                     ),
                 }
-        except:
-            logging.exception(f"Error occured for gun {gun.nickname}: ")
+        except Exception as e:
+            print(f"Error occured for gun {gun.nickname}")
+            raise (e)
 
     return dict(sorted(guns.items(), key=lambda x: bool(x[1]["sold_at"])))
 
@@ -819,6 +815,7 @@ def get_equipment() -> dict:
             not "_npc" in cm.nickname
             and not "npc_" in cm.nickname
             and flare.ammo_limit != inf
+            and cm.good()
         ):
             # save_icon(
             #     icon=cm.icon(), name=iconname(cm.good().item_icon), folder="equipment"
@@ -952,13 +949,25 @@ def get_equipment() -> dict:
                 "infocard": shield.infocard(),
                 "price": shield.price(),
                 "technology": shield.shield_type,
-                "capacity": shield.max_capacity,
-                "explosion_resistance": shield.explosion_resistance,
-                "regen_rate": shield.regeneration_rate,
-                "offline_rebuild_time": shield.offline_rebuild_time,
-                "offline_threshold": shield.offline_threshold,
-                "constant_power_draw": shield.constant_power_draw,
-                "rebuild_power_draw": shield.rebuild_power_draw,
+                "capacity": shield.max_capacity if shield.max_capacity else 0,
+                "explosion_resistance": (
+                    shield.explosion_resistance if shield.explosion_resistance else 0
+                ),
+                "regen_rate": (
+                    shield.regeneration_rate if shield.regeneration_rate else 0
+                ),
+                "offline_rebuild_time": (
+                    shield.offline_rebuild_time if shield.offline_rebuild_time else 0
+                ),
+                "offline_threshold": (
+                    shield.offline_threshold if shield.offline_threshold else 0
+                ),
+                "constant_power_draw": (
+                    shield.constant_power_draw if shield.constant_power_draw else 0
+                ),
+                "rebuild_power_draw": (
+                    shield.rebuild_power_draw if shield.rebuild_power_draw else 0
+                ),
                 "availability": list(
                     {
                         (
