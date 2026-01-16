@@ -8,7 +8,10 @@ import math
 from mathutils import Vector
 from PIL import Image
 import time
-from colorama import Fore
+from datetime import datetime, timedelta
+
+FORE_GREEN = "\033[32m"
+FORE_RESET = "\033[0m"
 
 context = bpy.context
 scene = context.scene
@@ -158,6 +161,11 @@ for i, ship_file in enumerate(ships):
 
     total_time = time.perf_counter() - start_time
     avg = total_time / (i + 1)
+    remaining_seconds = avg * (len(ships) - i)
+    complete_at = datetime.now() + timedelta(seconds=remaining_seconds)
     print(
-        f"[{Fore.GREEN}PYTHON{Fore.WHITE}] Last Render: {round(time.perf_counter() - this_render, 2)} seconds.\n[{Fore.GREEN}PYTHON{Fore.WHITE}] Average time per render: {round(avg, 2)} seconds\n[{Fore.GREEN}PYTHON{Fore.WHITE}] Time left: {time.strftime('%H:%M:%S', time.gmtime(int((avg * (len(ships) - i)))))}"
+        f"""[{FORE_GREEN}PYTHON{FORE_RESET}] Last Render: {round(time.perf_counter() - this_render, 2)} seconds.
+[{FORE_GREEN}PYTHON{FORE_RESET}] Average time per render: {round(avg, 2)} seconds
+[{FORE_GREEN}PYTHON{FORE_RESET}] Time left: {time.strftime('%H:%M:%S', time.gmtime(int(remaining_seconds)))}
+[{FORE_GREEN}PYTHON{FORE_RESET}] Will complete at: {complete_at.strftime('%H:%M:%S')}"""
     )
