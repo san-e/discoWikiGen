@@ -1,0 +1,9 @@
+[project]
+name = "discowikigen"
+version = "0.1.0"
+description = "Wiki page generator for Discovery Freelancer"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas-stubs~=3.0.3",
+]

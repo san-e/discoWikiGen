@@ -1,0 +1,24 @@
+import { dir_exists } from "std/fs"
+
+silent $ command -v uv $ failed {
+	echo("This project requires the uv package manager. Find installation instructions here: https://docs.astral.sh/uv/getting-started/installation/")
+	exit(1)
+}
+
+if (dir_exists("{pwd()}/.venv")) {
+	trust $ source .venv/bin/activate $
+	trust $ exec \$SHELL $
+}
+
+trust silent $ uv init $
+
+$ uv venv $ failed {
+	echo("Failed to initialize virtual environment.")
+	exit(1)
+}
+
+$ uv pip install -r requirements.txt $ failed {
+	echo("Failed to install dependencies.")
+	exit(1)
+}
+trust $ source .venv/bin/activate $
