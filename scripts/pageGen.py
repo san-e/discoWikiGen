@@ -4,7 +4,6 @@ from os.path import exists
 from inspect import cleandoc
 from itertools import zip_longest
 
-
 def chunkList(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
@@ -12,7 +11,7 @@ def chunkList(lst, n):
 
 
 def loadData(filename):
-    with open(f"{getcwd()}\\{filename}", "r") as file:
+    with open(f"{getcwd()}/{filename}", "r") as file:
         data = json.load(file)
     return data
 
@@ -51,7 +50,7 @@ def generateList(input_list):
     return list_html
 
 
-def generatePage(template, data, config, nickname):
+def generatePage(template: str, data, config, nickname):
     houses = config["pageGen"]["houses"]
     corps = config["pageGen"]["corporations"]
     if template.lower() == "ship":
@@ -63,38 +62,37 @@ def generatePage(template, data, config, nickname):
         hardpoints = "<h2>Hardpoints</h2>\n<ul>\n{hardpoints}\n</ul>\n"
         includes = "<h2>Purchase Includes</h2>\n<ul>\n{includes}\n</ul>"
         availability = "<h2>Availability</h2>\n{sold_at}\n"
-        time = "<i>NOTE: {time}<i>"
         category = "\n[[Category: Ships]]\n{rest}"
 
-        name = ship_entry["longName"]
+        name = ship_entry.longName
         image = f"{nickname}.png"
-        ship_class = ship_entry["type"]
-        techcompat = ship_entry["techcompat"]
-        gun_count = ship_entry["gunCount"]
-        turret_count = ship_entry["turretCount"]
-        hull = "{:,}".format(ship_entry["hit_pts"])
-        cargo = "{:,}".format(ship_entry["hold_size"])
-        batteries = "{:,}".format(ship_entry["bat_limit"])
-        bots = "{:,}".format(ship_entry["bot_limit"])
-        max_wep = ship_entry["maxClass"]
-        max_shield = "{:,}".format(ship_entry["maxShield"])
-        impulse = "{:,}".format(ship_entry["impulse_speed"])
-        turnrate = "{:,}".format(ship_entry["turnRate"])
-        power_output = "{:,}".format(ship_entry["power_output"])
-        max_cruise = "{:,}".format(ship_entry["maxCruise"])
-        power_recharge = "{:,}".format(ship_entry["power_recharge"])
-        hull_price = "{:,}".format(ship_entry["hull_price"])
-        package_price = "{:,}".format(ship_entry["package_price"])
+        ship_class = ship_entry.type
+        techcompat = ship_entry.techcompat
+        gun_count = ship_entry.gunCount
+        turret_count = ship_entry.turretCount
+        hull = "{:,}".format(ship_entry.hit_pts)
+        cargo = "{:,}".format(ship_entry.hold_size)
+        batteries = "{:,}".format(ship_entry.bat_limit)
+        bots = "{:,}".format(ship_entry.bot_limit)
+        max_wep = ship_entry.maxClass
+        max_shield = "{:,}".format(ship_entry.maxShield)
+        impulse = "{:,}".format(ship_entry.impulse_speed)
+        turnrate = "{:,}".format(ship_entry.turnRate)
+        power_output = "{:,}".format(ship_entry.power_output)
+        max_cruise = "{:,}".format(ship_entry.maxCruise)
+        power_recharge = "{:,}".format(ship_entry.power_recharge)
+        hull_price = "{:,}".format(ship_entry.hull_price)
+        package_price = "{:,}".format(ship_entry.package_price)
         other = ""
-        if ship_entry["torpedoCount"] > 0:
-            other += f'<li>{ship_entry["torpedoCount"]}xCD/T</li>\n'
-        if ship_entry["cmCount"] > 0:
-            other += f'<li>{ship_entry["cmCount"]}xCM</li>\n'
-        if ship_entry["mineCount"] > 0:
-            other += f'<li>{ship_entry["mineCount"]}xM</li>\n'
+        if ship_entry.torpedoCount > 0:
+            other += f'<li>{ship_entry.torpedoCount}xCD/T</li>\n'
+        if ship_entry.cmCount > 0:
+            other += f'<li>{ship_entry.cmCount}xCM</li>\n'
+        if ship_entry.mineCount > 0:
+            other += f'<li>{ship_entry.mineCount}xM</li>\n'
 
-        if ship_entry["maxThrust"] > 0:
-            max_thrust = ship_entry["maxThrust"]
+        if ship_entry.maxThrust > 0:
+            max_thrust = ship_entry.maxThrust
         else:
             max_thrust = '<span style="color: #f7001d; font-style: italic;">Thruster not available</span>'
 
@@ -124,20 +122,20 @@ def generatePage(template, data, config, nickname):
                         }}}}"""
         )
 
-        info = ship_entry["infocard"].split("\n", 1)[1].strip()
+        info = ship_entry.infocard.split("\n", 1)[1].strip()
         infocard = infocard.replace("{infocard}", info)
 
         comps = ""
-        for component, attributes in ship_entry["components"].items():
+        for component, attributes in ship_entry.components.items():
             comps += f"<li>{component}\n<ul>\n"
             for attribute in attributes:
                 comps += f"<li>{attribute}</li>\n"
             comps += "</ul></li>\n"
         components = components.replace("{components}", comps)
 
-        handleList = ship_entry["maneuverability"].split("\n")
+        handleList = ship_entry.maneuverability.split("\n")
         handle = ""
-        if ship_entry["mustUseMoors"]:
+        if ship_entry.mustUseMoors:
             handle = "<li>This ship is too large to use docking bays, it must use mooring points.</li>\n"
         for entry in handleList:
             if entry != "":
@@ -145,14 +143,12 @@ def generatePage(template, data, config, nickname):
         handling = handling.replace("{handling}", handle)
 
         harderpoint = ""
-        for hardpoint in ship_entry["hardpoints"]:
-            title = hardpoint.split(":")[0]
-            count = hardpoint.split(":")[1]
+        for title, count in ship_entry.hardpoints.items():
             harderpoint = f"{harderpoint}<li>{count}x {title}</li>\n"
         hardpoints = hardpoints.replace("{hardpoints}", harderpoint)
 
         included = ""
-        for title, price in ship_entry["equipment"]:
+        for title, price in ship_entry.equipment.items():
             included = f'{included}<li>{title} (${"{:,}".format(price)})</li>\n'
         includes = includes.replace("{includes}", included)
 
@@ -160,21 +156,19 @@ def generatePage(template, data, config, nickname):
             "{sold_at}",
             generateTable(
                 header=["Base", "Owner", "System", "Region"],
-                entries=ship_entry["sold_at"],
+                entries=ship_entry.sold_at,
             ),
         )
 
-        time = time.replace("{time}", ship_entry["time"])
-
         rest = ""
-        if ship_entry["built_by"] != "":
-            rest = rest + f'[[Category: {ship_entry["built_by"]}]]\n'
-        rest = rest + f'[[Category: {ship_entry["type"]}]]'
-        rest = rest + f'[[Category: {ship_entry["techcompat"]}]]'
+        if ship_entry.built_by != "":
+            rest = rest + f'[[Category: {ship_entry.built_by}]]\n'
+        rest = rest + f'[[Category: {ship_entry.type}]]'
+        rest = rest + f'[[Category: {ship_entry.techcompat}]]'
 
         category = category.replace("{rest}", rest)
 
-        if not ship_entry["components"]:
+        if not ship_entry.components:
             components = ""
 
         return f"{infobox}{infocard}{components}{handling}{hardpoints}{includes}{availability}{category}"
@@ -412,12 +406,12 @@ def generatePage(template, data, config, nickname):
 
         imports = ""
         if entry["commodities_buying"]:
-            imports = generateTable(["Commodity", "Price"], entry["commodities_buying"])
+            imports = generateTable(["Commodity", "Price"], entry["commodities_buying"].items())
 
         exports = ""
         if entry["commodities_selling"]:
             exports = generateTable(
-                ["Commodity", "Price"], entry["commodities_selling"]
+                ["Commodity", "Price"], entry["commodities_selling"].items()
             )
 
         commodities = commodities.replace("{imports}", imports)

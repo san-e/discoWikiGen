@@ -1,7 +1,6 @@
 using LibreLancer.Utf;
 using LibreLancer.Utf.Cmp;
 
-
 ScriptUsage(@"inputmodel[.cmp/.3db] [resourcefile.txm] [resourcefile2.mat] output.glb
 - Exports a Freelancer model (referencing associated material/texture files) to a .glb");
 

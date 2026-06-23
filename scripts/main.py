@@ -5,12 +5,11 @@ from flint.paths import is_probably_freelancer
 import requests
 from bs4 import BeautifulSoup
 import subprocess
+# Set working directory to scripts folder
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    import flWikiGen
-    import mediawikiBot
-except FileNotFoundError:
-    pass
+import flWikiGen
+import mediawikiBot
 
 
 def clearConsole():
@@ -53,18 +52,18 @@ def firstTimeSetup():
     while True:
         print("""Input the path to the root of a Librelancer install""")
         librelancer = input("Path: ")
-        if os.path.exists(librelancer + "/lleditscript.exe"):
+        if os.path.exists(librelancer + f"/lleditscript{'.exe' if os.name == 'nt' else ''}"):
             break
         else:
-            print("Path does not contain lleditscript.exe. Try again")
+            print(f"Path does not contain lleditscript{'.exe' if os.name == 'nt' else ' executable'}. Try again")
 
     while True:
         print("""Input the path to the root of a Blender install""")
         blender = input("Path: ")
-        if os.path.exists(blender + "/blender.exe"):
+        if os.path.exists(blender + f"/blender{'.exe' if os.name == 'nt' else ''}"):
             break
         else:
-            print("Path does not contain blender.exe. Try again")        
+            print(f"Path does not contain blender{'.exe' if os.name == 'nt' else ' executable'}. Try again")
 
     with open("./secret.json", "w") as f:
         json.dump(
@@ -73,17 +72,19 @@ def firstTimeSetup():
                 "URL": wikiLink,
                 "botCredentials": botCredentials,
                 "librelancer": librelancer,
-                "blender": blender
+                "blender": blender,
             },
             f,
             indent=1,
         )
+
 
 def ask(question: str):
     print(question)
     answer = True if "y" in input() else False
     clearConsole()
     return answer
+
 
 def pagesToUpdate():
     nuke = ask("Nuke the wiki before updating? y/N")
@@ -149,7 +150,7 @@ Confirm? y/N
     if "y" in input():
         clearConsole()
         print("Dumping game data\n===================")
-        flData = flWikiGen.main(dumpModels = "dumpModels" in choices)
+        flData = flWikiGen.main(dumpModels="dumpModels" in choices)
         if "renderShips" in choices:
             blender_render()
         wikitext = pageGen.main(flData)
@@ -168,7 +169,7 @@ def downloadServerConfig(url="https://discoverygc.com/gameconfigpublic/"):
     soup = BeautifulSoup(r.text, "html.parser")
     links = soup.find_all("a")
     urls = {
-        "https://discoverygc.com/gameconfigpublic/" + link.get("href") for link in links
+        url + link.get("href") for link in links
     }
 
     for i, url in enumerate(urls):
@@ -181,18 +182,33 @@ def downloadServerConfig(url="https://discoverygc.com/gameconfigpublic/"):
             with open(f"./server_config/{url.split('/')[-1]}", "wb") as f:
                 f.write(r.content)
 
+
 def clear_folder(folder: str):
-    files = [os.path.abspath(folder + f) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
+    files = [
+        os.path.abspath(folder + f)
+        for f in os.listdir(folder)
+        if os.path.isfile(os.path.join(folder, f))
+    ]
 
     for file in files:
         os.remove(file)
 
+
 def blender_render():
-    blender = os.path.join(secret["blender"], "blender.exe")
+    blender = os.path.join(secret["blender"], f"blender{'.exe' if os.name == 'nt' else ''}")
     clearConsole()
-    os.environ["PYTHONPATH"] = "../.venv/Lib/site-packages"
-    subprocess.call([blender, os.path.abspath("./renderer.blend"), "-b", "-P", os.path.abspath("./blender.py")])
+    os.environ["PYTHONPATH"] = os.path.abspath("../.venv/Lib/site-packages")
+    subprocess.call(
+        [
+            blender,
+            os.path.abspath("./renderer.blend"),
+            "-b",
+            "-P",
+            os.path.abspath("./blender.py"),
+        ]
+    )
     input()
+
 
 if __name__ == "__main__":
     with open("./config.json", "r") as f:

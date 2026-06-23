@@ -1,11 +1,14 @@
+from collections import defaultdict
+from dataclasses import dataclass
+
 import flint as fl
-import discoTechCompat as tech
+#import discoTechCompat as tech # disable this because the techcompat site is behind cloudflare now
 from json import dump, load
 from time import perf_counter
 from math import pi, inf
 from sys import argv
-from os import getcwd, makedirs, listdir, remove
-from os.path import exists, basename, splitext, isfile, join, abspath
+from os import makedirs
+from os.path import exists, basename, splitext
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
@@ -16,6 +19,10 @@ from selenium.webdriver.common.by import By
 import cv2
 import subprocess
 import time
+from typing import *
+
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 version = ""  # input("Enter game version: ")
 
@@ -23,7 +30,7 @@ with open("./config.json", "r") as file:
     config = load(file)
 with open("./secret.json", "r") as file:
     secrets = load(file)
-LLEDITSCRIPT = secrets["librelancer"] + "/lleditscript.exe"
+LLEDITSCRIPT = secrets["librelancer"] + f"/lleditscript{'.exe' if os.name == 'nt' else ''}"
 EXPORTER = "./exporter.cs-script"
 oorp = config["wikiGen"]["oorpSystems"]
 shipBuilders = config["wikiGen"]["shipBuilders"]
@@ -102,6 +109,7 @@ def filter_oorp_bases(bases):
         return dict(filter(lambda x: x[0].nickname not in oorpBases, bases.items()))
     elif type(bases) == EntitySet:
         return EntitySet(filter(lambda x: x.nickname not in oorpBases, bases.values()))
+    return {}
 
 
 processes = set()
@@ -157,9 +165,9 @@ def get_ships(definitions: dict, dumpModels: bool) -> dict:
                     built_by = fullName
                     break
 
-            equipment = []
+            equipment = {}
             for x in ship.equipment():
-                equipment.append([x.name(), x.price()])
+                equipment[x.name()] = x.price()
 
             try:
                 hull_price = ship.hull().price
@@ -227,15 +235,10 @@ def get_ships(definitions: dict, dumpModels: bool) -> dict:
                 power_output = 0
                 power_recharge = 0
 
-            hardpoints = []
+            hardpoints = defaultdict(int)
             for x in ship.hardpoints().values():
                 if x[0].name() != x[0].nickname:
-                    hardpoints.append(x[0].name())
-            tempHardpoints = []
-            for x in hardpoints:
-                tempHardpoints.append(f"{x}:{hardpoints.count(x)}")
-
-            hardpoints = list(dict.fromkeys(tempHardpoints))  # remove duplicates
+                    hardpoints[x[0].name()] += 1
 
             comps = []
             components = {}
@@ -296,54 +299,46 @@ def get_ships(definitions: dict, dumpModels: bool) -> dict:
                     f"../dumpedData/models/{ship.nickname}.glb",
                 )
 
-            ships[ship.nickname] = {
-                "name": ship.name(),
-                "longName": ship.infocard("plain").split("\n")[0],
-                "components": components,
-                "maneuverability": infocardMan,
-                "built_by": built_by,
-                "techcompat": techcompat,
-                "type": ship.type(),
-                "maxClass": maxClass,
-                "maxShield": maxShield,
-                "infocard": infocard.replace("&nbsp;", ""),
-                "hull_price": hull_price,
-                "package_price": ship.price(),
-                "impulse_speed": int(ship.impulse_speed()),
-                "maxThrust": maxThrust,
-                "hit_pts": ship.hit_pts,
-                "hold_size": ship.hold_size,
-                "gunCount": gunCount,
-                "thrusterCount": thrusterCount,
-                "turretCount": turretCount,
-                "torpedoCount": torpedoCount,
-                "mineCount": mineCount,
-                "cmCount": cmCount,
-                "bot_limit": ship.nanobot_limit,
-                "bat_limit": ship.shield_battery_limit,
-                "power_output": power_output,
-                "maxCruise": maxCruise,
-                "power_recharge": power_recharge,
-                "turnRate": round(turnRate, 2),
-                "angularDistance0.5": angularDistanceInTime,
-                "responseTime": responseTime,
-                "mustUseMoors": mustUseMoors,
-                "equipment": equipment,
-                "sold_at": [
-                    [
-                        base.name(),
-                        base.owner().name(),
-                        base.system_().name(),
-                        base.system_().region(),
-                    ]
+            ships[ship.nickname] = ShipEntry(
+                ship.name(),
+                ship.infocard("plain").split("\n")[0],
+                components,
+                infocardMan,
+                built_by,
+                techcompat,
+                ship.type(),
+                maxClass,
+                maxShield,
+                infocard.replace("&nbsp;", ""),
+                hull_price,
+                ship.price(),
+                int(ship.impulse_speed()),
+                maxThrust,
+                ship.hit_pts,
+                ship.hold_size,
+                gunCount,
+                thrusterCount,
+                turretCount,
+                torpedoCount,
+                mineCount,
+                cmCount,
+                ship.nanobot_limit,
+                ship.shield_battery_limit,
+                power_output,
+                maxCruise,
+                power_recharge,
+                round(turnRate, 2),
+                angularDistanceInTime,
+                responseTime,
+                mustUseMoors,
+                equipment,
+                [
+                    BaseEntry.from_nickname(base.nickname)
                     for base in filter_oorp_bases(ship.sold_at())
                     if base.has_solar()
                 ],
-                "hardpoints": hardpoints,
-                "time": datetime.now(tz=pytz.UTC).strftime(
-                    "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
-                ),
-            }
+                hardpoints
+            )
 
         except TypeError as e:
             print(f"Error occured for ship {ship.nickname}")
@@ -370,10 +365,10 @@ def get_bases() -> dict:
                     synopsis = fl.formats.dll.lookup_as_html(base.solar().ids_info + 1)
 
                 if base.news():
-                    news = [
-                        [newsitem.headline_(), newsitem.text_()]
+                    news = {
+                        newsitem.headline_(): newsitem.text_()
                         for newsitem in base.news()
-                    ]
+                    }
                 else:
                     news = []
 
@@ -397,14 +392,14 @@ def get_bases() -> dict:
                         for faction, rumor in base.rumors().items()
                     },
                     "news": news,
-                    "commodities_buying": [
-                        [commodity.name(), cost]
+                    "commodities_buying": {
+                        commodity.name(): cost
                         for commodity, cost in base.buys_commodities().items()
-                    ],
-                    "commodities_selling": [
-                        [commodity.name(), cost]
+                    },
+                    "commodities_selling": {
+                        commodity.name(): cost
                         for commodity, cost in base.sells_commodities().items()
-                    ],
+                    },
                     "ships_sold": ships_sold,
                     "time": datetime.now(tz=pytz.UTC).strftime(
                         "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
@@ -422,7 +417,7 @@ def get_systems(get_system_images=False) -> dict:
     # Selenium setup
     if get_system_images:
         options = Options()
-        options.binary_location = r"C:\Program Files\Mozilla Firefox\Firefox.exe"
+        options.binary_location = r"/usr/bin/firefox"
         options.add_argument("-headless")
         options.set_preference("layout.css.devPixelsPerPx", "2.0")
         driver = webdriver.Firefox(options=options)
@@ -569,7 +564,7 @@ def get_systems(get_system_images=False) -> dict:
                 # get_solars()
 
         except Exception as e:
-            print(f"Error occured for system {system.nickname}")
+            print(f"Error occurred for system {system.nickname}")
             raise (e)
     if get_system_images:
         driver.quit()
@@ -637,7 +632,7 @@ def get_factions() -> dict:
                     ),
                 }
         except TypeError as e:
-            print(f"Error occured for faction {faction.nickname}")
+            print(f"Error occurred for faction {faction.nickname}")
             raise (e)
     return factions
 
@@ -697,7 +692,7 @@ def get_commodities() -> dict:
                     ),
                 }
             except TypeError as e:
-                print(f"Error occured for commodity {commodity.nickname}")
+                print(f"Error occurred for commodity {commodity.nickname}")
                 raise (e)
     return commodities
 
@@ -789,7 +784,7 @@ def get_guns() -> dict:
                     ),
                 }
         except Exception as e:
-            print(f"Error occured for gun {gun.nickname}")
+            print(f"Error occurred for gun {gun.nickname}")
             raise (e)
 
     return dict(sorted(guns.items(), key=lambda x: bool(x[1]["sold_at"])))
@@ -1044,7 +1039,7 @@ def main(dumpModels: bool):
     data = {
         "README": f"This file was automatically generated by {basename(__file__)}. Do not edit unless you know what you're doing!",
         "Version": version,
-        "Ships": get_ships(definitions=tech.get_definitions(), dumpModels=dumpModels),
+        "Ships": get_ships(definitions={}, dumpModels=dumpModels),
         "Systems": get_systems(get_system_images=config["wikiGen"]["dumpSysmaps"]),
         "Bases": get_bases(),
         "Factions": get_factions(),
@@ -1058,42 +1053,87 @@ def main(dumpModels: bool):
             process.wait()
     return data
 
+@dataclass
+class BaseEntry:
+    name: str
+    infocard: str
+    owner: str
+    system: str
+    region: str
+    sector: str
+    bribes: list[str]
+    missions: list[str]
+    rumors: Dict[str, Set[str]]
+    "news": news,
+    "commodities_buying": {
+        commodity.name(): cost
+        for commodity, cost in base.buys_commodities().items()
+    },
+    "commodities_selling": {
+        commodity.name(): cost
+        for commodity, cost in base.sells_commodities().items()
+    },
+    "ships_sold": ships_sold,
 
-if __name__ == "__main__":
-    try:
-        if fl.paths.is_probably_freelancer(argv[1]):
-            fl.set_install_path(argv[1])
-        else:
-            print("Invalid directory")
-            quit()
-    except IndexError:
-        print(
-            f"Path to Freelancer directory not given.\nUsage: python {basename(__file__)} [path_to_freelancer]"
+    @classmethod
+    def from_nickname(cls, nickname: str) -> "BaseEntry":
+        base = fl.get_bases()[nickname]
+        return cls(
+            base.name(),
+            base.owner(),
+            base.system_(),
+            base.system_().region()
         )
-        fl.set_install_path(input())
 
-    oorpBases = [b.nickname for b in fl.bases if b.system_().nickname in oorp]
-    infocardMap = fl.interface.get_infocardmap()
-    commodity_table = {
-        commodity.nickname: commodity.name() for commodity in fl.commodities
-    }
 
-    filename = "flData.json"
-    print("Dumping game data\n===================")
-    startTime = perf_counter()
-    data = {
-        "README": f"This file was automatically generated by {basename(__file__)}. Do not edit unless you know what you're doing!",
-        "Version": version,
-        "Ships": get_ships(definitions=tech.get_definitions(), dumpModels=False),
-        "Systems": get_systems(get_system_images=config["wikiGen"]["dumpSysmaps"]),
-        "Bases": get_bases(),
-        "Factions": get_factions(),
-        "Commodities": get_commodities(),
-        "Weapons": get_guns(),
-        "Equipment": get_equipment(),
-    }
-    print(f"Game files read, writing {filename}...")
-    with open(f"../dumpedData/{filename}", "w") as f:
-        dump(data, f, indent=1)
-    endTime = perf_counter()
-    print(f"Done.\nReading and writing took {round(endTime-startTime, 2)}s")
+@dataclass
+class ShipEntry:
+    name: str
+    longName: str
+    components: dict[str, str]
+    maneuverability: str
+    built_by: str
+    techcompat: str
+    type: str
+    maxClass: int
+    maxShield: int
+    infocard: str
+    hull_price: int
+    package_price: int
+    impulse_speed: int
+    maxThrust: int
+    hit_pts: int
+    hold_size: int
+    gunCount: int
+    thrusterCount: int
+    turretCount: int
+    torpedoCount: int
+    mineCount: int
+    cmCount: int
+    bot_limit: int
+    bat_limit: int
+    power_output: int
+    maxCruise: int
+    power_recharge: int
+    turnRate: float
+    angularDistance: float
+    responseTime: float
+    mustUseMoors: bool
+    equipment: dict[str, int]
+    sold_at: list[BaseEntry]
+    hardpoints: dict[str, int]
+
+@dataclass
+class SystemEntry:
+    name: str
+    infocard: str
+    region: str
+    bases: bases
+    planets: planets
+    stars: stars
+    holes: holes
+    neighbors: neighbors
+    zones: zones
+    nebulae: nebulae
+    asteroids: asteroids
+    wrecks: wrecks

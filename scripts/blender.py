@@ -1,7 +1,7 @@
 import sys
 import os
-
-sys.path = [os.environ.get("PYTHONPATH")] + sys.path
+import pip
+pip.main(['install', 'pillow'])
 
 import bpy
 import math
