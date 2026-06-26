@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 from collections import defaultdict
 from dataclasses import dataclass
 
 import flint as fl
 #import discoTechCompat as tech # disable this because the techcompat site is behind cloudflare now
 from json import dump, load
-from time import perf_counter
+
+from flint.entities import Thruster
 from math import pi, inf
-from sys import argv
 from os import makedirs
 from os.path import exists, basename, splitext
 from PIL import Image
@@ -19,7 +21,6 @@ from selenium.webdriver.common.by import By
 import cv2
 import subprocess
 import time
-from typing import *
 
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -100,7 +101,7 @@ def get_mineable_commodites(path):
     return None
 
 
-def filter_oorp_bases(bases):
+def filter_oorp_bases(bases) -> list[fl.entities.Base] | dict | EntitySet[fl.entities.Base]:
     if not bases:
         return {}
     if type(bases) == list:
@@ -116,7 +117,7 @@ processes = set()
 MAX_PROCESSES = 50
 
 
-def dump_model(model, materials, destination):
+def dump_model(model, materials, destination) -> None:
     if len(processes) > MAX_PROCESSES:
         for aaaa in processes:
             aaaa.wait()
@@ -139,19 +140,17 @@ def save_icon(icon, name, folder):
         image.resize((128, 128)).save(f"../dumpedData/images/{folder}/{name}.png")
 
 
-def iconname(path):
+def iconname(path) -> str:
     return splitext(basename(path))[0]
 
 
 # ------------------------------------------------ #
 
 
-def get_ships(definitions: dict, dumpModels: bool) -> dict:
+def get_ships(definitions: dict, dumpModels: bool) -> dict[str, ShipEntry]:
     print("Reading ship data...")
     ships = {}
     for ship in fl.ships:
-        if ship.nickname == "medium_miner":
-            pass
         if (
             "_npc" in ship.nickname
             or not filter_oorp_bases(ship.sold_at())
@@ -333,7 +332,7 @@ def get_ships(definitions: dict, dumpModels: bool) -> dict:
                 mustUseMoors,
                 equipment,
                 [
-                    BaseEntry.from_nickname(base.nickname)
+                    base.nickname
                     for base in filter_oorp_bases(ship.sold_at())
                     if base.has_solar()
                 ],
@@ -342,76 +341,25 @@ def get_ships(definitions: dict, dumpModels: bool) -> dict:
 
         except TypeError as e:
             print(f"Error occured for ship {ship.nickname}")
-            raise (e)
+            raise e
     return ships
 
 
-def get_bases() -> dict:
+def get_bases() -> dict[str, BaseEntry]:
     print("Reading base data...")
     bases = {}
     for base in fl.bases:
-        if base.has_solar() and base.nickname not in oorpBases:
-            try:
-                ships_sold = [
-                    [ship.name(), ship.type(), price]
-                    for ship, price in base.sells_ships().items()
-                ]
-                specifications = fl.formats.dll.lookup_as_html(base.solar().ids_info)
-                try:
-                    synopsis = fl.formats.dll.lookup_as_html(
-                        infocardMap[base.solar().ids_info]
-                    )
-                except (IndexError, KeyError):
-                    synopsis = fl.formats.dll.lookup_as_html(base.solar().ids_info + 1)
-
-                if base.news():
-                    news = {
-                        newsitem.headline_(): newsitem.text_()
-                        for newsitem in base.news()
-                    }
-                else:
-                    news = []
-
-                if base.bribes():
-                    bribes = [faction.name() for faction in base.bribes()]
-                else:
-                    bribes = []
-
-                bases[base.nickname] = {
-                    "name": base.name(),
-                    "specs": specifications,
-                    "infocard": synopsis,
-                    "owner": base.owner().name(),
-                    "system": base.system_().name(),
-                    "region": base.system_().region(),
-                    "sector": base.sector(),
-                    "bribes": bribes,
-                    "missions": [faction.name() for faction in base.missions()],
-                    "rumors": {
-                        faction.name(): list(rumor)
-                        for faction, rumor in base.rumors().items()
-                    },
-                    "news": news,
-                    "commodities_buying": {
-                        commodity.name(): cost
-                        for commodity, cost in base.buys_commodities().items()
-                    },
-                    "commodities_selling": {
-                        commodity.name(): cost
-                        for commodity, cost in base.sells_commodities().items()
-                    },
-                    "ships_sold": ships_sold,
-                    "time": datetime.now(tz=pytz.UTC).strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
-                    ),
-                }
-            except (TypeError, AttributeError) as e:
-                print(f"Error occured for base {base.nickname}")
-                raise (e)
+        if not base.has_solar() or base.nickname in oorpBases:
+            continue
+        try:
+            bases[base.nickname] = BaseEntry.from_nickname(base.nickname)
+        except (TypeError, AttributeError) as e:
+            print(f"Error occured for base {base.nickname}")
+            raise e
     return bases
 
 
-def get_systems(get_system_images=False) -> dict:
+def get_systems(get_system_images=False) -> dict[str, SystemEntry]:
     print("Reading system data...")
 
     # Selenium setup
@@ -425,11 +373,9 @@ def get_systems(get_system_images=False) -> dict:
         driver.get(config["wikiGen"]["sysmapURL"])
 
     systems = {}
-    solars = {}
     for system in fl.systems:
         try:
             if system.nickname not in oorp:
-                bases = {}
                 planets = []
                 holes = []
                 neighbors = []
@@ -451,12 +397,6 @@ def get_systems(get_system_images=False) -> dict:
                             pass
                 for x in asteroids:
                     x.append(get_mineable_commodites(x[1]))
-                for base in system.bases():
-                    bases[base.name()] = {
-                        "owner": base.owner().name(),
-                        "factionLegality": base.owner().legality(),
-                        "type": str(type(base)),
-                    }
                 for planet in system.planets():
                     if type(planet) == flintClasses["PlanetaryBase"]:
                         owner = (
@@ -481,11 +421,7 @@ def get_systems(get_system_images=False) -> dict:
                         [
                             x.name(),
                             x.nickname,
-                            (
-                                x.infocard("html")
-                                if type(x.infocard("html")) == list
-                                else x.infocard("html")
-                            ),
+                            x.infocard("html"),
                         ]
                     )
                 for star in system.stars():
@@ -539,39 +475,34 @@ def get_systems(get_system_images=False) -> dict:
                         f"../dumpedData/images/systems/{system.nickname}_map.png"
                     )
 
-                systems[system.nickname] = {
-                    "name": system.name(),
-                    "infocard": system.infocard("plain"),
-                    "region": (
+                systems[system.nickname] = SystemEntry(
+                    system.name(),
+                    system.infocard("plain"),
+                    (
                         system.region()
                         if system.region() != "Independent"
                         else "Independent Worlds"
                     ),
-                    "bases": bases,
-                    "planets": planets,
-                    "stars": stars,
-                    "holes": holes,
-                    "neighbors": neighbors,
-                    "zones": zones,
-                    "nebulae": nebulae,
-                    "asteroids": asteroids,
-                    "wrecks": wrecks,
-                    "time": datetime.now(tz=pytz.UTC).strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
-                    ),
-                }
-
-                # get_solars()
+                    {base.nickname for base in system.bases()},
+                    planets,
+                    stars,
+                    holes,
+                    neighbors,
+                    zones,
+                    nebulae,
+                    asteroids,
+                    wrecks
+                )
 
         except Exception as e:
             print(f"Error occurred for system {system.nickname}")
-            raise (e)
+            raise e
     if get_system_images:
         driver.quit()
     return systems
 
 
-def get_factions() -> dict:
+def get_factions() -> dict[str, FactionEntry]:
     print("Reading faction data...")
     factions = {}
     for faction in fl.factions:
@@ -591,53 +522,33 @@ def get_factions() -> dict:
                 reps = sorted(reps.items(), key=lambda x: x[1])
                 reps = dict(reps)
 
-                factions[faction.nickname] = {
-                    "name": faction.name(),
-                    "shortName": faction.short_name(),
-                    "alignment": alignment,
-                    "infocard": '<p style="padding: 0px; margin: 0px;">'
+                factions[faction.nickname] = FactionEntry(
+                    faction.name(),
+                    faction.short_name(),
+                    alignment,
+                    '<p style="padding: 0px; margin: 0px;">'
                     + faction.infocard().replace(
                         "<p>", '<p style="padding: 0px; margin: 0px;">'
                     ),
-                    "ships": [
+                    [
                         [ship.name(), ship.type()]
                         for nickname, ship in faction.ships().items()
                     ],
-                    "bases": [
-                        [
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                        ]
-                        for nickname, base in filter_oorp_bases(faction.bases()).items()
-                    ],
-                    "bribes": [
-                        [
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                        ]
-                        for nickname, base in faction.bribes().items()
-                        if base.system_().nickname not in oorp
-                    ],
-                    "repsheet": reps,
-                    "rumors": {
-                        fl.bases[base].name(): text
+                    list(filter_oorp_bases(faction.bases()).keys()),
+                    list(filter_oorp_bases(faction.bribes()).keys()),
+                    reps,
+                    {
+                        base.name(): text
                         for base, text in faction.rumors().items()
-                    },
-                    "time": datetime.now(tz=pytz.UTC).strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
-                    ),
-                }
+                    }
+                )
         except TypeError as e:
             print(f"Error occurred for faction {faction.nickname}")
-            raise (e)
+            raise e
     return factions
 
 
-def get_commodities() -> dict:
+def get_commodities() -> dict[str, CommodityEntry]:
     template = cv2.imread(r"hrc_template.png")
 
     def match_hrc_template(icon_path):
@@ -654,46 +565,31 @@ def get_commodities() -> dict:
             try:
                 hrc = False
 
-                commodities[commodity.nickname] = {
-                    "name": commodity.name(),
-                    "infocard": commodity.infocard(),
-                    "volume": commodity.volume,
-                    "decay": commodity.decay_per_second,
-                    "defaultPrice": commodity.price(),
-                    "hrc": hrc,
-                    "boughtAt": [
-                        [
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        ]
+                commodities[commodity.nickname] = CommodityEntry(
+                    commodity.name(),
+                    commodity.infocard(),
+                    commodity.volume,
+                    commodity.decay_per_second,
+                    commodity.price(),
+                    hrc,
+                    {
+                        base.nickname
                         for base, price in filter_oorp_bases(
                             commodity.bought_at()
                         ).items()
                         if (hrc == True and commodity not in base.sells_commodities())
                         or (hrc == False)
-                    ],
-                    "soldAt": [
-                        [
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        ]
+                    },
+                    {
+                        base.nickname
                         for base, price in filter_oorp_bases(
                             commodity.sold_at()
                         ).items()
-                    ],
-                    "time": datetime.now(tz=pytz.UTC).strftime(
-                        "This page was generated on the %d/%m/%Y at %H:%M:%S. Server-side data may be changed on the server at any time, without any notice to the user community. The only authoritative source for in-game data is the game itself."
-                    ),
-                }
+                    }
+                )
             except TypeError as e:
                 print(f"Error occurred for commodity {commodity.nickname}")
-                raise (e)
+                raise e
     return commodities
 
 
@@ -725,7 +621,7 @@ def get_guns() -> dict:
                     )
 
             if (
-                (gun.sold_at() and not sold_oorp_only) or wrecks or gun.name().isupper()
+                    (gun.sold_at() and not sold_oorp_only) or wrecks or gun.name().isupper()
             ) and gun.is_valid():
 
                 icon_name = iconname(gun.good().item_icon)
@@ -748,41 +644,28 @@ def get_guns() -> dict:
                     range = round(gun.range(), 2)
                 except ValueError:
                     range = 0
-
-                guns[gun.nickname] = {
-                    "name": gun.infocard("plain").split("\n")[0],
-                    "shortName": gun.name(),
-                    "icon_name": icon_name,
-                    "infocard": gun.infocard(),
-                    "hull_damage": round(gun.hull_damage(), 2),
-                    "hull_dps": round(gun.hull_dps(), 2),
-                    "shield_damage": round(gun.shield_damage(), 2),
-                    "shield_dps": round(gun.shield_dps(), 2),
-                    "refire": round(gun.refire(), 2),
-                    "speed": gun.muzzle_velocity,
-                    "energy_per_second": round(gun.energy_per_second(), 2),
-                    "efficiency": round(gun.efficiency(), 2),
-                    "refire_rate": round(gun.refire(), 2),
-                    "rating": round(gun.rating(), 2),
-                    "range": range,
-                    "type": type,
-                    "sold_at": list(
-                        {
-                            (
-                                base.name(),
-                                base.owner().name(),
-                                base.system_().name(),
-                                base.system_().region(),
-                                price,
-                            )
-                            for base, price in sold_at.items()
-                        }
-                    ),
-                    "wrecks": wrecks,
-                    "time": datetime.now(tz=pytz.UTC).strftime(
-                        "Page generated on the %d/%m/%Y at %H:%M:%S UTC"
-                    ),
-                }
+                guns[gun.nickname] = GunEntry(
+                    gun.infocard("plain").split("\n")[0],
+                    icon_name,
+                    gun.infocard(),
+                    gun.name(),
+                    round(gun.hull_damage(), 2),
+                    round(gun.hull_dps(), 2),
+                    round(gun.shield_damage(), 2),
+                    round(gun.shield_dps(), 2),
+                    round(gun.refire(), 2),
+                    gun.muzzle_velocity,
+                    round(gun.energy_per_second(), 2),
+                    round(gun.efficiency(), 2),
+                    round(gun.rating(), 2),
+                    range,
+                    type,
+                    {
+                        base.nickname
+                        for base, price in sold_at.items()
+                    },
+                    wrecks
+                )
         except Exception as e:
             print(f"Error occurred for gun {gun.nickname}")
             raise (e)
@@ -816,29 +699,21 @@ def get_equipment() -> dict:
             #     icon=cm.icon(), name=iconname(cm.good().item_icon), folder="equipment"
             # )
 
-            equipment["CounterMeasures"][cm.nickname] = {
-                "name": cm.name(),
-                "icon_name": iconname(cm.good().item_icon),
-                "infocard": cm.infocard(),
-                "price": cm.price(),
-                "flare_price": flare.price(),
-                "max_flares": flare.ammo_limit,
-                "effectiveness": flare.effectiveness(),
-                "range": flare.range,
-                "lifetime": flare.lifetime,
-                "availability": list(
-                    {
-                        (
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        )
-                        for base, price in filter_oorp_bases(cm.sold_at()).items()
-                    }
-                ),
-            }
+            equipment["CounterMeasures"][cm.nickname] = CountermeasureEntry(
+                cm.name(),
+                iconname(cm.good().item_icon),
+                cm.infocard(),
+                cm.price(),
+                flare.price(),
+                flare.ammo_limit,
+                flare.effectiveness(),
+                flare.range,
+                flare.lifetime,
+                {
+                    base.nickname
+                    for base, price in filter_oorp_bases(cm.sold_at()).items()
+                }
+            )
 
     armors = fl.equipment.of_type(flintClasses["Armor"])
     for armor in armors:
@@ -849,26 +724,18 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Armor"][armor.nickname] = {
-                "name": armor.name(),
-                "icon_name": iconname(armor.good().item_icon),
-                "infocard": armor.infocard(),
-                "price": armor.price(),
-                "volume": armor.volume,
-                "multiplier": armor.hit_pts_scale,
-                "availability": list(
-                    {
-                        (
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        )
-                        for base, price in filter_oorp_bases(armor.sold_at()).items()
-                    }
-                ),
-            }
+            equipment["Armor"][armor.nickname] = ArmorEntry(
+                armor.name(),
+                iconname(armor.good().item_icon),
+                armor.infocard(),
+                armor.price(),
+                armor.volume,
+                armor.hit_pts_scale,
+                {
+                    base.nickname
+                    for base, price in filter_oorp_bases(armor.sold_at()).items()
+                }
+            )
 
     cloaks = fl.equipment.of_type(flintClasses["CloakingDevice"])
     for cloak in cloaks:
@@ -879,25 +746,17 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Cloaks"][cloak.nickname] = {
-                "name": cloak.name(),
-                "icon_name": iconname(cloak.good().item_icon),
-                "infocard": cloak.infocard(),
-                "price": cloak.price(),
-                "volume": cloak.volume,
-                "availability": list(
-                    {
-                        (
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        )
-                        for base, price in filter_oorp_bases(cloak.sold_at()).items()
-                    }
-                ),
-            }
+            equipment["Cloaks"][cloak.nickname] = CloakEntry(
+                cloak.name(),
+                iconname(cloak.good().item_icon),
+                cloak.infocard(),
+                cloak.price(),
+                cloak.volume,
+                {
+                    base.nickname
+                    for base, price in filter_oorp_bases(cloak.sold_at()).items()
+                }
+            )
 
     engines = fl.equipment.of_type(flintClasses["Engine"])
     for engine in engines:
@@ -908,26 +767,18 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Engines"][engine.nickname] = {
-                "name": engine.name(),
-                "icon_name": iconname(engine.good().item_icon),
-                "infocard": engine.infocard(),
-                "price": engine.price(),
-                "cruise_speed": engine.cruise_speed_(),
-                "cruise_charge_time": engine.cruise_charge_time,
-                "availability": list(
-                    {
-                        (
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        )
-                        for base, price in filter_oorp_bases(engine.sold_at()).items()
-                    }
-                ),
-            }
+            equipment["Engines"][engine.nickname] = EngineEntry(
+                engine.name(),
+                iconname(engine.good().item_icon),
+                engine.infocard(),
+                engine.price(),
+                engine.cruise_speed_(),
+                engine.cruise_charge_time,
+                {
+                    base.nickname
+                    for base, price in filter_oorp_bases(engine.sold_at()).items()
+                }
+            )
 
     shields = fl.equipment.of_type(flintClasses["ShieldGenerator"])
     for shield in shields:
@@ -938,44 +789,36 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Shields"][shield.nickname] = {
-                "name": shield.name(),
-                "icon_name": iconname(shield.good().item_icon),
-                "infocard": shield.infocard(),
-                "price": shield.price(),
-                "technology": shield.shield_type,
-                "capacity": shield.max_capacity if shield.max_capacity else 0,
-                "explosion_resistance": (
+            equipment["Shields"][shield.nickname] = ShieldEntry(
+                shield.name(),
+                iconname(shield.good().item_icon),
+                shield.infocard(),
+                shield.price(),
+                shield.shield_type,
+                shield.max_capacity if shield.max_capacity else 0,
+                (
                     shield.explosion_resistance if shield.explosion_resistance else 0
                 ),
-                "regen_rate": (
+                (
                     shield.regeneration_rate if shield.regeneration_rate else 0
                 ),
-                "offline_rebuild_time": (
+                (
                     shield.offline_rebuild_time if shield.offline_rebuild_time else 0
                 ),
-                "offline_threshold": (
+                (
                     shield.offline_threshold if shield.offline_threshold else 0
                 ),
-                "constant_power_draw": (
+                (
                     shield.constant_power_draw if shield.constant_power_draw else 0
                 ),
-                "rebuild_power_draw": (
+                (
                     shield.rebuild_power_draw if shield.rebuild_power_draw else 0
                 ),
-                "availability": list(
-                    {
-                        (
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        )
-                        for base, price in filter_oorp_bases(shield.sold_at()).items()
-                    }
-                ),
-            }
+                {
+                    base.nickname
+                    for base, price in filter_oorp_bases(shield.sold_at()).items()
+                }
+            )
 
     thrusters = fl.equipment.of_type(flintClasses["Thruster"])
     for thruster in thrusters:
@@ -986,28 +829,20 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Thrusters"][thruster.nickname] = {
-                "name": thruster.name(),
-                "icon_name": iconname(thruster.good().item_icon),
-                "infocard": thruster.infocard(),
-                "price": thruster.price(),
-                "power_usage": thruster.power_usage,
-                "max_force": thruster.max_force,
-                "efficiency": thruster.efficiency(),
-                "explosion_resistance": thruster.explosion_resistance,
-                "availability": list(
-                    {
-                        (
-                            base.name(),
-                            base.owner().name(),
-                            base.system_().name(),
-                            base.system_().region(),
-                            price,
-                        )
-                        for base, price in filter_oorp_bases(thruster.sold_at()).items()
-                    }
-                ),
-            }
+            equipment["Thrusters"][thruster.nickname] = ThrusterEntry(
+                thruster.name(),
+                iconname(thruster.good().item_icon),
+                thruster.infocard(),
+                thruster.price(),
+                thruster.power_usage,
+                thruster.max_force,
+                thruster.efficiency(),
+                thruster.explosion_resistance,
+                {
+                    base.nickname
+                    for base, price in filter_oorp_bases(thruster.sold_at()).items()
+                }
+            )
 
     equipment["CounterMeasures"] = dict(
         sorted(
@@ -1036,17 +871,15 @@ def main(dumpModels: bool):
     commodity_table = {
         commodity.nickname: commodity.name() for commodity in fl.commodities
     }
-    data = {
-        "README": f"This file was automatically generated by {basename(__file__)}. Do not edit unless you know what you're doing!",
-        "Version": version,
-        "Ships": get_ships(definitions={}, dumpModels=dumpModels),
-        "Systems": get_systems(get_system_images=config["wikiGen"]["dumpSysmaps"]),
-        "Bases": get_bases(),
-        "Factions": get_factions(),
-        "Commodities": get_commodities(),
-        "Weapons": get_guns(),
-        "Equipment": get_equipment(),
-    }
+    data = CompoundEntries (
+        get_ships(definitions={}, dumpModels=dumpModels),
+        get_systems(get_system_images=config["wikiGen"]["dumpSysmaps"]),
+        get_bases(),
+        get_factions(),
+        get_commodities(),
+        get_guns(),
+        get_equipment(),
+    )
 
     if len(processes) > 0:
         for process in processes:
@@ -1054,37 +887,14 @@ def main(dumpModels: bool):
     return data
 
 @dataclass
-class BaseEntry:
-    name: str
-    infocard: str
-    owner: str
-    system: str
-    region: str
-    sector: str
-    bribes: list[str]
-    missions: list[str]
-    rumors: Dict[str, Set[str]]
-    "news": news,
-    "commodities_buying": {
-        commodity.name(): cost
-        for commodity, cost in base.buys_commodities().items()
-    },
-    "commodities_selling": {
-        commodity.name(): cost
-        for commodity, cost in base.sells_commodities().items()
-    },
-    "ships_sold": ships_sold,
-
-    @classmethod
-    def from_nickname(cls, nickname: str) -> "BaseEntry":
-        base = fl.get_bases()[nickname]
-        return cls(
-            base.name(),
-            base.owner(),
-            base.system_(),
-            base.system_().region()
-        )
-
+class CompoundEntries:
+    ships: dict[str, ShipEntry]
+    systems: dict[str, SystemEntry]
+    bases: dict[str, BaseEntry]
+    factions: dict[str, FactionEntry]
+    commodities: dict[str, CommodityEntry]
+    weapons: dict[str, GunEntry]
+    equipment: dict[str, dict[str, EquipmentEntry]]
 
 @dataclass
 class ShipEntry:
@@ -1120,7 +930,7 @@ class ShipEntry:
     responseTime: float
     mustUseMoors: bool
     equipment: dict[str, int]
-    sold_at: list[BaseEntry]
+    sold_at: set[str]
     hardpoints: dict[str, int]
 
 @dataclass
@@ -1128,12 +938,160 @@ class SystemEntry:
     name: str
     infocard: str
     region: str
-    bases: bases
-    planets: planets
-    stars: stars
-    holes: holes
-    neighbors: neighbors
-    zones: zones
-    nebulae: nebulae
-    asteroids: asteroids
-    wrecks: wrecks
+    bases: set[str]
+    planets: list[list[str]]
+    stars: dict[str, str]
+    holes: list[list[str]]
+    neighbors: list[str]
+    zones: list[list[str]]
+    nebulae: list[list[str]]
+    asteroids: list[list[str]]
+    wrecks: list[dict[str, str | list[str | int]]]
+
+@dataclass
+class BaseEntry:
+    name: str
+    infocard: str
+    owner: str
+    system: str
+    region: str
+    sector: str
+    bribes: list[str]
+    missions: list[str]
+    rumors: dict[str, set[str]]
+    news: dict[str, str]
+    commodities_buying: dict[str, int]
+    commodities_selling: dict[str, int]
+    ships_sold: set[str]
+
+    @classmethod
+    def from_nickname(cls, nickname: str) -> "BaseEntry":
+        base = fl.get_bases()[nickname]
+        return cls(
+            base.name(),
+            base.infocard(),
+            base.owner(),
+            base.system_(),
+            base.system_().region(),
+            base.sector(),
+            [faction.name() for faction in base.bribes()],
+            [faction.name() for faction in base.missions()],
+            {
+                faction.name(): rumor
+                for faction, rumor in base.rumors().items()
+            },
+            {
+                newsitem.headline_(): newsitem.text_()
+                for newsitem in base.news()
+            },
+            {
+                commodity.name(): cost
+                for commodity, cost in base.buys_commodities().items()
+            },
+            {
+                commodity.name(): cost
+                for commodity, cost in base.sells_commodities().items()
+            },
+            {
+                ship.nickname
+                for ship, price in base.sells_ships().items()
+            }
+        )
+
+@dataclass
+class FactionEntry:
+    name: str
+    shortName: str
+    alignment: str
+    infocard: str
+    ships: list[list[str]]
+    bases: list[str]
+    bribes: list[str]
+    repsheet: dict[str, float]
+    rumors: dict[str, str]
+
+@dataclass
+class CommodityEntry:
+    name: str
+    infocard: str
+    volume: int
+    decay: int
+    defaultPrice: int
+    hrc: bool
+    boughtAt: set[str]
+    soldAt: set[str]
+
+@dataclass
+class EquipmentEntry:
+    name: str
+    icon_name: str
+    infocard: str
+
+@dataclass
+class GunEntry(EquipmentEntry):
+    shortName: str
+    hull_damage: float
+    hull_dps: float
+    shield_damage: float
+    shield_dps: float
+    refire: float
+    speed: int
+    energy_per_second: float
+    efficiency: float
+    rating: float
+    range: int
+    type: str
+    sold_at: set[str]
+    wrecks: list[list[str]]
+
+@dataclass
+class CountermeasureEntry(EquipmentEntry):
+    price: int
+    flare_price: int
+    max_flares: int
+    effectiveness: float
+    range: float
+    lifetime: float
+    availability: set[str]
+
+@dataclass
+class ArmorEntry(EquipmentEntry):
+    price: int
+    volume: int
+    multiplier: float
+    availability: set[str]
+
+@dataclass
+class CloakEntry(EquipmentEntry):
+    price: int
+    volume: int
+    availability: set[str]
+
+@dataclass
+class EngineEntry(EquipmentEntry):
+    price: int
+    cruise_speed: float
+    cruise_charge_time: int
+    availability: set[str]
+
+@dataclass
+class ShieldEntry(EquipmentEntry):
+    price: int
+    technology: str
+    capacity: float
+    explosion_resistance: float
+    regen_rate: float
+    offline_rebuild_time: float
+    offline_threshold: float
+    constant_power_draw: float
+    rebuild_power_draw: float
+    availability: set[str]
+
+@dataclass
+class ThrusterEntry(EquipmentEntry):
+    price: int
+    power_usage: float
+    max_force: float
+    efficiency: float
+    explosion_resistance: float
+    availability: set[str]

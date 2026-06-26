@@ -4,6 +4,12 @@ from os.path import exists
 from inspect import cleandoc
 from itertools import zip_longest
 
+from flint.entities import equipment, EquipmentGood
+from selenium.common import InvalidArgumentException
+
+from scripts.flWikiGen import CompoundEntries, BaseEntry, CountermeasureEntry, ArmorEntry, EngineEntry, ShieldEntry
+
+
 def chunkList(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
@@ -50,12 +56,12 @@ def generateList(input_list):
     return list_html
 
 
-def generatePage(template: str, data, config, nickname):
+def generatePage(template: str, data: CompoundEntries, config, nickname) -> str:
     houses = config["pageGen"]["houses"]
     corps = config["pageGen"]["corporations"]
     if template.lower() == "ship":
-        ship_entry = data["Ships"][nickname]
-        name = data["Ships"][nickname]["name"]
+        ship_entry = data.ships[nickname]
+        name = ship_entry.name
         infocard = "<p>{infocard}\n</p><p><br/>\n</p>\n"
         components = '<h2>Components</h2>\n<ul style="line-height: 1.5em; margin-bottom: 15px">\n{components}\n</ul>\n'
         handling = "<h2>Handling</h2>\n<ul>\n{handling}\n</ul>\n"
@@ -173,8 +179,8 @@ def generatePage(template: str, data, config, nickname):
 
         return f"{infobox}{infocard}{components}{handling}{hardpoints}{includes}{availability}{category}"
     elif "sys" in template.lower():
-        entry = data["Systems"][nickname]
-        name = data["Systems"][nickname]["name"]
+        entry = data.systems[nickname]
+        name = entry.name
         infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff" title={nickname}><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{image}|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">System\n</td></tr>\n<tr>\n<td class="infobox-data-title"><b>Governing House</b>\n</td>\n<td style="padding-right: 1em">{governingHouse}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Region</b>\n</td>\n<td style="padding-right: 1em">{region}\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Connected Systems</b>\n</td>\n<td style="padding-right: 1em">{systems}\n</td></tr>\n\n</td></tr></table>'
         infocard = '<p>{infocard}</p>\n<br style="clear: both; height: 0px;" />\n</p>\n'
         overview = '<h1><span class="mw-headline" id="System_Overview">System Overview</span></h1>\n<hr>\n<table style="width: 100%;">\n<tr>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Astronomical Bodies</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Stellar Objects</div>\n{suns}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Planetary Objects</div>\n{planets}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Nebulae &amp; Asteroids</div>\n{fields}\n</td>\n<td style="width: 33%; vertical-align: top; border-right: 1px dotted #999999; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Industrial Development</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Space Stations</div>\n{stations}\n<li class="mw-empty-elt"></li></ul>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Commodity Mining</div>\n{mining}\n</td>\n<td style="width: 33%; vertical-align: top; padding: .5em 1em; margin: 1em;">\n<div style=" font-size: 150%; text-align: center; line-height: 1.5em; border-bottom-width: 1px; border-bottom-color: #AAAAAA; border-bottom-style: solid;">Faction Presence</div>\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Lawful Factions</div>\n{lawfuls}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Corporations &amp; Guilds</div>\n{corps}\n<div style=" font-size: 133%; text-decoration: underline; line-height: 1.5em; padding-top: .5em;">Unlawful Factions</div>\n{unlawfuls}\n</td></tr></table>\n'
@@ -187,11 +193,11 @@ def generatePage(template: str, data, config, nickname):
         time = "<i>NOTE: {time}<i>"
         category = "\n[[Category: Systems]]\n{region}"
 
-        infobox = infobox.replace("{name}", entry["name"])
+        infobox = infobox.replace("{name}", entry.name)
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{image}", f"{nickname}.png")
 
-        region = entry["region"]
+        region = entry.region
         if region == "Independent":
             region = "Independent Worlds"
         if region in houses:
@@ -202,7 +208,7 @@ def generatePage(template: str, data, config, nickname):
             infobox = infobox.replace("{governingHouse}", "Independent")
         infobox = infobox.replace("{region}", region)
         temp = ""
-        for neighbor in entry["neighbors"]:
+        for neighbor in entry.neighbors:
             temp = f"{temp}[[{neighbor}]]<br/>"
         infobox = infobox.replace("{systems}", temp)
 
@@ -216,7 +222,7 @@ def generatePage(template: str, data, config, nickname):
             )
 
         temp = ""
-        for star, card in entry["stars"].items():
+        for star, card in entry.stars.items():
             temp = f"{temp}<b>{star}</b><ul>"
             card = card[:-1]
             card = card.split("\n")
@@ -225,10 +231,10 @@ def generatePage(template: str, data, config, nickname):
             temp = f"{temp}</ul>"
         overview = overview.replace("{suns}", temp)
 
-        if entry["planets"]:
+        if entry.planets:
             overview = overview.replace(
                 "{planets}",
-                generateTable(header=["Planet", "Owner"], entries=entry["planets"]),
+                generateTable(header=["Planet", "Owner"], entries=entry.planets),
             )
         else:
             overview = overview.replace("{planets}", "")
@@ -237,19 +243,19 @@ def generatePage(template: str, data, config, nickname):
         temp2 = []
         nebs = []
         asts = []
-        for zone, nick, info in entry["zones"]:
+        for zone, nick, info in entry.zones:
             if zone in temp2:
                 continue
             temp2.append(zone)
             temp = (
                 f"{temp}{zone}\n"
-                if nick in [field[0] for field in entry["asteroids"]]
-                or nick in [nebula[0] for nebula in entry["nebulae"]]
+                if nick in [field[0] for field in entry.asteroids]
+                or nick in [nebula[0] for nebula in entry.nebulae]
                 else temp
             )
-            if nick in [nebula[0] for nebula in entry["nebulae"]]:
+            if nick in [nebula[0] for nebula in entry.nebulae]:
                 nebs.append([zone, nick, info])
-            elif nick in [field[0] for field in entry["asteroids"]]:
+            elif nick in [field[0] for field in entry.asteroids]:
                 asts.append([zone, nick, info])
         temp = temp[:-1].split("\n")
         temp.sort()
@@ -264,7 +270,11 @@ def generatePage(template: str, data, config, nickname):
         lawfulFactions = []
         unlawfulFactions = []
         corporateFactions = []
-        for base, dicty in entry["bases"].items():
+        bases: dict[str, BaseEntry] = data.bases
+        for nick in entry.bases:
+            base: BaseEntry = data.bases[nick]
+
+        for base, dicty in entry.bases.items():
             if dicty["type"] != "<class 'flint.entities.solars.PlanetaryBase'>":
                 bases.append([base, dicty["owner"]])
             if dicty["owner"] in corps:
@@ -283,7 +293,7 @@ def generatePage(template: str, data, config, nickname):
 
         mineableCommodities = "<ul>"
         mineableCommodity = []
-        for doesnt, matter, commodity in entry["asteroids"]:
+        for doesnt, matter, commodity in entry.asteroids:
             if commodity != None:
                 mineableCommodity.append(commodity)
         mineableCommodity = list(dict.fromkeys(mineableCommodity))
@@ -335,7 +345,7 @@ def generatePage(template: str, data, config, nickname):
         asteroids = asteroids.replace("{asteroids}", asteroiden.replace("&nbsp;", ""))
 
         wreckages = ""
-        for w in entry["wrecks"]:
+        for w in entry.wrecks:
             wreckages = f"""{wreckages}<h3>{w['name']} - {w['sector']}</h3>\n{w['infocard']}\n"""
             if w["loot"]:
                 wreckages += """Contains:\n<ul style="margin-top:-15px;">\n"""
@@ -345,17 +355,15 @@ def generatePage(template: str, data, config, nickname):
 
         wrecks = wrecks.replace("{wrecks}", wreckages.replace("&nbsp;", ""))
 
-        if entry["holes"]:
+        if entry.holes:
             gates = gates.replace(
                 "{gates}",
                 generateTable(
-                    header=["Target System", "Type", "Location"], entries=entry["holes"]
+                    header=["Target System", "Type", "Location"], entries=entry.holes
                 ),
             )
         else:
             gates = gates.replace("{gates}", "")
-
-        time = time.replace("{time}", entry["time"])
 
         if region != "":
             category = category.replace("{region}", f"[[Category: {region}]]")
@@ -364,7 +372,7 @@ def generatePage(template: str, data, config, nickname):
 
         return f"{infobox}{infocard}{overview}{navmap}{AoI}{nebulae}{asteroids}{wrecks}{gates}{category}"
     elif "base" in template.lower():
-        entry = data["Bases"][nickname]
+        entry = data.Bases[nickname]
         name = entry["name"]
 
         infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; font-size: 11px; line-height: 14px; background: transparent; border: 1px solid white;" cellpadding="3">\n\n<tr>\n<td colspan="2" style="text-align: center; font-size: 16px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff", title="{nickname}"><b>{name}</b>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;">\n<div class="center">\n<div class="floatnone">[[File:{nickname}.png|250px]]</div>\n</div>\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">Owner\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{owner}\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 14px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff">Location\n</td>\n</tr>\n<tr>\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px;">{location}\n</td>\n</tr>\n</table>\n'
@@ -379,12 +387,12 @@ def generatePage(template: str, data, config, nickname):
 
         infobox = infobox.replace("{nickname}", nickname)
         infobox = infobox.replace("{name}", name)
-        infobox = infobox.replace("{owner}", f'[[{entry["owner"]}]]')
+        infobox = infobox.replace("{owner}", f'[[{entry.owner}]]')
         infobox = infobox.replace(
             "{location}", f"<b>{entry['sector']}</b>, [[{entry['system']}]]"
         )
 
-        info = entry["specs"] + "</font></font></b></i>" + "<p >" + entry["infocard"]
+        info = entry.specs + "</font></font></b></i>" + "<p >" + entry.infocard
         infocard = infocard.replace(
             "{infocard}",
             '<p style="padding: 0px; margin: 0px;">'
@@ -392,12 +400,12 @@ def generatePage(template: str, data, config, nickname):
         )
 
         bribes = "<ul>\n"
-        for faction in entry["bribes"]:
+        for faction in entry.bribes:
             bribes = f"{bribes}<li>[[{faction}]]</li>\n"
         bribes = f"{bribes}</ul>"
 
         missions = "<ul>\n"
-        for faction in entry["missions"]:
+        for faction in entry.missions:
             missions = f"{missions}<li>[[{faction}]]</li>\n"
         missions = f"{missions}</ul>"
 
@@ -405,20 +413,20 @@ def generatePage(template: str, data, config, nickname):
         bribesNmissions = bribesNmissions.replace("{missions}", missions)
 
         imports = ""
-        if entry["commodities_buying"]:
-            imports = generateTable(["Commodity", "Price"], entry["commodities_buying"].items())
+        if entry.commodities_buying:
+            imports = generateTable(["Commodity", "Price"], entry.commodities_buying.items())
 
         exports = ""
-        if entry["commodities_selling"]:
+        if entry.commodities_selling:
             exports = generateTable(
-                ["Commodity", "Price"], entry["commodities_selling"].items()
+                ["Commodity", "Price"], entry.commodities_selling.items()
             )
 
         commodities = commodities.replace("{imports}", imports)
         commodities = commodities.replace("{exports}", exports)
 
         shippos = ""
-        for ship, type, price in entry["ships_sold"]:
+        for ship, type, price in entry.ships_sold:
             temp = "<tr>\n"
             temp = f'{temp}<td>[[{ship}]]</td>\n<td>{type}</td>\n<td>{"{:,}".format(price)}$</td>\n'
             temp = f"{temp}</tr>\n"
@@ -428,14 +436,14 @@ def generatePage(template: str, data, config, nickname):
 
         newsTemplate = '<table style="margin-bottom: 10px; margin-left: 1em; width:90%; border: 1px solid white;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: rgba(255, 255, 255, 0.2); color: #ffffff;"><b>{headline}</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px; padding-left: 20px; padding-right: 20px">\n{news}\n</td>\n</tr>\n</table>\n'
         new = ""
-        for headline, newsItem in entry["news"]:
+        for headline, newsItem in entry.news:
             new = f'{new}{newsTemplate.replace("{headline}", headline).replace("{news}", newsItem)}\n'
 
         news = news.replace("{news}", new)
 
         rumorTemplate = '<table style="margin-bottom: 10px; margin-left: 1em; width:90%; border: 1px solid white;" cellpadding="3">\n<tr>\n<td style="text-align: center; font-size: larger; background: rgba(255, 255, 255, 0.2); color: #ffffff;"><b>[[{rumorFaction}]]</b>\n</td>\n</tr>\n<tr>\n<td style="padding-bottom: 7px;">\n{rumors}\n</td>\n</tr>\n</table>\n'
         rum = ""
-        for faction, rumorList in entry["rumors"].items():
+        for faction, rumorList in entry.rumors.items():
             temp = "<ul>"
             for rumor in rumorList:
                 temp = f"{temp}<li>{rumor.replace('&nbsp;', '')}</li><hr>\n"
@@ -444,14 +452,14 @@ def generatePage(template: str, data, config, nickname):
 
         rumors = rumors.replace("{rumors}", rum)
 
-        time = time.replace("{time}", entry["time"])
+        time = time.replace("{time}", entry.time)
 
-        other = f'[[Category: {entry["owner"]}]]\n[[Category: {entry["region"]}]]\n[[Category: {entry["system"]}]]\n'
+        other = f'[[Category: {entry.owner}]]\n[[Category: {entry.region}]]\n[[Category: {entry.system}]]\n'
         categories = categories.replace("{other}", other)
 
         return f"{infobox}{infocard}{bribesNmissions}{commodities}{ships}{news}{rumors}{categories}"
     elif "faction" in template.lower():
-        entry = data["Factions"][nickname]
+        entry = data.Factions[nickname]
 
         infobox = '__NOTOC__\n<table class="infobox bordered" style="float: right; margin-left: 1em; margin-bottom: 10px; width: 250px; font-size: 11px; line-height: 14px; border: 1px solid white;" cellpadding="3">\n\n<td colspan="2" style="text-align: center; font-size: 12px; line-height: 18px; background: rgba(255, 255, 255, 0.2); color: #ffffff", title = "{nickname}"><b>{name}</b>\n</td></tr>\n<tr>\n<td colspan="2" style="text-align: center; border: 1px solid white;"><div class="center"><div class="floatnone">[[File:{nickname}.png|center|250px]]</div></div>\n</td></tr>\n\n<tr>\n<td class="infobox-data-title"><b>Alignment</b>\n</td>\n<td style="padding-right: 1em">{alignment}\n</td></tr>\n</table>\n'
         infocard = "{infocard}\n"
@@ -794,6 +802,7 @@ def generatePage(template: str, data, config, nickname):
         )
 
         return f"{infobox}{infocard}{availability}{categories}"
+    raise ValueError("template is not a valid template")
 
 
 def generateSpecial(ships={}, systems={}, bases={}, factions={}, commodities={}):
@@ -842,7 +851,7 @@ def generateSpecial(ships={}, systems={}, bases={}, factions={}, commodities={})
     return pages
 
 
-def assemblePages(loadedData):
+def assemblePages(data: CompoundEntries):
     configData = loadData("config.json")
     sources = {}
     redirects = {}
@@ -851,151 +860,152 @@ def assemblePages(loadedData):
 
     sysSource = {}
     print("Assembling System pages")
-    for name, attributes in loadedData["Systems"].items():
+    for name, system in data.systems.items():
         source = (
             generatePage(
-                template="System", data=loadedData, config=configData, nickname=name
+                template="System", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        sysSource[attributes["name"]] = source
+        sysSource[system.name] = source
     sources["Systems"] = sysSource
 
     shipSource = {}
     print("Assembling Ship pages")
-    for name, attributes in loadedData["Ships"].items():
+    for name, ship in data.ships.items():
         source = (
             generatePage(
-                template="Ship", data=loadedData, config=configData, nickname=name
+                template="Ship", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        shipSource[attributes["name"]] = source
-        if attributes["name"] != attributes["longName"]:
-            redirects[attributes["longName"]] = (
-                f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
+        shipSource[ship.name] = source
+        if ship.name != ship.longName:
+            redirects[ship.longName] = (
+                f"""#REDIRECT[[{ship.name}]] [[Category: NukeOnPatch]]"""
             )
     sources["Ships"] = shipSource
 
     baseSource = {}
     print("Assembling Base pages")
-    for name, attributes in loadedData["Bases"].items():
+    for name, base in data.bases.items():
         source = (
             generatePage(
-                template="Base", data=loadedData, config=configData, nickname=name
+                template="Base", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
         name = (
-            attributes["name"]
-            if attributes["name"] not in sources["Ships"].keys()
-            else f'{attributes["name"]} (b)'
+            base.name
+            if base.name not in sources["Ships"].keys()
+            else f'{base.name} (b)'
         )
         baseSource[name] = source
     sources["Bases"] = baseSource
 
     factionSource = {}
     print("Assembling Faction pages")
-    for name, attributes in loadedData["Factions"].items():
-        if not "Guard" in attributes["name"]:
+    for name, faction in data.factions.items():
+        if not "Guard" in faction.name:
             source = (
                 generatePage(
                     template="Faction",
-                    data=loadedData,
+                    data=data,
                     config=configData,
                     nickname=name,
                 )
                 + "[[Category: NukeOnPatch]]"
             )
-            factionSource[attributes["name"]] = source
-            if attributes["name"] != attributes["shortName"]:
-                redirects[attributes["shortName"]] = (
-                    f"""#REDIRECT[[{attributes["name"]}]] [[Category: NukeOnPatch]]"""
+            factionSource[faction.name] = source
+            if faction.name != faction.shortName:
+                redirects[faction.shortName] = (
+                    f"""#REDIRECT[[{faction.name}]] [[Category: NukeOnPatch]]"""
                 )
     sources["Factions"] = factionSource
 
     commoditySource = {}
     print("Assembling Commodity pages")
-    for name, attributes in loadedData["Commodities"].items():
+    for name, commodity in data.commodities.items():
         source = (
             generatePage(
-                template="Commodity", data=loadedData, config=configData, nickname=name
+                template="Commodity", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        commoditySource[attributes["name"]] = source
+        commoditySource[commodity.name] = source
     sources["Commodities"] = commoditySource
 
     weaponSource = {}
     print("Assembling Weapon pages")
-    for name, attributes in loadedData["Weapons"].items():
+    for name, weapon in data.weapons.items():
         source = (
             generatePage(
-                template="Weapon", data=loadedData, config=configData, nickname=name
+                template="Weapon", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        weaponSource[attributes["name"]] = source
+        weaponSource[weapon.name] = source
     sources["Weapons"] = weaponSource
 
+    equipment = data.equipment
     cmSource = {}
     print("Assembling CM pages")
-    for name, attributes in loadedData["Equipment"]["CounterMeasures"].items():
+    for name, cm in (x for x in equipment.items() if isinstance(x, CountermeasureEntry)):
         source = (
             generatePage(
-                template="CM", data=loadedData, config=configData, nickname=name
+                template="CM", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        cmSource[attributes["name"]] = source
+        cmSource[cm["name"]] = source
     sources["CMs"] = cmSource
 
     armorSource = {}
     print("Assembling Armor pages")
-    for name, attributes in loadedData["Equipment"]["Armor"].items():
+    for name, armor in (x for x in equipment.items() if isinstance(x, ArmorEntry)):
         source = (
             generatePage(
-                template="Armor", data=loadedData, config=configData, nickname=name
+                template="Armor", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        armorSource[attributes["name"]] = source
+        armorSource[armor["name"]] = source
     sources["Armor"] = armorSource
 
     cloakSource = {}
     print("Assembling Cloak pages")
-    for name, attributes in loadedData["Equipment"]["Cloaks"].items():
+    for name, cloak in (x for x in equipment.items() if isinstance(x, ArmorEntry)):
         source = (
             generatePage(
-                template="Cloak", data=loadedData, config=configData, nickname=name
+                template="Cloak", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        cloakSource[attributes["name"]] = source
+        cloakSource[cloak["name"]] = source
     sources["Cloaks"] = cloakSource
 
     engineSource = {}
     print("Assembling Engine pages")
-    for name, attributes in loadedData["Equipment"]["Engines"].items():
+    for name, engine in (x for x in equipment.items() if isinstance(x, EngineEntry)):
         source = (
             generatePage(
-                template="Engine", data=loadedData, config=configData, nickname=name
+                template="Engine", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        engineSource[attributes["name"]] = source
+        engineSource[engine["name"]] = source
     sources["Engines"] = engineSource
 
     shieldSource = {}
     print("Assembling Shield pages")
-    for name, attributes in loadedData["Equipment"]["Shields"].items():
+    for name, shield in (x for x in equipment.items() if isinstance(x, ShieldEntry)):
         source = (
             generatePage(
-                template="Shield", data=loadedData, config=configData, nickname=name
+                template="Shield", data=data, config=configData, nickname=name
             )
             + "[[Category: NukeOnPatch]]"
         )
-        shieldSource[attributes["name"]] = source
+        shieldSource[shield.name] = source
     sources["Shields"] = shieldSource
 
     print("Assembling Redirect pages")
@@ -1003,26 +1013,17 @@ def assemblePages(loadedData):
 
     print("Assembling Special pages")
     sources["Special"] = generateSpecial(
-        ships=loadedData["Ships"],
-        bases=loadedData["Bases"],
-        systems=loadedData["Systems"],
-        factions=loadedData["Factions"],
-        commodities=loadedData["Commodities"],
+        ships=data["Ships"],
+        bases=data["Bases"],
+        systems=data["Systems"],
+        factions=data["Factions"],
+        commodities=data["Commodities"],
     )
 
     return sources
 
 
-def main(loadedData=None):
-    if not loadedData:
-        loadedData = loadData("../dumpedData/flData.json")
-
+def main(loadedData: CompoundEntries):
     sources = assemblePages(loadedData)
     print("DONE")
     return sources
-
-
-if __name__ == "__main__":
-    sources = main()
-    with open("../dumpedData/wikitext.json", "w") as f:
-        json.dump(sources, f, indent=1)
