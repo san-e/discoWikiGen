@@ -511,35 +511,7 @@ def get_factions() -> dict[str, FactionEntry]:
     for faction in fl.factions:
         try:
             if faction.nickname not in faction.name() and not faction.name().isspace():
-                alignment = (
-                    "Corporation"
-                    if faction.name() in config["pageGen"]["corporations"]
-                    else faction.legality()
-                )
-
-                reps = {
-                    faction.name(): rep
-                    for faction, rep in faction.rep_sheet().items()
-                    if rep
-                }
-                reps = sorted(reps.items(), key=lambda x: x[1])
-                reps = dict(reps)
-
-                factions[faction.nickname] = FactionEntry(
-                    faction.name(),
-                    faction.short_name(),
-                    alignment,
-                    '<p style="padding: 0px; margin: 0px;">'
-                    + faction.infocard().replace(
-                        "<p>", '<p style="padding: 0px; margin: 0px;">'
-                    ),
-                    {nickname for nickname, ship in faction.ships().items()},
-                    list(filter_oorp_bases(faction.bases()).keys()),
-                    list(filter_oorp_bases(faction.bribes()).keys()),
-                    reps,
-                    {base.name(): text for base, text in faction.rumors().items()},
-                    faction.legality(),
-                )
+                factions[faction.nickname] = FactionEntry.from_nickname(faction.nickname)
         except TypeError as e:
             print(f"Error occurred for faction {faction.nickname}")
             raise e
@@ -561,30 +533,7 @@ def get_commodities() -> dict[str, CommodityEntry]:
     for commodity in fl.commodities:
         if filter_oorp_bases(commodity.sold_at()).keys():
             try:
-                hrc = False
-
-                commodities[commodity.nickname] = CommodityEntry(
-                    commodity.name(),
-                    commodity.infocard(),
-                    commodity.volume,
-                    commodity.decay_per_second,
-                    commodity.price(),
-                    hrc,
-                    {
-                        base.nickname
-                        for base, price in filter_oorp_bases(
-                        commodity.bought_at()
-                    ).items()
-                        if (hrc == True and commodity not in base.sells_commodities())
-                           or (hrc == False)
-                    },
-                    {
-                        base.nickname
-                        for base, price in filter_oorp_bases(
-                        commodity.sold_at()
-                    ).items()
-                    },
-                )
+                commodities[commodity.nickname] = CommodityEntry.from_nickname(commodity.nickname)
             except TypeError as e:
                 print(f"Error occurred for commodity {commodity.nickname}")
                 raise e
@@ -621,27 +570,15 @@ def get_guns() -> dict:
             if (
                     (gun.sold_at() and not sold_oorp_only) or wrecks or gun.name().isupper()
             ) and gun.is_valid():
-                guns[gun.nickname] = GunEntry().from_nickname(gun.nickname)
+                guns[gun.nickname] = GunEntry.from_nickname(gun.nickname)
         except Exception as e:
             print(f"Error occurred for gun {gun.nickname}")
             raise e
 
     return dict(sorted(guns.items(), key=lambda x: bool(x[1]["sold_at"])))
 
-
-def get_equipment() -> dict:
-    print("Reading other equipment...")
-
-    equipment = {
-        "CounterMeasures": {},
-        "Armor": {},
-        "Cloaks": {},
-        "Engines": {},
-        "Shields": {},
-        "Thrusters": {},
-    }
-
-    # CMs
+def get_countermeasures() -> dict[str, CountermeasureEntry]:
+    cms = {}
     countermeasures = fl.equipment.of_type(flintClasses["CounterMeasureDropper"])
     for cm in countermeasures:
         flare = cm.countermeasure()
@@ -655,22 +592,11 @@ def get_equipment() -> dict:
             #     icon=cm.icon(), name=iconname(cm.good().item_icon), folder="equipment"
             # )
 
-            equipment["CounterMeasures"][cm.nickname] = CountermeasureEntry(
-                cm.name(),
-                iconname(cm.good().item_icon),
-                cm.infocard(),
-                cm.price(),
-                flare.price(),
-                flare.ammo_limit,
-                flare.effectiveness(),
-                flare.range,
-                flare.lifetime,
-                {
-                    base.nickname
-                    for base, price in filter_oorp_bases(cm.sold_at()).items()
-                },
-            )
+            cms[cm.nickname] = CountermeasureEntry.from_nickname(cm.nickname)
+    return cms
 
+def get_armors() -> dict[str, ArmorEntry]:
+    armor = {}
     armors = fl.equipment.of_type(flintClasses["Armor"])
     for armor in armors:
         if filter_oorp_bases(armor.sold_at()):
@@ -680,19 +606,11 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Armor"][armor.nickname] = ArmorEntry(
-                armor.name(),
-                iconname(armor.good().item_icon),
-                armor.infocard(),
-                armor.price(),
-                armor.volume,
-                armor.hit_pts_scale,
-                {
-                    base.nickname
-                    for base, price in filter_oorp_bases(armor.sold_at()).items()
-                },
-            )
+            armor[armor.nickname] = ArmorEntry.from_nickname(armor.nickname)
+    return armor
 
+def get_cloaks() -> dict[str, CloakEntry]:
+    c = {}
     cloaks = fl.equipment.of_type(flintClasses["CloakingDevice"])
     for cloak in cloaks:
         if not cloak.name().isspace():
@@ -702,18 +620,11 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Cloaks"][cloak.nickname] = CloakEntry(
-                cloak.name(),
-                iconname(cloak.good().item_icon),
-                cloak.infocard(),
-                cloak.price(),
-                cloak.volume,
-                {
-                    base.nickname
-                    for base, price in filter_oorp_bases(cloak.sold_at()).items()
-                },
-            )
+            c[cloak.nickname] = CloakEntry.from_nickname(cloak.nickname)
+    return c
 
+def get_engines() -> dict[str, EngineEntry]:
+    e = {}
     engines = fl.equipment.of_type(flintClasses["Engine"])
     for engine in engines:
         if filter_oorp_bases(engine.sold_at()):
@@ -723,19 +634,11 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Engines"][engine.nickname] = EngineEntry(
-                engine.name(),
-                iconname(engine.good().item_icon),
-                engine.infocard(),
-                engine.price(),
-                engine.cruise_speed_(),
-                engine.cruise_charge_time,
-                {
-                    base.nickname
-                    for base, price in filter_oorp_bases(engine.sold_at()).items()
-                },
-            )
+            e[engine.nickname] = EngineEntry.from_nickname(engine.nickname)
+    return e
 
+def get_shields() -> dict[str, ShieldEntry]:
+    s = {}
     shields = fl.equipment.of_type(flintClasses["ShieldGenerator"])
     for shield in shields:
         if filter_oorp_bases(shield.sold_at()):
@@ -745,25 +648,11 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Shields"][shield.nickname] = ShieldEntry(
-                shield.name(),
-                iconname(shield.good().item_icon),
-                shield.infocard(),
-                shield.price(),
-                shield.shield_type,
-                shield.max_capacity if shield.max_capacity else 0,
-                (shield.explosion_resistance if shield.explosion_resistance else 0),
-                (shield.regeneration_rate if shield.regeneration_rate else 0),
-                (shield.offline_rebuild_time if shield.offline_rebuild_time else 0),
-                (shield.offline_threshold if shield.offline_threshold else 0),
-                (shield.constant_power_draw if shield.constant_power_draw else 0),
-                (shield.rebuild_power_draw if shield.rebuild_power_draw else 0),
-                {
-                    base.nickname
-                    for base, price in filter_oorp_bases(shield.sold_at()).items()
-                },
-            )
+            s[shield.nickname] = ShieldEntry.from_nickname(shield.nickname)
+    return s
 
+def get_thrusters() -> dict[str, ThrusterEntry]:
+    t = {}
     thrusters = fl.equipment.of_type(flintClasses["Thruster"])
     for thruster in thrusters:
         if filter_oorp_bases(thruster.sold_at()):
@@ -773,31 +662,8 @@ def get_equipment() -> dict:
             #     folder="equipment",
             # )
 
-            equipment["Thrusters"][thruster.nickname] = ThrusterEntry(
-                thruster.name(),
-                iconname(thruster.good().item_icon),
-                thruster.infocard(),
-                thruster.price(),
-                thruster.power_usage,
-                thruster.max_force,
-                thruster.efficiency(),
-                thruster.explosion_resistance,
-                {
-                    base.nickname
-                    for base, price in filter_oorp_bases(thruster.sold_at()).items()
-                },
-            )
-
-    equipment["CounterMeasures"] = dict(
-        sorted(
-            equipment["CounterMeasures"].items(),
-            key=lambda x: bool(x[1]["availability"]),
-        )
-    )
-    equipment["Cloaks"] = dict(
-        sorted(equipment["Cloaks"].items(), key=lambda x: bool(x[1]["availability"]))
-    )
-    return equipment
+            t[thruster.nickname] = ThrusterEntry.from_nickname(thruster.nickname)
+    return t
 
 
 def main(dumpModels: bool):
@@ -822,7 +688,12 @@ def main(dumpModels: bool):
         get_factions(),
         get_commodities(),
         get_guns(),
-        get_equipment(),
+        get_countermeasures(),
+        get_armors(),
+        get_cloaks(),
+        get_engines(),
+        get_shields(),
+        get_thrusters()
     )
 
     if len(processes) > 0:
@@ -838,7 +709,6 @@ class CompoundEntries:
     bases: dict[str, BaseEntry]
     factions: dict[str, FactionEntry]
     commodities: dict[str, CommodityEntry]
-    weapons: dict[str, GunEntry]
     guns: dict[str, GunEntry]
     countermeasures: dict[str, CountermeasureEntry]
     armors: dict[str, ArmorEntry]
@@ -846,6 +716,20 @@ class CompoundEntries:
     engines: dict[str, EngineEntry]
     shields: dict[str, ShieldEntry]
     thrusters: dict[str, ThrusterEntry]
+
+    def __post_init__(self):
+        self.link()
+
+        self.countermeasures = dict(
+            sorted(
+                self.countermeasures.items(),
+                key=lambda x: bool(x[1].availability),
+            )
+        )
+
+        self.cloaks = dict(
+            sorted(self.cloaks.items(), key=lambda x: bool(x[1].availability))
+        )
 
     def link(self):
         for entry in self.ships.values():
@@ -1028,6 +912,30 @@ class FactionEntry:
     rumors: dict[FactionEntry, str] = field(default_factory=dict, init=False)
     legality: str
 
+    @classmethod
+    def from_nickname(cls, nickname: str) -> FactionEntry:
+        faction = fl.get_factions()[nickname]
+        return cls(
+            faction.name(),
+            faction.short_name(),
+            (
+                "Corporation"
+                if faction.name() in config["pageGen"]["corporations"]
+                else faction.legality()
+            ),
+            faction.infocard(),
+            {nickname for nickname, ship in faction.ships().items()},
+            list(filter_oorp_bases(faction.bases()).keys()),
+            set(filter_oorp_bases(faction.bribes()).keys()),
+            dict(sorted({
+                faction.name(): rep
+                for faction, rep in faction.rep_sheet().items()
+                if rep
+            }, key=lambda x: x[1])),
+            {base.name(): text for base, text in faction.rumors().items()},
+            faction.legality(),
+        )
+
 
 @dataclass(eq=True, unsafe_hash=True)
 class CommodityEntry:
@@ -1041,6 +949,33 @@ class CommodityEntry:
     boughtAt: set[BaseEntry] = field(default_factory=set, init=False)
     _soldAt_ids: set[str]
     soldAt: set[BaseEntry] = field(default_factory=set, init=False)
+
+    @classmethod
+    def from_nickname(cls, nickname: str) -> CommodityEntry:
+        commodity = fl.get_commodities()[nickname]
+        hrc = False
+        return cls(
+            commodity.name(),
+            commodity.infocard(),
+            commodity.volume,
+            commodity.decay_per_second,
+            commodity.price(),
+            hrc,
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(
+                commodity.bought_at()
+            ).items()
+                if (hrc == True and commodity not in base.sells_commodities())
+                   or (hrc == False)
+            },
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(
+                commodity.sold_at()
+            ).items()
+            },
+        )
 
 
 @dataclass(eq=True, unsafe_hash=True)
@@ -1114,6 +1049,22 @@ class CountermeasureEntry(EquipmentEntry):
     def from_nickname(cls, nickname: str) -> CountermeasureEntry:
         cm: fl.entities.equipment.CounterMeasureDropper = \
         fl.get_equipment().of_type(fl.entities.equipment.CounterMeasureDropper)[nickname]
+        flare = cm.countermeasure()
+        return cls(
+            cm.name(),
+            iconname(cm.good().item_icon),
+            cm.infocard(),
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(cm.sold_at()).items()
+            },
+            cm.price(),
+            flare.price(),
+            flare.ammo_limit,
+            flare.effectiveness(),
+            flare.range,
+            flare.lifetime,
+        )
 
 
 @dataclass(eq=True, unsafe_hash=True)
@@ -1122,11 +1073,43 @@ class ArmorEntry(EquipmentEntry):
     volume: int
     multiplier: float
 
+    @classmethod
+    def from_nickname(cls, nickname: str) -> ArmorEntry:
+        armor: fl.entities.equipment.Armor = \
+            fl.get_equipment().of_type(fl.entities.equipment.Armor)[nickname]
+        return cls(
+            armor.name(),
+            iconname(armor.good().item_icon),
+            armor.infocard(),
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(armor.sold_at()).items()
+            },
+            armor.price(),
+            armor.volume,
+            armor.hit_pts_scale
+        )
 
 @dataclass(eq=True, unsafe_hash=True)
 class CloakEntry(EquipmentEntry):
     price: int
     volume: int
+
+    @classmethod
+    def from_nickname(cls, nickname: str) -> CloakEntry:
+        cloak: fl.entities.equipment.CloakingDevice = \
+            fl.get_equipment().of_type(fl.entities.equipment.CloakingDevice)[nickname]
+        return cls(
+            cloak.name(),
+            iconname(cloak.good().item_icon),
+            cloak.infocard(),
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(cloak.sold_at()).items()
+            },
+            cloak.price(),
+            cloak.volume,
+        )
 
 
 @dataclass(eq=True, unsafe_hash=True)
@@ -1134,6 +1117,23 @@ class EngineEntry(EquipmentEntry):
     price: int
     cruise_speed: float
     cruise_charge_time: int
+
+    @classmethod
+    def from_nickname(cls, nickname: str) -> EngineEntry:
+        engine: fl.entities.equipment.Engine = \
+            fl.get_equipment().of_type(fl.entities.equipment.Engine)[nickname]
+        return cls(
+            engine.name(),
+            iconname(engine.good().item_icon),
+            engine.infocard(),
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(engine.sold_at()).items()
+            },
+            engine.price(),
+            engine.cruise_speed,
+            engine.cruise_charge_time,
+        )
 
 
 @dataclass(eq=True, unsafe_hash=True)
@@ -1148,6 +1148,29 @@ class ShieldEntry(EquipmentEntry):
     constant_power_draw: float
     rebuild_power_draw: float
 
+    @classmethod
+    def from_nickname(cls, nickname: str) -> ShieldEntry:
+        shield: fl.entities.equipment.ShieldGenerator = \
+            fl.get_equipment().of_type(fl.entities.equipment.ShieldGenerator)[nickname]
+        return cls(
+            shield.name(),
+            iconname(shield.good().item_icon),
+            shield.infocard(),
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(shield.sold_at()).items()
+            },
+            shield.shield_type,
+            shield.max_capacity if shield.max_capacity else 0,
+            (shield.explosion_resistance if shield.explosion_resistance else 0),
+            (shield.regeneration_rate if shield.regeneration_rate else 0),
+            (shield.offline_rebuild_time if shield.offline_rebuild_time else 0),
+            (shield.offline_threshold if shield.offline_threshold else 0),
+            (shield.constant_power_draw if shield.constant_power_draw else 0),
+            (shield.rebuild_power_draw if shield.rebuild_power_draw else 0),
+
+        )
+
 
 @dataclass(eq=True, unsafe_hash=True)
 class ThrusterEntry(EquipmentEntry):
@@ -1156,3 +1179,23 @@ class ThrusterEntry(EquipmentEntry):
     max_force: float
     efficiency: float
     explosion_resistance: float
+
+    @classmethod
+    def from_nickname(cls, nickname: str) -> ThrusterEntry:
+        thruster: fl.entities.equipment.Thruster = \
+            fl.get_equipment().of_type(fl.entities.equipment.Thruster)[nickname]
+        return cls(
+            thruster.name(),
+            iconname(thruster.good().item_icon),
+            thruster.infocard(),
+            {
+                base.nickname
+                for base, price in filter_oorp_bases(thruster.sold_at()).items()
+            },
+            thruster.price(),
+            thruster.power_usage,
+            thruster.max_force,
+            thruster.efficiency(),
+            thruster.explosion_resistance,
+        )
+
