@@ -1,15 +1,23 @@
 using LibreLancer.Utf;
 using LibreLancer.Utf.Cmp;
+using LibreLancer.Resources;
+using LibreLancer.Data.Schema;
 
 ScriptUsage(@"inputmodel[.cmp/.3db] [resourcefile.txm] [resourcefile2.mat] output.glb
 - Exports a Freelancer model (referencing associated material/texture files) to a .glb");
-
 var args = ParseArguments(2);
 AssertFileExists(args[0]);
 
+// bypass Game constructor being protected now
+class HeadlessGame : Game
+{
+    public HeadlessGame(int w, int h, bool allowScreensaver, GameConfiguration configuration)
+        : base(w, h, allowScreensaver, configuration) { }
+}
+
 // Create our fake game context
 Game win;
-win = new Game(1,1, false, true, GameConfiguration.HeadlessTest()
+win = new HeadlessGame(1, 1, true, GameConfiguration.HeadlessTest()
     .WithTick(() => win.Exit())
 );
 win.Run();
@@ -22,9 +30,7 @@ for(int i = 0; i < args.Length - 1; i++) {
     var eutf = new EditableUtf(args[i]);
     resourceManager.AddResources(eutf.Export(), i.ToString());
 }
-
 var utf = UtfLoader.LoadDrawable(File.OpenRead(args[0]), args[0], resourceManager);
-
 EditResult<SimpleMesh.Model> exported;
 var settings = new ModelExporterSettings() { IncludeLods = false, IncludeHardpoints = false, IncludeWireframes = false };
 if (utf is ModelFile mdl)
@@ -35,12 +41,10 @@ else {
     Console.Error.WriteLine("Input isn't utf or 3db");
     Environment.Exit(1);
 }
-
 if(exported.IsError) {
     Console.Error.WriteLine(exported.AllMessages());
     Environment.Exit(1);
 }
-
 using (var outfile = File.Create(args[^1])) {
     exported.Data.SaveTo(outfile, SimpleMesh.ModelSaveFormat.GLB);
 }
