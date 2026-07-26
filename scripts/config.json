@@ -102,7 +102,7 @@
    "z_": "Zoners"
   },
   "dumpSysmaps": false,
-  "sysmapURL": "https://fifthbarrier.github.io/Navmap/",
+  "sysmapURL": "https://slimythemoon.github.io/DiscoNavmap/",
   "dumpedData": "../dumpedData/",
   "createDir": [
    "../dumpedData/images/ships",

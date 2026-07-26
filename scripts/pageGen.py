@@ -12,7 +12,7 @@ def chunkList(lst, n):
 
 
 def loadData(filename):
-    with open(f"{getcwd()}\\{filename}", "r") as file:
+    with open(f"{getcwd()}/{filename}", "r") as file:
         data = json.load(file)
     return data
 
@@ -170,7 +170,6 @@ def generatePage(template, data, config, nickname):
         if ship_entry["built_by"] != "":
             rest = rest + f'[[Category: {ship_entry["built_by"]}]]\n'
         rest = rest + f'[[Category: {ship_entry["type"]}]]'
-        rest = rest + f'[[Category: {ship_entry["techcompat"]}]]'
 
         category = category.replace("{rest}", rest)
 
@@ -390,7 +389,7 @@ def generatePage(template, data, config, nickname):
             "{location}", f"<b>{entry['sector']}</b>, [[{entry['system']}]]"
         )
 
-        info = entry["specs"] + "</font></font></b></i>" + "<p >" + entry["infocard"]
+        info = entry["infocard"]
         infocard = infocard.replace(
             "{infocard}",
             '<p style="padding: 0px; margin: 0px;">'

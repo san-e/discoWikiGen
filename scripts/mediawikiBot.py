@@ -4,7 +4,6 @@ from os.path import exists, isdir, split
 from os import scandir
 import time
 from alive_progress import alive_bar
-from pprint import pprint
 
 with open("config.json", "r") as f:
     config = load(f)
