@@ -102,7 +102,7 @@ def generatePage(template, data, config, nickname):
             f"""  __NOTOC__
 {{{{ShipInfoBox
 |shipName={name}
-|imageName={image}
+|nickname={nickname}
 |shipClass={ship_class}
 |techColumn={techcompat}
 |gunsTurrets={gun_count} / {turret_count}
