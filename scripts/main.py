@@ -134,7 +134,7 @@ def pagesToUpdate():
     return [option for option, chosen in options.items() if chosen == True]
 
 
-def callBot():
+def callBot(config):
     choices = pagesToUpdate()
     print(
         f"""You chose the following:
@@ -153,7 +153,7 @@ Confirm? y/N
         flData = flWikiGen.main(dumpModels="dumpModels" in choices)
         if "renderShips" in choices:
             blender_render()
-        wikitext = pageGen.main(flData)
+        wikitext = pageGen.main(config)
         clearConsole()
         if "dumpModels" in choices:
             choices.remove("dumpModels")

@@ -113,7 +113,7 @@ def filter_oorp_bases(
         return dict(filter(lambda x: x[0].nickname not in oorpBases, bases.items()))
     elif type(bases) == EntitySet:
         return EntitySet(filter(lambda x: x.nickname not in oorpBases, bases.values()))
-    return {}
+    raise ValueError("bases is of incompatible type " + type(bases))
 
 
 processes = set()
