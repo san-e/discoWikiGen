@@ -1,10 +1,10 @@
-import requests
-from json import load
-from os.path import exists, isdir, split
-from os import scandir
 import time
+from json import load
+from os import scandir
+from os.path import exists, isdir, split
+
+import requests
 from alive_progress import alive_bar
-from pprint import pprint
 
 with open("config.json", "r") as f:
     config = load(f)
@@ -15,32 +15,32 @@ with open(config["bot"]["botPassword"], "r") as f:
 delay = config["bot"]["delay"]
 
 
-def login(botPasswordPath):
-    if not exists(botPasswordPath):
+def login(bot_password_path):
+    if not exists(bot_password_path):
         raise FileNotFoundError
 
-    with open(botPasswordPath, "r") as f:
+    with open(bot_password_path, "r") as f:
         data = load(f)
-        botName, botPassword = data["botCredentials"][0], data["botCredentials"][1]
+        bot_name, bot_password = data["botCredentials"][0], data["botCredentials"][1]
 
     session = requests.Session()
 
-    loginToken_params = {
+    login_token_params = {
         "action": "query",
         "format": "json",
         "meta": "tokens",
         "type": "login",
     }
 
-    request = session.get(url=URL, params=loginToken_params)
+    request = session.get(url=URL, params=login_token_params)
     data = request.json()
-    loginToken = data["query"]["tokens"]["logintoken"]
+    login_token = data["query"]["tokens"]["logintoken"]
 
     login_params = {
         "action": "login",
-        "lgname": botName,
-        "lgpassword": botPassword,
-        "lgtoken": loginToken,
+        "lgname": bot_name,
+        "lgpassword": bot_password,
+        "lgtoken": login_token,
         "format": "json",
     }
     request = session.post(URL, data=login_params)
@@ -49,16 +49,16 @@ def login(botPasswordPath):
 
     request = session.get(url=URL, params=csrf_params)
     data = request.json()
-    csrfToken = data["query"]["tokens"]["csrftoken"]
+    csrf_token = data["query"]["tokens"]["csrftoken"]
 
-    return session, csrfToken
+    return session, csrf_token
 
 
-def uploadText(wikitext, titleText):
-    def upload(toUpload):
-        session, csrfToken = login(config["bot"]["botPassword"])
-        failedUploads = {}
-        for name, text in toUpload.items():
+def upload_text(wikitext, title_text):
+    def upload(to_upload):
+        session, csrf_token = login(config["bot"]["botPassword"])
+        failed_uploads = {}
+        for name, text in to_upload.items():
             bar.text = f"-> Updating: {name}"
             edit_params = {
                 "action": "edit",
@@ -66,40 +66,33 @@ def uploadText(wikitext, titleText):
                 "text": text,
                 "bot": True,
                 "format": "json",
-                "token": csrfToken,
+                "token": csrf_token,
             }
             request = session.post(URL, data=edit_params)
             data = request.json()
             try:
                 error = data["error"]["code"]
                 if error == "ratelimited":
-                    failedUploads[name] = text
+                    failed_uploads[name] = text
                 print(f"Error updating {name}: {error}, trying again later...")
                 if error == "badtoken":
-                    session, csrfToken = login(config["bot"]["botPassword"])
+                    session, csrf_token = login(config["bot"]["botPassword"])
             except:
                 bar()
             time.sleep(delay)
 
-        return failedUploads
+        return failed_uploads
 
-    with alive_bar(len(wikitext.keys()), dual_line=True, title=titleText) as bar:
+    with alive_bar(len(wikitext.keys()), dual_line=True, title=title_text) as bar:
         failures = upload(wikitext)
 
         while failures:
             failures = upload(failures)
 
 
-def uploadImages(titleImage, path="../dumpedData/images"):
-    subdirectories = set()
-    if exists(path):
-        with scandir(path) as dirs:
-            for entry in dirs:
-                if isdir(entry.path):
-                    subdirectories.add(entry.path)
-
-    def getWikiImages():
-        session, csrfToken = login(config["bot"]["botPassword"])
+def upload_images(title_image, path="../dumpedData/images"):
+    def get_wiki_images():
+        session, csrf_token = login(config["bot"]["botPassword"])
         allimages_params = {
             "action": "query",
             "format": "json",
@@ -113,11 +106,11 @@ def uploadImages(titleImage, path="../dumpedData/images"):
         return allimages
 
     def upload(entries):
-        session, csrfToken = login(config["bot"]["botPassword"])
-        failedUploads = []
-        with alive_bar(len(entries), dual_line=True, title=titleImage) as bar:
+        session, csrf_token = login(config["bot"]["botPassword"])
+        failed_uploads = []
+        with alive_bar(len(entries), dual_line=True, title=title_image) as bar:
             for entry in entries:
-                if not entry["name"].endswith("png"):
+                if not (entry["name"].endswith("png") or entry["name"].endswith("glb")):
                     continue
 
                 try:
@@ -138,7 +131,7 @@ def uploadImages(titleImage, path="../dumpedData/images"):
                     "filename": entry["name"],
                     "comment": config["bot"]["comment"],
                     "format": "json",
-                    "token": csrfToken,
+                    "token": csrf_token,
                     "bot": True,
                     "ignorewarnings": 1,
                 }
@@ -158,16 +151,23 @@ def uploadImages(titleImage, path="../dumpedData/images"):
                         print(
                             f"Error uploading {entry['name']}: {error}, trying again later..."
                         )
-                        failedUploads.append(
+                        failed_uploads.append(
                             {"name": entry["name"], "path": entry["path"]}
                         )
                 except:
                     pass
                 # time.sleep(delay)
                 bar()
-        return failedUploads
+        return failed_uploads
 
-    allimages = getWikiImages()
+    subdirectories = set()
+    if exists(path):
+        with scandir(path) as dirs:
+            for entry in dirs:
+                if isdir(entry.path):
+                    subdirectories.add(entry.path)
+
+    allimages = get_wiki_images()
 
     failures = []
     for directory in subdirectories:
@@ -180,20 +180,20 @@ def uploadImages(titleImage, path="../dumpedData/images"):
         failures = upload(failures)
 
 
-def nukeTheWiki(titleNuke):
-    session, csrfToken = login(config["bot"]["botPassword"])
+def nuke_the_wiki(title_nuke):
+    session, csrf_token = login(config["bot"]["botPassword"])
 
     def nuke():
-        session, csrfToken = login(config["bot"]["botPassword"])
-        with alive_bar(len(idsToNuke), dual_line=True, title=titleNuke) as bar:
-            for id in idsToNuke:
+        session, csrf_token = login(config["bot"]["botPassword"])
+        with alive_bar(len(ids_to_nuke), dual_line=True, title=title_nuke) as bar:
+            for id in ids_to_nuke:
                 bar.text = f"Nuking pageID {id}"
                 nuke_params = {
                     "action": "delete",
                     "format": "json",
                     "reason": "This page has been nuked!",
                     "pageid": id,
-                    "token": csrfToken,
+                    "token": csrf_token,
                 }
 
                 request = session.post(URL, nuke_params)
@@ -201,7 +201,7 @@ def nukeTheWiki(titleNuke):
                     error = request.json()["error"]["code"]
                     print(f"Error updating {id}: {error}, trying again later...")
                     if error == "badtoken":
-                        session, csrfToken = login(config["bot"]["botPassword"])
+                        session, csrf_token = login(config["bot"]["botPassword"])
                     bar()
                 except:
                     bar()
@@ -209,7 +209,7 @@ def nukeTheWiki(titleNuke):
 
                 # time.sleep(delay) # seemingly not neccessary
 
-    queryNuke_params = {
+    query_nuke_params = {
         "action": "query",
         "generator": "categorymembers",
         "gcmtitle": config["bot"]["nukeCategory"],
@@ -220,14 +220,14 @@ def nukeTheWiki(titleNuke):
         "format": "json",
     }
 
-    request = session.post(URL, data=queryNuke_params)
-    idsToNuke = set(request.json()["query"]["pages"].keys())
+    request = session.post(URL, data=query_nuke_params)
+    ids_to_nuke = set(request.json()["query"]["pages"].keys())
 
     nuke()
 
 
-def addWarning():
-    session, csrfToken = login(config["bot"]["botPassword"])
+def add_warning():
+    session, csrf_token = login(config["bot"]["botPassword"])
     edit_params = {
         "action": "edit",
         "title": "Main_Page",
@@ -235,7 +235,7 @@ def addWarning():
         "summary": "Adding update warning for the duration of the update.",
         "bot": True,
         "format": "json",
-        "token": csrfToken,
+        "token": csrf_token,
     }
     request = session.post(URL, data=edit_params)
     data = request.json()
@@ -243,16 +243,16 @@ def addWarning():
     return data.get("edit", {}).get("newrevid", 0)
 
 
-def undoEdit(title, revId):
-    session, csrfToken = login(config["bot"]["botPassword"])
+def undo_edit(title, rev_id):
+    session, csrf_token = login(config["bot"]["botPassword"])
     edit_params = {
         "action": "edit",
         "title": title,
-        "undo": revId,
-        "summary": f"Update complete, undoing revision {revId}",
+        "undo": rev_id,
+        "summary": f"Update complete, undoing revision {rev_id}",
         "bot": True,
         "format": "json",
-        "token": csrfToken,
+        "token": csrf_token,
     }
 
     request = session.post(URL, data=edit_params)
@@ -285,16 +285,6 @@ def main(wikidata=None, choices=None):
         wikitext = wikitext | wikidata["Commodities"]
     if "weapons" in choices:
         wikitext = wikitext | wikidata["Weapons"]
-    if "cms" in choices:
-        wikitext = wikitext | wikidata["CMs"]
-    if "armor" in choices:
-        wikitext = wikitext | wikidata["Armor"]
-    if "cloaks" in choices:
-        wikitext = wikitext | wikidata["Cloaks"]
-    if "engines" in choices:
-        wikitext = wikitext | wikidata["Engines"]
-    if "shields" in choices:
-        wikitext = wikitext | wikidata["Shields"]
     if "redirects" in choices:
         wikitext = wikitext | wikidata["Redirects"]
     if "special" in choices:
@@ -302,26 +292,31 @@ def main(wikidata=None, choices=None):
 
     print("Adding update warning to Main_Page")
     global warningRevId
-    warningRevId = addWarning()
+    warningRevId = add_warning()
 
     if "nuke" in choices:
-        nukeTheWiki(
-            titleNuke=config["bot"]["titleNuke"],
+        nuke_the_wiki(
+            title_nuke=config["bot"]["titleNuke"],
         )
 
-    uploadText(
+    upload_text(
         wikitext=wikitext,
-        titleText=config["bot"]["titleText"],
+        title_text=config["bot"]["titleText"],
     )
     if "images" in choices:
-        uploadImages(
-            titleImage=config["bot"]["titleImage"],
+        upload_images(
+            title_image=config["bot"]["titleImage"],
             path=config["bot"]["images"],
+        )
+    if "models" in choices:
+        upload_images(
+            title_image=config["bot"]["titleModels"],
+            path=config["bot"]["models"],
         )
 
     if warningRevId:
         print("Removing update warning")
-        undoEdit("Main_Page", warningRevId)
+        undo_edit("Main_Page", warningRevId)
 
 
 if __name__ == "__main__":

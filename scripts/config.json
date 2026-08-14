@@ -116,13 +116,15 @@
     "includeSysmaps": true
   },
   "bot": {
-    "delay": 0.26,
+    "delay": 1.26,
     "botPassword": "secret.json",
     "wikitext": "../dumpedData/wikitext.json",
     "titleText": "mediawikiBot.py | Updating Text",
     "titleImage": "mediawikiBot.py | Uploading Images",
+    "titleModels": "mediawikiBot.py | Uploading Models",
     "titleNuke": "mediawikiBot.py | Nuking wiki",
     "images": "../dumpedData/images",
+    "models": "../dumpedData/models",
     "nukeCategory": "Category:NukeOnPatch",
     "comment": "replaceOnPatch",
     "categories": [
