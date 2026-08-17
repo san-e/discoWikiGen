@@ -1,6 +1,7 @@
 .vscode/
 __pycache__/
-dumpedData/*
+dumpedData/**
+!dumpedData/**/.gitkeep
 gen.bat
 scripts/botPassword.json
 everything.bat
