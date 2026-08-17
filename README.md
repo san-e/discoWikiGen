@@ -1,26 +1,16 @@
 # discoWikiGen
-WIP dynamic wiki page source generator for Discovery Freelancer 
+Wiki page generator for Discovery Freelancer
 
+## Installation
+This project uses the uv package manager. Refer to installation instructions [here](https://docs.astral.sh/uv/getting-started/installation/). 
 
-## Dependencies
-- My [fork](https://github.com/BASEFlow1/flint) of [flint](https://github.com/biqqles/flint)
-- beautifulsoup4
-- pillow
-- html-table-parser-python3
-- pandas
-- alive_progress
-- requests
-- selenium
-- opencv-python
+In the root directory, run `uv venv` to create a virtual environment, followed by `uv sync` to fetch the dependencies.
 
-To install, do:
+Alternatively on Linux: Run `venv.sh`.
 
-`pip install beautifulsoup4 pillow html-table-parser-python3 pandas alive_progress requests pytz selenium opencv-python`
-
-`pip install https://github.com/san-e/flint/archive/wiki.zip -U`
-
-or navigate to the `requirements.txt` file and do `pip install -r requirements.txt`
+## Usage
+Run `uv run scripts/main.py`. It will guide you through initial setup.
 
 ---
 
-Developed and tested on Python 3.11.0
+Developed and tested on Python 3.11.14

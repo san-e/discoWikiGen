@@ -36,17 +36,19 @@ if [ "${ret_dir_exists38_v0__8_5}" != 0 ]; then
     exec $SHELL
     __status=$?
 fi
-uv init>/dev/null 2>&1
-__status=$?
 uv venv
 __status=$?
 if [ "${__status}" != 0 ]; then
     echo "Failed to initialize virtual environment."
     exit 1
 fi
-uv pip install -r requirements.txt
+uv sync
 __status=$?
 if [ "${__status}" != 0 ]; then
     echo "Failed to install dependencies."
     exit 1
 fi
+source .venv/bin/activate
+__status=$?
+exec $SHELL
+__status=$?

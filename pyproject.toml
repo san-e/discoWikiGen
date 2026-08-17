@@ -5,5 +5,17 @@ description = "Wiki page generator for Discovery Freelancer"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "pandas-stubs~=3.0.3",
+    "alive-progress>=3.3.0",
+    "beautifulsoup4>=4.15.0",
+    "black>=26.5.1",
+    "fl-flint>=0.20.0",
+    "opencv-python>=5.0.0.93",
+    "pandas>=3.0.5",
+    "pillow>=12.3.0",
+    "pytz>=2026.3.post1",
+    "requests>=2.34.2",
+    "selenium>=4.46.0",
 ]
+
+[tool.uv.sources]
+fl-flint = { url = "https://github.com/san-e/flint/archive/wiki.zip" }

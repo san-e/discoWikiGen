@@ -1,0 +1,46 @@
+using LibreLancer.Utf;
+using LibreLancer.Utf.Cmp;
+using LibreLancer.Resources;
+using LibreLancer.Data.Schema;
+using LibreLancer.Data;
+using LibreLancer.Data.IO;
+using LibreLancer.ContentEdit;
+using LibreLancer.Shaders;
+
+ScriptUsage(@"freelancer_path output_path
+- Renders all ships into the output path in .png format");
+var args = ParseArguments(2);
+
+var win = HeadlessContext.Create();
+win.RenderContext.AnisotropyLevel = win.RenderContext.MaxAnisotropy;
+
+AllShaders.Compile(win.RenderContext);
+var vfs = FileSystem.FromPath(args[0]);
+var resources = new GameResourceManager(win, vfs);
+var db = new GameItemDb(vfs);
+var data = new GameDataManager(db, resources);
+data.LoadData(win);
+// GameDataManager expects glContext to run some code on the UI thread after load
+//win.RunUIEvents();
+
+// Loop through our ships
+foreach(var ship in data.Items.Ships) {
+    try {
+        resources.ClearTextures();
+        FLLog.Info("Draw", $"Rendering {ship.Nickname}");
+
+        var loaded = ship.ModelFile.LoadFile(resources)?.Drawable as IRigidModelFile;
+        if (loaded == null)
+        {
+            FLLog.Warning("Draw", $"Could not load rigid model for {ship.Nickname}, skipping");
+            continue;
+        }
+
+
+        var model = loaded.CreateRigidModel(true, resources);
+        ModelImageRenderer.RenderToPng(resources, model, 1024*2, 1024*2, System.IO.Path.Combine([args[1], $"{ship.Nickname}.png"]));
+    } catch (Exception e) {
+        FLLog.Error("oasch", e.ToString());
+        continue;
+    }
+}

@@ -10,15 +10,14 @@ if (dir_exists("{pwd()}/.venv")) {
 	trust $ exec \$SHELL $
 }
 
-trust silent $ uv init $
-
 $ uv venv $ failed {
 	echo("Failed to initialize virtual environment.")
 	exit(1)
 }
 
-$ uv pip install -r requirements.txt $ failed {
+$ uv sync $ failed {
 	echo("Failed to install dependencies.")
 	exit(1)
 }
 trust $ source .venv/bin/activate $
+trust $ exec \$SHELL $
