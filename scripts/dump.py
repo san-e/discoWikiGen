@@ -4,6 +4,7 @@ import subprocess
 import time
 from io import BytesIO
 from pathlib import PureWindowsPath
+from pageGen import filter_systems
 
 from PIL import Image
 from flint.formats import utf
@@ -84,7 +85,7 @@ def dump_sysmaps():
 
     n = len(fl.systems) - len(config["wikiGen"]["oorpSystems"])
     i = 1
-    for system in fl.systems:
+    for system in filter_systems(fl.systems):
         if system.nickname in config["wikiGen"]["oorpSystems"]:
             continue
         print(f"{i}/{n}: {system.nickname}              ", end="\r", flush=True)
@@ -97,7 +98,7 @@ def dump_sysmaps():
         while (
             driver.find_elements(By.CLASS_NAME, "loadingOverlay")
             or driver.find_elements(By.CLASS_NAME, "loaderTitle")
-            or driver.find_elements(By.CLASS_NAME, "systemTitle")[0] == "Sirius"
+            or "Sirius" in {x.text for x in driver.find_elements(By.CLASS_NAME, "systemTitle")}
         ):
             time.sleep(0.1)
             x += 1

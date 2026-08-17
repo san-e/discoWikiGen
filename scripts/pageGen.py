@@ -178,7 +178,7 @@ def generate_list(input_list: Iterable, html: bool = False):
         out += "\n".join(f"<li>{x}</li>" for x in input_list)
         out += "</ul>"
         return out
-    return "\n".join({f"* {x}" for x in input_list}).strip()
+    return "\n".join([f"* {x}" for x in input_list]).strip()
 
 
 def faction_link(faction: fl.entities.universe.Faction) -> str:
@@ -217,10 +217,9 @@ def ship_table(ships: fl.entities.EntitySet) -> str:
 
 
 def base_table(bases: fl.entities.EntitySet) -> str:
-    houses = CONFIG["pageGen"]["houses"]
     return generate_table(
         header=["Base", "Owner", "System", "Region"],
-        entries={
+        entries=[
             (
                 f"[[{base.name()}]]",
                 faction_link(base.owner()),
@@ -228,7 +227,7 @@ def base_table(bases: fl.entities.EntitySet) -> str:
                 region_link(base.system_().region()),
             )
             for base in bases
-        },
+        ],
         sortable=True,
     )
 

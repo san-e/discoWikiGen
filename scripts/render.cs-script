@@ -14,7 +14,6 @@ var args = ParseArguments(2);
 var win = HeadlessContext.Create();
 win.RenderContext.AnisotropyLevel = win.RenderContext.MaxAnisotropy;
 
-win.RenderContext.AnisotropyLevel = win.RenderContext.MaxAnisotropy;
 AllShaders.Compile(win.RenderContext);
 var vfs = FileSystem.FromPath(args[0]);
 var resources = new GameResourceManager(win, vfs);
@@ -39,7 +38,7 @@ foreach(var ship in data.Items.Ships) {
 
 
         var model = loaded.CreateRigidModel(true, resources);
-        ModelImageRenderer.RenderToPng(resources, model, 1024*2, 1024*2, $"{args[1]}/{ship.Nickname}.png");
+        ModelImageRenderer.RenderToPng(resources, model, 1024*2, 1024*2, System.IO.Path.Combine([args[1], $"{ship.Nickname}.png"]));
     } catch (Exception e) {
         FLLog.Error("oasch", e.ToString());
         continue;

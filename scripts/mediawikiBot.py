@@ -117,7 +117,7 @@ def upload_images(title_image, path="../dumpedData/images"):
                     continue
 
                 try:
-                    if allimages[entry["name"]] != config["bot"]["comment"]:
+                    if allimages[entry["name"].lower()] != config["bot"]["comment"]:
                         print(
                             f"Skipping {entry['name']}, probably shouldn't be replaced."
                         )

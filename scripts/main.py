@@ -24,8 +24,8 @@ def clear_console():
 def first_time_setup():
     while True:
         print("""Input the Path to your Freelancer installation:""")
-        freelancerPath = input()
-        if is_probably_freelancer(freelancerPath):
+        freelancer_path = input()
+        if is_probably_freelancer(freelancer_path):
             clear_console()
             break
         else:
@@ -67,7 +67,7 @@ def first_time_setup():
         You will only need this if you intend to dump system maps from the online Navmap"""
         )
         firefox = input("Path: ")
-        if os.path.exists(firefox) + os.path.isfile(firefox):
+        if os.path.exists(firefox) and os.path.isfile(firefox):
             break
         else:
             print(f"Path does not point to a Firefox binary. Try again")
@@ -78,7 +78,7 @@ def first_time_setup():
         You will only need this if you intend to dump system maps from the online Navmap"""
         )
         geckodriver = input("Path: ")
-        if os.path.exists(firefox) + os.path.isfile(firefox):
+        if os.path.exists(firefox) and os.path.isfile(firefox):
             break
         else:
             print(f"Path does not point to a geckodriver binary. Try again")
@@ -86,7 +86,7 @@ def first_time_setup():
     with open("./secret.json", "w") as f:
         json.dump(
             {
-                "freelancerPath": freelancerPath,
+                "freelancer": freelancer_path,
                 "URL": wikiLink,
                 "botCredentials": botCredentials,
                 "librelancer": librelancer,
