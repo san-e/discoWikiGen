@@ -1,0 +1,75 @@
+name: Run fandom wiki update
+on:
+  workflow_dispatch:
+jobs:
+  do_the_thing:
+    name: do the thing
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.discovery_deploy_key }}
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          path: discoWikiGen
+      - name: Checkout discovery
+        run: |
+          git clone git@github.com:san-e/discovery-freelancer.git
+          mv discovery-freelancer $HOME/freelancer
+      - name: Install uv
+        run: | 
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Setup venv
+        run: |
+          cd discoWikiGen
+          uv venv
+          uv sync
+      - name: Setup SDL
+        run: |
+           sudo apt-get update
+           sudo apt-get install -y libsdl2-2.0-0 libsdl2-dev
+      - uses: browser-actions/setup-firefox@v1
+        name: Install real Firefox
+      - name: Install geckodriver
+        run: |
+          LATEST_URL=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest \
+            | jq -r '.assets[] | select(.name | test("linux64.tar.gz$")) | .browser_download_url')
+          curl -L "$LATEST_URL" -o geckodriver.tar.gz
+          mkdir -p geckodriver
+          tar -xzf geckodriver.tar.gz -C geckodriver
+          mkdir -p "$HOME/geckodriver"
+          mv geckodriver/geckodriver "$HOME/geckodriver/geckodriver"
+          chmod +x "$HOME/geckodriver/geckodriver"
+      - name: Fetch latest LibreLancer SDK
+        run: |
+          curl -L "https://librelancer.net/builds/librelancer-sdk-daily-ubuntu-amd64.tar.gz" -o librelancer.tar.gz
+          mkdir -p "$HOME/librelancer"
+          tar -xzf librelancer.tar.gz
+          mv librelancer-*-ubuntu-amd64/* "$HOME/librelancer"
+      - name: Write secrets to secret.json
+        run: |
+          jq -n \
+          --arg firefox "/usr/bin/firefox" \
+          --arg webdriver "$HOME/geckodriver/geckodriver" \
+          --arg librelancer "$HOME/librelancer" \
+          --arg bc0 "${{ secrets.botCredentials0_fandom }}" \
+          --arg bc1 "${{ secrets.botCredentials1_fandom }}" \
+          --arg url "${{ secrets.URL_fandom }}" \
+          --arg freelancer $HOME/freelancer \
+          '{
+            firefox: $firefox,
+            webdriver: $webdriver,
+            librelancer: $librelancer,
+            botCredentials: [$bc0, $bc1],
+            URL: $url,
+            freelancer: $freelancer
+          }' > discoWikiGen/scripts/secret.json
+
+      - name: Run script
+        run: |
+          cd discoWikiGen
+          uv run scripts/main.py --headless
