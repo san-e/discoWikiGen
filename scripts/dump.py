@@ -35,7 +35,7 @@ def dump_models() -> None:
         arguments = [LLEDITSCRIPT, EXPORTER, ship.model()]
         for material in ship.materials():
             arguments.append(material)
-        arguments.append(f"../dumpedData/models/{ship.nickname}.glb")
+        arguments.append(f"../dumpedData/models/ships/{ship.nickname}.glb")
         p = subprocess.Popen(arguments, stdout=subprocess.DEVNULL)
         processes.add(p)
 
@@ -177,4 +177,4 @@ def dump(
 
 
 if __name__ == "__main__":
-    dump(models=False, ship_render=True, sysmaps=False)
+    dump(models=True, ship_render=False, sysmaps=False)

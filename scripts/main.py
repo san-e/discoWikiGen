@@ -118,6 +118,7 @@ def pages_to_update():
     (d) Factions
     (e) Commodities
     (f) Weapons
+    (g) Solars
     (1) Redirects
     (2) Special
     (3) Images
@@ -133,11 +134,7 @@ def pages_to_update():
         "factions": True if "d" in selection or "x" in selection else False,
         "commodities": True if "e" in selection or "x" in selection else False,
         "weapons": True if "f" in selection or "x" in selection else False,
-        "cms": True if "g" in selection or "x" in selection else False,
-        "armor": True if "h" in selection or "x" in selection else False,
-        "cloaks": True if "i" in selection or "x" in selection else False,
-        "engines": True if "j" in selection or "x" in selection else False,
-        "shields": True if "k" in selection or "x" in selection else False,
+        "solars": True if "g" in selection or "x" in selection else False,
         "redirects": True if "1" in selection or "x" in selection else False,
         "special": True if "2" in selection or "x" in selection else False,
         "images": True if "3" in selection or "x" in selection else False,
@@ -173,7 +170,6 @@ Confirm? y/N
             clear_folder("../dumpedData/images/news/")
             dump.dump(icons=True)
         clear_console()
-        print("Dumping game data\n===================")
         wikitext = pageGen.main()
         clear_console()
         if "dumpModels" in choices:

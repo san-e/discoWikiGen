@@ -74,9 +74,12 @@ def upload_text(wikitext, title_text):
                 error = data["error"]["code"]
                 if error == "ratelimited":
                     failed_uploads[name] = text
-                print(f"Error updating {name}: {error}, trying again later...")
-                if error == "badtoken":
+                    print(f"Error updating {name}: {error}, trying again later...")
+                elif error == "badtoken":
+                    failed_uploads[name] = text
                     session, csrf_token = login(config["bot"]["botPassword"])
+                else:
+                    print(f"Error updating {name}: {error}")
             except:
                 bar()
             time.sleep(delay)
@@ -285,6 +288,8 @@ def main(wikidata=None, choices=None):
         wikitext = wikitext | wikidata["Commodities"]
     if "weapons" in choices:
         wikitext = wikitext | wikidata["Weapons"]
+    if "solars" in choices:
+        wikitext = wikitext | wikidata["Solars"]
     if "redirects" in choices:
         wikitext = wikitext | wikidata["Redirects"]
     if "special" in choices:

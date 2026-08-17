@@ -5,7 +5,6 @@ import re
 from collections import defaultdict
 from collections.abc import Iterable
 from functools import lru_cache
-from itertools import zip_longest
 from os import getcwd
 from pathlib import PureWindowsPath
 from string import Template
@@ -22,6 +21,9 @@ from flint.entities import (
     ShipPackage,
     Good,
     Entity,
+    Solar,
+    Planet,
+    BaseSolar,
 )
 from flint.formats import ini, dll
 
@@ -80,11 +82,11 @@ def filter_oorp_bases(
     raise ValueError("bases is of incompatible type " + str(type(bases)))
 
 
-def filter_bases(bases: EntitySet[Base]) -> EntitySet[Base]:
+def filter_bases(bases: Iterable[Base]) -> EntitySet[Base]:
     return EntitySet(base for base in filter_oorp_bases(bases) if base.has_solar())
 
 
-def filter_ships(ships: EntitySet[Ship]) -> EntitySet[Ship]:
+def filter_ships(ships: Iterable[Ship]) -> EntitySet[Ship]:
     ships_in_pob_recipes = get_pob_recipes_ships()
     return EntitySet(
         ship
@@ -99,7 +101,7 @@ def filter_ships(ships: EntitySet[Ship]) -> EntitySet[Ship]:
     )
 
 
-def filter_systems(systems: EntitySet[System]) -> EntitySet[System]:
+def filter_systems(systems: Iterable[System]) -> EntitySet[System]:
     return EntitySet(
         system
         for system in systems
@@ -107,13 +109,13 @@ def filter_systems(systems: EntitySet[System]) -> EntitySet[System]:
     )
 
 
-def filter_factions(factions: EntitySet[Faction]) -> EntitySet[Faction]:
+def filter_factions(factions: Iterable[Faction]) -> EntitySet[Faction]:
     return EntitySet(
         x for x in factions if not x.nickname.lower() in x.name().lower() and x.name()
     )
 
 
-def filter_commodities(commodities: EntitySet[Commodity]) -> EntitySet[Commodity]:
+def filter_commodities(commodities: Iterable[Commodity]) -> EntitySet[Commodity]:
     return EntitySet(
         c
         for c in commodities
@@ -183,6 +185,14 @@ def faction_link(faction: fl.entities.universe.Faction) -> str:
     return f"[[File:{faction.nickname}.png|19px]] [[{faction.name()}]]"
 
 
+def region_link(region: str) -> str:
+    return (
+        f"{{{{House Link | {region.title()} | long }}}}"
+        if region in CONFIG["pageGen"]["houses"]
+        else "Independent"
+    )
+
+
 def fade_out(stuff: str):
     return (
         """<div style="max-height: 500px; overflow-y: auto; -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%); mask-image: linear-gradient(to bottom, black 90%, transparent 100%); padding-bottom: 60px;">\n"""
@@ -215,11 +225,7 @@ def base_table(bases: fl.entities.EntitySet) -> str:
                 f"[[{base.name()}]]",
                 faction_link(base.owner()),
                 f"[[{base.system_().name()}]]",
-                (
-                    f"{{{{House Link | {base.system_().region().title()} | long }}}}"
-                    if base.system_().region() in houses
-                    else base.system_().region().title()
-                ),
+                region_link(base.system_().region()),
             )
             for base in bases
         },
@@ -380,11 +386,7 @@ def generate_system_page(system: System) -> str:
         name=system.name(),
         nickname=system.nickname,
         infocard=system.infocard("html").split("Settled Planets")[0] + "</div>",
-        government=(
-            f"{{{{House Link | {system.region().title()} | long }}}}"
-            if system.region() in houses
-            else "Independent"
-        ),
+        government=region_link(system.region()),
         region=system.region().title(),
         neighbors=generate_list(
             [
@@ -462,6 +464,24 @@ def generate_system_page(system: System) -> str:
                 if destination in filter_systems(system.connections().values())
             ],
         ),
+    )
+
+
+def generate_solar_page(solar: Solar):
+    return load_template("solar").substitute(
+        name=solar.name(),
+        nickname=solar.nickname,
+        system=solar.system().name(),
+        region=region_link(solar.system().region()),
+        region_=solar.system().region(),
+        nearby=l if (l := generate_list([
+                f"[[{x.name()}]]"
+                for x in solar.nearby(20_000)
+                if isinstance(x, BaseSolar)
+            ],
+            html=True,
+        )) else "<i>None</i>",
+        infocard=solar.infocard(),
     )
 
 
@@ -844,6 +864,26 @@ def assemble_pages():
         source = generate_system_page(system=system) + "[[Category: NukeOnPatch]]"
         sys_source[system.name()] = source
     sources["Systems"] = sys_source
+    print("")
+
+    solar_source = {}
+    print("Assembling Solar pages")
+    for i, solar in enumerate(
+        s := [
+            x
+            for x in EntitySet.merge(
+                s.planets() for s in filter_systems(fl.get_systems())
+            )
+            if not isinstance(x, fl.entities.PlanetaryBase)
+        ]
+    ):
+        print(
+            f"{i+1}/{len(s)}: {solar.nickname}                                     ",
+            end="\r",
+        )
+        source = generate_solar_page(solar=solar) + "[[Category: NukeOnPatch]]"
+        solar_source[solar.name()] = source
+    sources["Solars"] = solar_source
     print("")
 
     ship_source = {}
