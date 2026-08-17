@@ -211,23 +211,6 @@ def clear_folder(folder: str):
         os.remove(file)
 
 
-def blender_render():
-    blender = os.path.join(
-        secret["blender"], f"blender{'.exe' if os.name == 'nt' else ''}"
-    )
-    clear_console()
-    os.environ["PYTHONPATH"] = os.path.abspath("../.venv/Lib/site-packages")
-    subprocess.call(
-        [
-            blender,
-            os.path.abspath("./renderer.blend"),
-            "-b",
-            "-P",
-            os.path.abspath("./blender.py"),
-        ]
-    )
-    input()
-
 
 if __name__ == "__main__":
     with open("./config.json", "r") as f:
