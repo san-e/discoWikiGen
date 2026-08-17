@@ -42,38 +42,8 @@
       "unch10",
       "vr01"
     ],
-    "shipBuilders": {
-      "li_": "Liberty",
-      "br_": "Bretonia",
-      "ku_": "Kusari",
-      "rh_": "Rheinland",
-      "ga_": "Gallia",
-      "bw_": "Borderworlds",
-      "ew_": "Edge Worlds",
-      "co_": "Corsairs",
-      "oc_": "Outcasts",
-      "col_": "Crayter Republic",
-      "or_": "The Order",
-      "no_": "Nomads",
-      "no2_": "Nomads",
-      "core_": "The Core",
-      "gc_": "Golden Chrysanthemums",
-      "img_": "Independent Miners Guild",
-      "gmg": "Gas Miners Guild",
-      "bh_": "Bounty Hunters",
-      "molly_": "Mollys",
-      "z_": "Zoners"
-    },
-    "dumpSysmaps": false,
     "sysmapURL": "https://slimythemoon.github.io/DiscoNavmap/",
-    "dumpedData": "../dumpedData/",
-    "createDir": [
-      "../dumpedData/images/ships",
-      "../dumpedData/images/commodities",
-      "../dumpedData/images/guns",
-      "../dumpedData/images/equipment",
-      "../dumpedData/images/systems"
-    ]
+    "dumpedData": "../dumpedData/"
   },
   "pageGen": {
     "houses": [
@@ -126,14 +96,6 @@
     "images": "../dumpedData/images",
     "models": "../dumpedData/models",
     "nukeCategory": "Category:NukeOnPatch",
-    "comment": "replaceOnPatch",
-    "categories": [
-      "Ships",
-      "Systems",
-      "Bases"
-    ]
-  },
-  "techcompat": {
-    "techcompatURL": "https://discoverygc.com/techcompat/techcompat_table.php"
+    "comment": "replaceOnPatch"
   }
 }
