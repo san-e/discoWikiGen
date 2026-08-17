@@ -78,7 +78,7 @@ def first_time_setup():
         You will only need this if you intend to dump system maps from the online Navmap"""
         )
         geckodriver = input("Path: ")
-        if os.path.exists(firefox) and os.path.isfile(firefox):
+        if os.path.exists(geckodriver) and os.path.isfile(geckodriver):
             break
         else:
             print(f"Path does not point to a geckodriver binary. Try again")
@@ -158,7 +158,7 @@ Confirm? y/N
 
     if "y" in input():
         if "dumpModels" in choices:
-            clear_folder("../dumpedData/models/")
+            clear_folder("../dumpedData/models/ships")
             dump.dump(models=True)
         if "renderShips" in choices:
             clear_folder("../dumpedData/images/ships/")
