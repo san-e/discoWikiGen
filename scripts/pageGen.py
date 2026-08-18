@@ -27,6 +27,9 @@ from flint.entities import (
 )
 from flint.formats import ini, dll
 
+# Set working directory to scripts folder
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 BAR = "{{!}}"
 DBAR = "{{!!}}"
 
