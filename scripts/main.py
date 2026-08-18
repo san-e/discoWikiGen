@@ -1,6 +1,6 @@
 import json
 import os
-import subprocess
+import sys
 
 import requests
 from bs4 import BeautifulSoup
@@ -143,7 +143,7 @@ def pages_to_update():
         "dumpModels": dump_models,
         "renderShips": render,
         "dumpSysmaps": dump_sysmaps,
-        "dumpIcons": dump_icons
+        "dumpIcons": dump_icons,
     }
     clear_console()
     return [option for option, chosen in options.items() if chosen == True]
@@ -211,11 +211,36 @@ def clear_folder(folder: str):
         os.remove(file)
 
 
+def headless():
+    # just do everything without prompts
+    dump.dump(models=True, sysmaps=True, icons=True, ship_render=True)
+    wikitext = pageGen.main()
+    mediawikiBot.main(
+        wikidata=wikitext,
+        choices=[
+            "systems",
+            "ships",
+            "bases",
+            "factions",
+            "commodities",
+            "weapons",
+            "solars",
+            "redirects",
+            "special",
+            "images",
+            "models",
+            "nuke",
+        ],
+    )
+
 
 if __name__ == "__main__":
+    HEADLESS = sys.argv[1] == "--headless"
     with open("./config.json", "r") as f:
         config = json.load(f)
     if not os.path.exists("./secret.json"):
+        if HEADLESS:
+            raise FileNotFoundError("secret.json should exist when running headlessly")
         print("Running first time setup...")
         first_time_setup()
         clear_console()
@@ -224,4 +249,7 @@ if __name__ == "__main__":
         secret = json.load(f)
     download_server_config()
     print("")
-    call_bot()
+    if HEADLESS:
+        headless()
+    else:
+        call_bot()
