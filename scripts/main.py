@@ -202,9 +202,9 @@ def download_server_config(url="https://discoverygc.com/gameconfigpublic/"):
 
 def clear_folder(folder: str):
     files = [
-        os.path.abspath(folder + f)
+        os.path.abspath(os.path.join(folder, f))
         for f in os.listdir(folder)
-        if os.path.isfile(os.path.join(folder, f))
+        if os.path.isfile(os.path.join(folder, f)) and f != ".gitkeep"
     ]
 
     for file in files:
@@ -235,7 +235,7 @@ def headless():
 
 
 if __name__ == "__main__":
-    HEADLESS = sys.argv[1] == "--headless"
+    HEADLESS = sys.argv[-1] == "--headless"
     with open("./config.json", "r") as f:
         config = json.load(f)
     if not os.path.exists("./secret.json"):

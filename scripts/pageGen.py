@@ -263,6 +263,13 @@ def generate_ship_page(ship: Ship) -> str:
 
     thruster_force = 72000
     engine = ship.engine()
+    ship.linear_drag = ship.linear_drag if not isinstance(ship.linear_drag, list) else ship.linear_drag[-1]
+    if engine:
+        engine.linear_drag = (
+            engine.linear_drag
+            if not isinstance(engine.linear_drag, list)
+            else engine.linear_drag[-1]
+        )
     linear_drag = ship.linear_drag + engine.linear_drag if engine else ship.linear_drag
     force = thruster_force + engine.max_force if engine else thruster_force
     other = "<ul>"
