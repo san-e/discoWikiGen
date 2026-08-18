@@ -169,7 +169,7 @@ def rumor_tabber(entry: Faction | Base) -> str:
     ):
         tabber += f"|-|{base.name()} ({len(rumors)})=\n<div style='column-count:3; column-gap:2em;'>\n"
         for rumor in rumors:
-            tabber += f"{{{{Quote | {rumor} }}}}"
+            tabber += f"{{{{Quote | 1={rumor} }}}}"
         tabber += "</div>\n"
     tabber += "</tabber>"
     return tabber
