@@ -708,9 +708,9 @@ def generate_gun_page(gun: Gun) -> str:
 
     return load_template("gun").substitute(
         name=gun.name(),
-        nickname=gun.nickname,
+        nickname=icon_name(gun.good().item_icon if gun.good() else Good.DEFAULT_ICON),
         technology=gun.technology(),
-        hull_damage=gun.hull_damage(),
+        hull_damage=(gun.hull_damage(), 2),
         shield_damage=gun.shield_damage(),
         hull_damage_s=gun.hull_dps(),
         shield_damage_s=gun.shield_dps(),

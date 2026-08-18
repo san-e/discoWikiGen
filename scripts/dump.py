@@ -4,6 +4,9 @@ import subprocess
 import time
 from io import BytesIO
 from pathlib import PureWindowsPath
+
+from flint.entities import Good
+
 from pageGen import filter_systems
 
 from PIL import Image
@@ -133,7 +136,7 @@ def dump_icons():
         image.save(f"../dumpedData/images/{folder}/{name}.png")
 
     for commodity in fl.get_commodities():
-        name = icon_name(commodity.good().item_icon) if commodity.good().item_icon else icon_name(commodity.good().DEFAULT_ICON)
+        name = icon_name(commodity.good().item_icon) if commodity.good().item_icon else icon_name(Good.DEFAULT_ICON)
         save_icon(
             commodity.icon(), name, "commodities"
         )
