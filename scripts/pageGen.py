@@ -263,7 +263,11 @@ def generate_ship_page(ship: Ship) -> str:
 
     thruster_force = 72000
     engine = ship.engine()
-    ship.linear_drag = ship.linear_drag if not isinstance(ship.linear_drag, list) else ship.linear_drag[-1]
+    ship.linear_drag = (
+        ship.linear_drag
+        if not isinstance(ship.linear_drag, list)
+        else ship.linear_drag[-1]
+    )
     if engine:
         engine.linear_drag = (
             engine.linear_drag
@@ -297,6 +301,11 @@ def generate_ship_page(ship: Ship) -> str:
         for x in ship.hardpoints().values()
         if x[-1].name() != x[-1].nickname
     ]
+    engine.cruise_speed = (
+        engine.cruise_speed
+        if engine and not isinstance(engine.cruise_speed, list)
+        else (engine.cruise_speed[-1] if engine else 0)
+    )
     return load_template("ship").substitute(
         name=ship.infocard("plain").split("\n")[0],
         image=f"{ship.nickname}.png",
@@ -319,7 +328,7 @@ def generate_ship_page(ship: Ship) -> str:
         max_cruise=(
             "{:,}".format(
                 engine.cruise_speed
-                if ship.engine().cruise_speed != 0
+                if engine and engine.cruise_speed != 0
                 else fl.interface.get_constants()["engineequipconsts"]["cruising_speed"]
             )
         ),
@@ -483,13 +492,20 @@ def generate_solar_page(solar: Solar):
         system=solar.system().name(),
         region=region_link(solar.system().region()),
         region_=solar.system().region(),
-        nearby=l if (l := generate_list([
-                f"[[{x.name()}]]"
-                for x in solar.nearby(20_000)
-                if isinstance(x, BaseSolar)
-            ],
-            html=True,
-        )) else "<i>None</i>",
+        nearby=(
+            l
+            if (
+                l := generate_list(
+                    [
+                        f"[[{x.name()}]]"
+                        for x in solar.nearby(20_000)
+                        if isinstance(x, BaseSolar)
+                    ],
+                    html=True,
+                )
+            )
+            else "<i>None</i>"
+        ),
         infocard=solar.infocard(),
     )
 
