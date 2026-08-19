@@ -5,6 +5,7 @@ from os.path import exists, isdir, split
 
 import requests
 from alive_progress import alive_bar
+from requests import Response
 
 with open("config.json", "r") as f:
     config = load(f)
@@ -33,7 +34,7 @@ def login(bot_password_path):
     }
 
     request = session.get(url=URL, params=login_token_params)
-    data = request.json()
+    data = request_json_handler(request.json())
     login_token = data["query"]["tokens"]["logintoken"]
 
     login_params = {
@@ -48,11 +49,17 @@ def login(bot_password_path):
     csrf_params = {"action": "query", "meta": "tokens", "format": "json"}
 
     request = session.get(url=URL, params=csrf_params)
-    data = request.json()
+    data = request_json_handler(request.json())
     csrf_token = data["query"]["tokens"]["csrftoken"]
 
     return session, csrf_token
 
+def request_json_handler(r: Response):
+    try:
+        return r.json()
+    except requests.exceptions.JSONDecodeError as e:
+        print(r.text)
+        raise e
 
 def upload_text(wikitext, title_text):
     def upload(to_upload):
@@ -69,7 +76,7 @@ def upload_text(wikitext, title_text):
                 "token": csrf_token,
             }
             request = session.post(URL, data=edit_params)
-            data = request.json()
+            data = request_json_handler(request.json())
             try:
                 error = data["error"]["code"]
                 if error == "ratelimited":
@@ -141,7 +148,7 @@ def upload_images(title_image, path="../dumpedData/images"):
                 with open(entry["path"], "rb") as fileParam:
                     file = {"file": (entry["name"], fileParam, "multipart/form-data")}
                     request = session.post(URL, files=file, data=upload_params)
-                data = request.json()
+                data = request_json_handler(request.json())
 
                 try:
                     error = data["error"]["code"]
@@ -201,14 +208,14 @@ def nuke_the_wiki(title_nuke):
 
                 request = session.post(URL, nuke_params)
                 try:
-                    error = request.json()["error"]["code"]
+                    error = request_json_handler(request.json())["error"]["code"]
                     print(f"Error updating {id}: {error}, trying again later...")
                     if error == "badtoken":
                         session, csrf_token = login(config["bot"]["botPassword"])
                     bar()
                 except:
                     bar()
-                # print(request.json())
+                # print(request_json_handler(request.json()))
 
                 # time.sleep(delay) # seemingly not neccessary
 
@@ -224,7 +231,7 @@ def nuke_the_wiki(title_nuke):
     }
 
     request = session.post(URL, data=query_nuke_params)
-    ids_to_nuke = set(request.json()["query"]["pages"].keys())
+    ids_to_nuke = set(request_json_handler(request.json())["query"]["pages"].keys())
 
     nuke()
 
@@ -241,7 +248,7 @@ def add_warning():
         "token": csrf_token,
     }
     request = session.post(URL, data=edit_params)
-    data = request.json()
+    data = request_json_handler(request.json())
 
     return data.get("edit", {}).get("newrevid", 0)
 
@@ -259,7 +266,7 @@ def undo_edit(title, rev_id):
     }
 
     request = session.post(URL, data=edit_params)
-    data = request.json()
+    data = request_json_handler(request.json())
 
     return bool(data.get("edit", {}).get("result") == "Success")
 
