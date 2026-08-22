@@ -38,6 +38,7 @@ foreach(var ship in data.Items.Ships) {
 
 
         var model = loaded.CreateRigidModel(true, resources);
+        ModelImageRenderer.lighting.Ambient = new Color3f(90 / 255f, 90 / 255f, 90 / 255f);
         ModelImageRenderer.RenderToPng(resources, model, 1024*2, 1024*2, System.IO.Path.Combine([args[1], $"{ship.Nickname}.png"]));
     } catch (Exception e) {
         FLLog.Error("oasch", e.ToString());
