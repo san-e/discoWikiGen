@@ -58,6 +58,7 @@ def render_ships() -> None:
             secret["freelancer"],
             "../dumpedData/images/ships",
         ),
+	stdout=subprocess.DEVNULL
     )
     p.wait()
 
