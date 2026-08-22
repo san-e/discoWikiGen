@@ -72,4 +72,5 @@ jobs:
       - name: Run script
         run: |
           cd discoWikiGen
+          export PYTHONUNBUFFERED=1
           uv run scripts/main.py --headless
