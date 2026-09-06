@@ -6,6 +6,7 @@ using LibreLancer.Data;
 using LibreLancer.Data.IO;
 using LibreLancer.ContentEdit;
 using LibreLancer.Shaders;
+using LibreLancer.Graphics;
 
 ScriptUsage(@"freelancer_path output_path
 - Renders all ships into the output path in .png format");
@@ -17,6 +18,7 @@ win.RenderContext.AnisotropyLevel = win.RenderContext.MaxAnisotropy;
 AllShaders.Compile(win.RenderContext);
 var vfs = FileSystem.FromPath(args[0]);
 var resources = new GameResourceManager(win, vfs);
+var maxAA = win.RenderContext.MaxAntialias;
 var db = new GameItemDb(vfs);
 var data = new GameDataManager(db, resources);
 data.LoadData(win);
@@ -39,7 +41,7 @@ foreach(var ship in data.Items.Ships) {
 
         var model = loaded.CreateRigidModel(true, resources);
         ModelImageRenderer.lighting.Ambient = new Color3f(90 / 255f, 90 / 255f, 90 / 255f);
-        ModelImageRenderer.RenderToPng(resources, model, 1024*2, 1024*2, System.IO.Path.Combine([args[1], $"{ship.Nickname}.png"]));
+        ModelImageRenderer.RenderToPng(resources, model, 1024*2, 1024*2, System.IO.Path.Combine([args[1], $"{ship.Nickname}.png"]), maxAA);
     } catch (Exception e) {
         FLLog.Error("oasch", e.ToString());
         continue;
