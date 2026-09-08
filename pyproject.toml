@@ -3,7 +3,7 @@ name = "discowikigen"
 version = "0.1.0"
 description = "Wiki page generator for Discovery Freelancer"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
     "alive-progress>=3.3.0",
     "beautifulsoup4>=4.15.0",
@@ -15,6 +15,7 @@ dependencies = [
     "pytz>=2026.3.post1",
     "requests>=2.34.2",
     "selenium>=4.46.0",
+    "dataclassy>=1.0.1",
 ]
 
 [tool.uv.sources]
