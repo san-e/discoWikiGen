@@ -73,6 +73,7 @@ def render(renderer: str, out_path: str) -> None:
     for image in os.listdir(out_path):
         if not image.endswith(".png"):
             continue
+        print(f"Cropping: {image}              ", end="\r", flush=True)
         im = Image.open(f"{out_path}/{image}")
         im = im.crop(im.getbbox())
         im.save(f"{out_path}/{image}")
