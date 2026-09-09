@@ -22,8 +22,7 @@ var maxAA = win.RenderContext.MaxAntialias;
 var db = new GameItemDb(vfs);
 var data = new GameDataManager(db, resources);
 data.LoadData(win);
-// GameDataManager expects glContext to run some code on the UI thread after load
-//win.RunUIEvents();
+ModelImageRenderer.lighting.Ambient = new Color3f(90 / 255f, 90 / 255f, 90 / 255f);
 
 // Loop through our ships
 foreach(var ship in data.Items.Ships) {
@@ -40,7 +39,6 @@ foreach(var ship in data.Items.Ships) {
 
 
         var model = loaded.CreateRigidModel(true, resources);
-        ModelImageRenderer.lighting.Ambient = new Color3f(90 / 255f, 90 / 255f, 90 / 255f);
         ModelImageRenderer.RenderToPng(resources, model, 1024*2, 1024*2, System.IO.Path.Combine([args[1], $"{ship.Nickname}.png"]), maxAA);
     } catch (Exception e) {
         FLLog.Error("oasch", e.ToString());
