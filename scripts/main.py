@@ -109,6 +109,7 @@ def pages_to_update():
     nuke = ask("Nuke the wiki before updating? y/N")
     dump_models = ask("Dump Ship Models? y/N")
     render = ask("Render Ships? y/N")
+    render_bases = ask("Render Bases? y/N")
     dump_sysmaps = ask("Dump System Maps? y/N")
     dump_icons = ask("Dump Good Icons? y/N")
     print("""Which of the following (if any) pages do you wish to update?
@@ -142,6 +143,7 @@ def pages_to_update():
         "nuke": nuke,
         "dumpModels": dump_models,
         "renderShips": render,
+        "renderBases": render_bases,
         "dumpSysmaps": dump_sysmaps,
         "dumpIcons": dump_icons,
     }
@@ -163,6 +165,9 @@ Confirm? y/N
         if "renderShips" in choices:
             clear_folder("../dumpedData/images/ships/")
             dump.dump(ship_render=True)
+        if "renderBases" in choices:
+            clear_folder("../dumpedData/images/bases/")
+            dump.dump(base_render=True)
         if "dumpSysmaps" in choices:
             clear_folder("../dumpedData/images/systems/")
             dump.dump(sysmaps=True)
@@ -213,7 +218,7 @@ def clear_folder(folder: str):
 
 def headless():
     # just do everything without prompts
-    dump.dump(models=True, sysmaps=True, icons=True, ship_render=True)
+    dump.dump(models=True, sysmaps=True, icons=True, ship_render=True, base_render=True)
     wikitext = pageGen.main()
     mediawikiBot.main(
         wikidata=wikitext,

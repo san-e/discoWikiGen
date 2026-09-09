@@ -44,31 +44,38 @@ def dump_models() -> None:
         processes.add(p)
 
 
-def render_ships() -> None:
+def render_ships():
     print("== Rendering ships ==")
+    render("./render.cs-script", "../dumpedData/images/ships")
+
+def render_bases():
+    print("== Rendering bases ==")
+    render("./renderbase.cs-script", "../dumpedData/images/bases")
+
+
+def render(renderer: str, out_path: str) -> None:
     with open("./secret.json", "r") as f:
         secret = json.load(f)
 
     LLEDITSCRIPT = secret["librelancer"] + "/lleditscript"
-    RENDERER = "./render.cs-script"
     p = subprocess.Popen(
         (
             LLEDITSCRIPT,
-            RENDERER,
+            renderer,
             secret["freelancer"],
-            "../dumpedData/images/ships",
+            out_path,
         ),
-	stdout=subprocess.DEVNULL
+        stdout=subprocess.DEVNULL,
     )
     p.wait()
 
     # crop transparency
-    for image in os.listdir("../dumpedData/images/ships"):
+    for image in os.listdir(out_path):
         if not image.endswith(".png"):
             continue
-        im = Image.open(f"../dumpedData/images/ships/{image}")
+        im = Image.open(f"{out_path}/{image}")
         im = im.crop(im.getbbox())
-        im.save(f"../dumpedData/images/ships/{image}")
+        im.save(f".{out_path}/{image}")
 
 
 def dump_sysmaps():
@@ -102,7 +109,8 @@ def dump_sysmaps():
         while (
             driver.find_elements(By.CLASS_NAME, "loadingOverlay")
             or driver.find_elements(By.CLASS_NAME, "loaderTitle")
-            or "Sirius" in {x.text for x in driver.find_elements(By.CLASS_NAME, "systemTitle")}
+            or "Sirius"
+            in {x.text for x in driver.find_elements(By.CLASS_NAME, "systemTitle")}
         ):
             time.sleep(0.1)
             x += 1
@@ -137,10 +145,12 @@ def dump_icons():
         image.save(f"../dumpedData/images/{folder}/{name}.png")
 
     for commodity in fl.get_commodities():
-        name = icon_name(commodity.good().item_icon) if commodity.good().item_icon else icon_name(Good.DEFAULT_ICON)
-        save_icon(
-            commodity.icon(), name, "commodities"
+        name = (
+            icon_name(commodity.good().item_icon)
+            if commodity.good().item_icon
+            else icon_name(Good.DEFAULT_ICON)
         )
+        save_icon(commodity.icon(), name, "commodities")
 
     # News Icons should be uploaded manually since they're hardcoded anyway
 
@@ -164,6 +174,7 @@ def dump_icons():
 def dump(
     models: bool = False,
     ship_render: bool = False,
+    base_render: bool = False,
     sysmaps: bool = False,
     icons: bool = False,
 ) -> None:
@@ -175,6 +186,8 @@ def dump(
         dump_models()
     if ship_render:
         render_ships()
+    if base_render:
+        render_bases()
     if sysmaps:
         dump_sysmaps()
     if icons:
@@ -182,4 +195,4 @@ def dump(
 
 
 if __name__ == "__main__":
-    dump(models=True, ship_render=False, sysmaps=False)
+    dump(models=True, ship_render=False, base_render=False, sysmaps=False)

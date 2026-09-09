@@ -1,0 +1,89 @@
+using LibreLancer.Utf;
+using LibreLancer.Utf.Cmp;
+using LibreLancer.Resources;
+using LibreLancer.Data.GameData;
+using LibreLancer.Data;
+using LibreLancer.Data.IO;
+using LibreLancer.ContentEdit;
+using LibreLancer.Shaders;
+using LibreLancer.Graphics;
+using LibreLancer.World;
+using LibreLancer.Data.GameData.World;
+using System.Linq;
+
+ScriptUsage(@"freelancer_path output_path
+- Renders all bases into the output path in .png format");
+var args = ParseArguments(2);
+
+var win = HeadlessContext.Create();
+win.RenderContext.AnisotropyLevel = win.RenderContext.MaxAnisotropy;
+var maxAA = win.RenderContext.MaxAntialias;
+
+AllShaders.Compile(win.RenderContext);
+var vfs = FileSystem.FromPath(args[0]);
+var resources = new GameResourceManager(win, vfs);
+var db = new GameItemDb(vfs);
+var data = new GameDataManager(db, resources);
+data.LoadData(win);
+ModelImageRenderer.lighting.Ambient = new Color3f(90 / 255f, 90 / 255f, 90 / 255f);
+
+List<RigidModelPart> EnumerateAll(RigidModelPart p) {
+    List<RigidModelPart> list = new List<RigidModelPart>();
+    if (p.Children != null) {
+        foreach(var c in p.Children) {
+            list.Add(c);
+            list.AddRange(EnumerateAll(c));
+        }
+    }
+    return list;
+}
+
+
+// Loop through our bases
+foreach(var b in data.Items.Bases) {
+    try {
+        FLLog.Info("Draw", $"Rendering {b.Nickname}");
+        resources.ClearTextures();
+        RigidModelPart resultPart = new RigidModelPart();
+        resultPart.Children = new List<RigidModelPart>();
+        var system = data.Items.Systems.Get(b.System);
+        var mainSolar = system.Objects.Where(obj => obj.Base == b).First();
+        var allsolars = system.Objects.Where(obj => obj.Parent == mainSolar.Nickname || obj.Base == b);
+
+        foreach(var s in allsolars) {
+            var modelFile = s.Archetype.ModelFile.LoadFile(resources).Drawable as IRigidModelFile;
+            var model = modelFile.CreateRigidModel(true, resources);
+
+            // revert inherited rotation + position
+            var invRot = Quaternion.Inverse(mainSolar.Rotation);
+            var worldOffset = s.Position - mainSolar.Position;
+            var localOffset = Vector3.Transform(worldOffset, invRot);
+
+            var transform = new Transform3D(localOffset, invRot * s.Rotation);
+            model.Root.Construct = new FixConstruct();
+            model.Root.Construct.OverrideTransform = transform;
+            resultPart.Children.Add(model.Root);
+        }
+        var result = new RigidModel();
+        result.Root = resultPart;
+        result.AllParts = EnumerateAll(resultPart).ToArray();
+        result.UpdateTransform();
+        
+        var bb = result.GetBoundingBox();
+        var middle = (bb.Max + bb.Min) * 0.5f;
+
+        resultPart.Construct = new FixConstruct {
+            OverrideTransform = new Transform3D(-middle, Quaternion.Identity)
+        };
+        result.UpdateTransform();
+        ModelImageRenderer.RenderToPng(resources, result, 1024*4, 1024*4, System.IO.Path.Combine([args[1], $"{b.Nickname}.png"]), maxAA, 3.5f);
+
+        system = null;
+        mainSolar = null;
+        allsolars = null;
+        result = null;
+    } catch (Exception e) {
+        FLLog.Error("oasch", $"Something happend with base {b.Nickname}:\n{e.ToString()}");
+        continue;
+    }
+}
