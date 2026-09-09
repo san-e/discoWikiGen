@@ -254,7 +254,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.15.0" },
     { name = "black", specifier = ">=26.5.1" },
     { name = "dataclassy", specifier = ">=1.0.1" },
-    { name = "fl-flint", url = "https://github.com/san-e/flint/archive/wiki.zip" },
+    { name = "fl-flint", url = "https://github.com/san-e/flint/archive/master.zip" },
     { name = "opencv-python", specifier = ">=5.0.0.93" },
     { name = "pandas", specifier = ">=3.0.5" },
     { name = "pillow", specifier = ">=12.3.0" },
@@ -266,13 +266,13 @@ requires-dist = [
 [[package]]
 name = "fl-flint"
 version = "0.20.1"
-source = { url = "https://github.com/san-e/flint/archive/wiki.zip" }
+source = { url = "https://github.com/san-e/flint/archive/master.zip" }
 dependencies = [
     { name = "dataclassy" },
     { name = "deconstruct" },
     { name = "pillow" },
 ]
-sdist = { hash = "sha256:a869bcbe292d22d6b1d27a4ecb0c120e4d7d3785b9fc30061456980ca3989c1d" }
+sdist = { hash = "sha256:b7bc403bec3f849218201e83471fa0f2e5ecb44bd27f8b286971b6debf40e1ec" }
 
 [package.metadata]
 requires-dist = [

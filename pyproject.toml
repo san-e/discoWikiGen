@@ -19,4 +19,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-fl-flint = { url = "https://github.com/san-e/flint/archive/wiki.zip" }
+fl-flint = { url = "https://github.com/san-e/flint/archive/master.zip" }
