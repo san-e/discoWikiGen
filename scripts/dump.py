@@ -75,7 +75,7 @@ def render(renderer: str, out_path: str) -> None:
             continue
         im = Image.open(f"{out_path}/{image}")
         im = im.crop(im.getbbox())
-        im.save(f".{out_path}/{image}")
+        im.save(f"{out_path}/{image}")
 
 
 def dump_sysmaps():
