@@ -1,4 +1,4 @@
-using LibreLancer.Utf;
+Pusing LibreLancer.Utf;
 using LibreLancer.Utf.Cmp;
 using LibreLancer.Resources;
 using LibreLancer.Data.GameData;
@@ -76,7 +76,7 @@ foreach(var b in data.Items.Bases) {
             OverrideTransform = new Transform3D(-middle, Quaternion.Identity)
         };
         result.UpdateTransform();
-        ModelImageRenderer.RenderToPng(resources, result, 1024*4, 1024*4, System.IO.Path.Combine([args[1], $"{b.Nickname}.png"]), maxAA, 3.5f);
+        ModelImageRenderer.RenderToPng(resources, result, 1024*4, 1024*4, System.IO.Path.Combine([args[1], $"{b.Nickname}.png"]), maxAA);
 
         system = null;
         mainSolar = null;
