@@ -1,4 +1,4 @@
-Pusing LibreLancer.Utf;
+using LibreLancer.Utf;
 using LibreLancer.Utf.Cmp;
 using LibreLancer.Resources;
 using LibreLancer.Data.GameData;
