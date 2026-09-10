@@ -46,6 +46,14 @@ jobs:
           chmod +x "$HOME/geckodriver/geckodriver"
       - name: Build LibreLancer
         run: |
+          sudo apt update && sudo apt install -y \
+              dotnet-sdk-10.0 \
+              libsdl2-dev \
+              libopenal-dev \
+              gcc \
+              g++ \
+              cmake \
+              libgtk-3-dev
           git clone https://github.com/Librelancer/Librelancer.git
           cd Librelancer
           chmod +x build.sh
