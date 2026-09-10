@@ -1,6 +1,32 @@
 name: Run fandom wiki update
 on:
   workflow_dispatch:
+    inputs:
+      models:
+        description: "Dump ship models"
+        type: boolean
+        required: true
+        default: true
+      sysmaps:
+        description: "Dump sysmaps"
+        type: boolean
+        required: true
+        default: true
+      icons:
+        description: "Dump icons"
+        type: boolean
+        required: true
+        default: true
+      ship_render:
+        description: "Render ships"
+        type: boolean
+        required: true
+        default: true
+      base_render:
+        description: "Render bases"
+        type: boolean
+        required: true
+        default: true
 jobs:
   do_the_thing:
     name: do the thing
@@ -83,4 +109,10 @@ jobs:
         run: |
           cd discoWikiGen
           export PYTHONUNBUFFERED=1
-          uv run scripts/main.py --headless
+          ARGS="--headless"
+          [ "${{ github.event.inputs.models }}" = "true" ] && ARGS="$ARGS models"
+          [ "${{ github.event.inputs.sysmaps }}" = "true" ] && ARGS="$ARGS sysmaps"
+          [ "${{ github.event.inputs.icons }}" = "true" ] && ARGS="$ARGS icons"
+          [ "${{ github.event.inputs.ship_render }}" = "true" ] && ARGS="$ARGS ship_render"
+          [ "${{ github.event.inputs.base_render }}" = "true" ] && ARGS="$ARGS base_render"
+          uv run scripts/main.py $ARGS
