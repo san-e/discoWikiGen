@@ -59,7 +59,7 @@ jobs:
           chmod +x build.sh
           ./build.sh
           mkdir -p "$HOME/librelancer"
-          mv bin/librelancer-*-ubuntu-amd64/* "$HOME/librelancer"
+          mv bin/librelancer-sdk*/* "$HOME/librelancer"
       - name: Write secrets to secret.json
         run: |
           jq -n \
