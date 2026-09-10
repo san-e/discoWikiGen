@@ -216,9 +216,9 @@ def clear_folder(folder: str):
         os.remove(file)
 
 
-def headless():
+def headless(models = True, sysmaps = True, icons = True, ship_render = True, base_render = True):
     # just do everything without prompts
-    dump.dump(models=True, sysmaps=True, icons=True, ship_render=True, base_render=True)
+    dump.dump(models=models, sysmaps=sysmaps, icons=icons, ship_render=ship_render, base_render=base_render)
     wikitext = pageGen.main()
     mediawikiBot.main(
         wikidata=wikitext,
@@ -240,7 +240,7 @@ def headless():
 
 
 if __name__ == "__main__":
-    HEADLESS = sys.argv[-1] == "--headless"
+    HEADLESS = "--headless" in sys.argv
     with open("./config.json", "r") as f:
         config = json.load(f)
     if not os.path.exists("./secret.json"):
@@ -255,6 +255,10 @@ if __name__ == "__main__":
     download_server_config()
     print("")
     if HEADLESS:
-        headless()
+        headless(models = "models" in sys.argv,
+                 sysmaps = "sysmaps" in sys.argv,
+                 icons = "icons" in sys.argv,
+                 ship_render = "ship_render" in sys.argv,
+                 base_render = "base_render" in sys.argv)
     else:
         call_bot()

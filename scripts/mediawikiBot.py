@@ -161,6 +161,7 @@ def upload_images(title_image, path="../dumpedData/images"):
                         print(
                             f"Error uploading {entry['name']}: {error}, trying again later..."
                         )
+                        print(entry["error"]["info"])
                         failed_uploads.append(
                             {"name": entry["name"], "path": entry["path"]}
                         )
