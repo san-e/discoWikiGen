@@ -44,12 +44,14 @@ jobs:
           mkdir -p "$HOME/geckodriver"
           mv geckodriver/geckodriver "$HOME/geckodriver/geckodriver"
           chmod +x "$HOME/geckodriver/geckodriver"
-      - name: Fetch latest LibreLancer SDK
+      - name: Build LibreLancer
         run: |
-          curl -L "https://librelancer.net/builds/librelancer-sdk-daily-ubuntu-amd64.tar.gz" -o librelancer.tar.gz
+          git clone https://github.com/Librelancer/Librelancer.git
+          cd Librelancer
+          chmod +x build.sh
+          ./build.sh
           mkdir -p "$HOME/librelancer"
-          tar -xzf librelancer.tar.gz
-          mv librelancer-*-ubuntu-amd64/* "$HOME/librelancer"
+          mv bin/librelancer-*-ubuntu-amd64/* "$HOME/librelancer"
       - name: Write secrets to secret.json
         run: |
           jq -n \
