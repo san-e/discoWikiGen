@@ -80,7 +80,7 @@ jobs:
               g++ \
               cmake \
               libgtk-3-dev
-          git clone https://github.com/Librelancer/Librelancer.git
+          git clone https://codeberg.org/Librelancer/Librelancer
           cd Librelancer
           chmod +x build.sh
           ./build.sh
