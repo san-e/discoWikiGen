@@ -454,7 +454,7 @@ def generate_system_page(system: System) -> str:
         mining_zones=generate_list(
             [f"[[{c.name()}]]" for c in system.mineable_commodities()]
         ),
-        navmap=f'[[File:{system.nickname}_map.png|center|750px|link={CONFIG["wikiGen"]["sysmapURL"]}#q={system.name().replace(" ", "%20")}]]',
+        navmapURL=f'{CONFIG["wikiGen"]["sysmapURL"]}#q={system.name().replace(" ", "%20")}',
         nebulae="<div style='column-count:3; column-gap:2em;'>\n"
         + "\n".join(
             [

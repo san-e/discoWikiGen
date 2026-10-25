@@ -11,7 +11,7 @@ on:
         description: "Dump sysmaps"
         type: boolean
         required: true
-        default: true
+        default: false
       icons:
         description: "Dump icons"
         type: boolean
