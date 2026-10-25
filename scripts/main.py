@@ -83,6 +83,10 @@ def first_time_setup():
         else:
             print(f"Path does not point to a geckodriver binary. Try again")
 
+    clear_console()
+    print("Input the User Agent that will be used in web requests")
+    userAgent = input("User Agent: ")
+
     with open("./secret.json", "w") as f:
         json.dump(
             {
@@ -92,6 +96,7 @@ def first_time_setup():
                 "librelancer": librelancer,
                 "firefox": firefox,
                 "webdriver": geckodriver,
+                "userAgent": userAgent,
             },
             f,
             indent=1,
@@ -189,7 +194,8 @@ Confirm? y/N
 
 
 def download_server_config(url="https://discoverygc.com/gameconfigpublic/"):
-    r = requests.get(url)
+    header = {"User-Agent": secret["userAgent"]}
+    r = requests.get(url, headers=header)
     soup = BeautifulSoup(r.text, "html.parser")
     links = soup.find_all("a")
     urls = {url + link.get("href") for link in links}
@@ -199,7 +205,7 @@ def download_server_config(url="https://discoverygc.com/gameconfigpublic/"):
             f"{i+1}/{len(urls)} Downloading {url.split('/')[-1]}.                    ",
             end="\r",
         )
-        r = requests.get(url)
+        r = requests.get(url, headers=header)
         if r.ok:
             with open(f"./server_config/{url.split('/')[-1]}", "wb") as f:
                 f.write(r.content)

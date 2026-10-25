@@ -11,8 +11,9 @@ with open("config.json", "r") as f:
     config = load(f)
 
 with open(config["bot"]["botPassword"], "r") as f:
-    URL = load(f)["URL"]
+    secret = load(f)
 
+URL = secret["URL"]
 delay = config["bot"]["delay"]
 
 
@@ -25,6 +26,7 @@ def login(bot_password_path):
         bot_name, bot_password = data["botCredentials"][0], data["botCredentials"][1]
 
     session = requests.Session()
+    session.headers.update({"User-Agent": secret["userAgent"]})
 
     login_token_params = {
         "action": "query",
