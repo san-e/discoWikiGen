@@ -324,10 +324,11 @@ def main(wikidata=None, choices=None):
             path=config["bot"]["images"],
         )
     if "models" in choices:
-        upload_images(
-            title_image=config["bot"]["titleModels"],
-            path=config["bot"]["models"],
-        )
+        pass # we dont use the models on the wiki yet and uploading anyway causes issues
+        # upload_images(
+        #     title_image=config["bot"]["titleModels"],
+        #     path=config["bot"]["models"],
+        # )
 
     if warningRevId:
         print("Removing update warning")
