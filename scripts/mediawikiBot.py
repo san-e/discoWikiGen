@@ -61,6 +61,8 @@ def request_json_handler(r: Response):
         return r.json()
     except requests.exceptions.JSONDecodeError as e:
         print(r.text)
+        print("Removing update warning")
+        undo_edit("Main_Page", warningRevId)
         raise e
 
 def upload_text(wikitext, title_text):
