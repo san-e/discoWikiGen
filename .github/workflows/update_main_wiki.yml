@@ -1,6 +1,32 @@
 name: Run main wiki update
 on:
   workflow_dispatch:
+    inputs:
+      models:
+        description: "Dump ship models"
+        type: boolean
+        required: true
+        default: true
+      sysmaps:
+        description: "Dump sysmaps"
+        type: boolean
+        required: true
+        default: true
+      icons:
+        description: "Dump icons"
+        type: boolean
+        required: true
+        default: true
+      ship_render:
+        description: "Render ships"
+        type: boolean
+        required: true
+        default: true
+      base_render:
+        description: "Render bases"
+        type: boolean
+        required: true
+        default: true
 jobs:
   do_the_thing:
     name: do the thing
@@ -44,12 +70,22 @@ jobs:
           mkdir -p "$HOME/geckodriver"
           mv geckodriver/geckodriver "$HOME/geckodriver/geckodriver"
           chmod +x "$HOME/geckodriver/geckodriver"
-      - name: Fetch latest LibreLancer SDK
+      - name: Build LibreLancer
         run: |
-          curl -L "https://librelancer.net/builds/librelancer-sdk-daily-ubuntu-amd64.tar.gz" -o librelancer.tar.gz
+          sudo apt update && sudo apt install -y \
+              dotnet-sdk-10.0 \
+              libsdl2-dev \
+              libopenal-dev \
+              gcc \
+              g++ \
+              cmake \
+              libgtk-3-dev
+          git clone https://codeberg.org/Librelancer/Librelancer
+          cd Librelancer
+          chmod +x build.sh
+          ./build.sh
           mkdir -p "$HOME/librelancer"
-          tar -xzf librelancer.tar.gz
-          mv librelancer-*-ubuntu-amd64/* "$HOME/librelancer"
+          mv bin/librelancer-sdk*/* "$HOME/librelancer"
       - name: Write secrets to secret.json
         run: |
           jq -n \
@@ -60,17 +96,25 @@ jobs:
           --arg bc1 "${{ secrets.botCredentials1 }}" \
           --arg url "${{ secrets.URL }}" \
           --arg freelancer $HOME/freelancer \
+          --arg userAgent "${{ secrets.userAgent }}"
           '{
             firefox: $firefox,
             webdriver: $webdriver,
             librelancer: $librelancer,
             botCredentials: [$bc0, $bc1],
             URL: $url,
-            freelancer: $freelancer
+            freelancer: $freelancer,
+            userAgent: $userAgent
           }' > discoWikiGen/scripts/secret.json
 
       - name: Run script
         run: |
           cd discoWikiGen
           export PYTHONUNBUFFERED=1
-          uv run scripts/main.py --headless
+          ARGS="--headless"
+          [ "${{ github.event.inputs.models }}" = "true" ] && ARGS="$ARGS models"
+          [ "${{ github.event.inputs.sysmaps }}" = "true" ] && ARGS="$ARGS sysmaps"
+          [ "${{ github.event.inputs.icons }}" = "true" ] && ARGS="$ARGS icons"
+          [ "${{ github.event.inputs.ship_render }}" = "true" ] && ARGS="$ARGS ship_render"
+          [ "${{ github.event.inputs.base_render }}" = "true" ] && ARGS="$ARGS base_render"
+          uv run scripts/main.py $ARGS
