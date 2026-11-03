@@ -96,7 +96,7 @@ jobs:
           --arg bc1 "${{ secrets.botCredentials1 }}" \
           --arg url "${{ secrets.URL }}" \
           --arg freelancer $HOME/freelancer \
-          --arg userAgent "${{ secrets.userAgent }}"
+          --arg userAgent "${{ secrets.userAgent }}" \
           '{
             firefox: $firefox,
             webdriver: $webdriver,
