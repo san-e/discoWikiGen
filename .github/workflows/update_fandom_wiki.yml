@@ -92,17 +92,19 @@ jobs:
           --arg firefox "/usr/bin/firefox" \
           --arg webdriver "$HOME/geckodriver/geckodriver" \
           --arg librelancer "$HOME/librelancer" \
-          --arg bc0 "${{ secrets.botCredentials0_fandom }}" \
-          --arg bc1 "${{ secrets.botCredentials1_fandom }}" \
-          --arg url "${{ secrets.URL_fandom }}" \
+          --arg bc0 "${{ secrets.botCredentials0 }}" \
+          --arg bc1 "${{ secrets.botCredentials1 }}" \
+          --arg url "${{ secrets.URL }}" \
           --arg freelancer $HOME/freelancer \
+          --arg userAgent "${{ secrets.userAgent }}"
           '{
             firefox: $firefox,
             webdriver: $webdriver,
             librelancer: $librelancer,
             botCredentials: [$bc0, $bc1],
             URL: $url,
-            freelancer: $freelancer
+            freelancer: $freelancer,
+            userAgent: $userAgent
           }' > discoWikiGen/scripts/secret.json
 
       - name: Run script
